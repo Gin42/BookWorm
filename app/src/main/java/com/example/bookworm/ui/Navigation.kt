@@ -20,7 +20,7 @@ import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsScreen
 import com.example.bookworm.ui.screens.home.LibraryScreen
 import com.example.bookworm.ui.screens.settings.SettingsScreen
-import com.example.bookworm.ui.screens.settings.SettingsViewModel
+import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
 import com.example.bookworm.ui.screens.userpage.UserPageScreen
 import kotlinx.serialization.Serializable
@@ -47,7 +47,7 @@ sealed class BottomNavigation(val label: String, val icon: ImageVector, val rout
 }
 
 @Composable
-fun BookWormNavGraph(navController :  NavHostController, isDarkMode: MutableState<Boolean>) {
+fun BookWormNavGraph(navController :  NavHostController) {
     NavHost(
         navController = navController,
         startDestination = BookWormRoute.Home
@@ -67,9 +67,10 @@ fun BookWormNavGraph(navController :  NavHostController, isDarkMode: MutableStat
         }
 
         composable<BookWormRoute.Setting> {
-            val settingsVM = koinViewModel<SettingsViewModel>()
-            val state by settingsVM.state.collectAsStateWithLifecycle()
-            SettingsScreen(navController, state, settingsVM.actions)
+            val themeViewModel = koinViewModel<ThemeViewModel>()
+            val themeState by themeViewModel.state.collectAsStateWithLifecycle()
+
+            SettingsScreen(navController, themeState, themeViewModel::changeTheme)
         }
 
         composable<BookWormRoute.Statistics> {
