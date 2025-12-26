@@ -15,6 +15,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,17 +49,20 @@ import androidx.navigation.NavController
 import com.example.bookworm.ui.composables.AddDiaryFloatingButton
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.ui.screens.authentication.LoginAction
+import com.example.bookworm.ui.screens.authentication.LoginState
 
 
 @Composable
 fun BookDetailsScreen(
     navController: NavController,
-    bookId: String
+    bookId: String,
+    state: BookDetailsState,
+    actions: BookDetailsAction
 ) {
     Scaffold(
         topBar = { AppBar(navController = navController, goBack = true) },
         floatingActionButton = { AddDiaryFloatingButton(navController) },
-        bottomBar = { NavBottom(navController) }
     ) { contentPadding ->
 
         val numberOfEntries = 5
@@ -93,6 +100,7 @@ fun BookDetailsScreen(
                 )
             }
 
+            //book main info
             item {
                 ListItem(
                     modifier = Modifier
@@ -123,6 +131,57 @@ fun BookDetailsScreen(
                 )
             }
 
+            //book status
+            item {
+                ListItem(
+                    modifier = Modifier
+                        .border(1.dp, Color.Transparent)
+                        .clip(MaterialTheme.shapes.medium),
+                    headlineContent = {
+                        Text(
+                            state.readingStatus.name.replace('_', ' ').lowercase()
+                                .replaceFirstChar { it.titlecase() },
+                            style = MaterialTheme.typography.titleMedium)
+                    },
+                    trailingContent = {
+                        IconButton(
+                            onClick = { actions.setStatusExpanded(!state.statusExpanded) },
+                        ) {
+                            Icon(
+                                imageVector = if (state.statusExpanded) {
+                                    Icons.Filled.ArrowDropUp
+                                } else {
+                                    Icons.Filled.ArrowDropDown
+                                },
+                                contentDescription = "Status options"
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = state.statusExpanded,
+                            onDismissRequest = { actions.setStatusExpanded(false) }
+                        ) {
+                            ReadingStatus.entries.forEach { status ->
+                                DropdownMenuItem(
+                                    onClick = {
+                                        actions.setReadingStatus(status)
+                                        actions.setStatusExpanded(false)
+                                    },
+                                    text = {
+                                        Text(
+                                            status.name.replace('_', ' ').lowercase()
+                                                .replaceFirstChar { it.titlecase() })
+                                    },
+                                )
+                            }
+                        }
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    )
+                )
+            }
+
+            //progress bar
             item {
                 ListItem(
                     modifier = Modifier
@@ -149,6 +208,7 @@ fun BookDetailsScreen(
                 )
             }
 
+            //book journey
 
             items(numberOfEntries) { index ->
                 DiaryEntry(navController)
