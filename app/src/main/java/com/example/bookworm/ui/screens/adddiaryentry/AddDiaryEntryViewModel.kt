@@ -40,7 +40,5 @@ class AddDiaryEntryViewModel : ViewModel() {
         override fun setShowDatePicker(showDatePicker: Boolean) {
             _state.update { it.copy(showDatePicker = showDatePicker) }
         }
-
-
     }
 }
