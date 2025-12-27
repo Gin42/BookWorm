@@ -1,5 +1,6 @@
 package com.example.bookworm.ui.screens.bookdetails
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -17,26 +18,23 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,9 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.ui.composables.AddDiaryFloatingButton
 import com.example.bookworm.ui.composables.AppBar
-import com.example.bookworm.ui.composables.NavBottom
-import com.example.bookworm.ui.screens.authentication.LoginAction
-import com.example.bookworm.ui.screens.authentication.LoginState
 
 
 @Composable
@@ -64,8 +59,6 @@ fun BookDetailsScreen(
         topBar = { AppBar(navController = navController, goBack = true) },
         floatingActionButton = { AddDiaryFloatingButton(navController) },
     ) { contentPadding ->
-
-        val numberOfEntries = 5
 
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -103,8 +96,6 @@ fun BookDetailsScreen(
             //book main info
             item {
                 ListItem(
-                    modifier = Modifier
-                        .padding(bottom = 15.dp),
                     headlineContent = {
                         Text(
                             "Book Title",
@@ -141,11 +132,12 @@ fun BookDetailsScreen(
                         Text(
                             state.readingStatus.name.replace('_', ' ').lowercase()
                                 .replaceFirstChar { it.titlecase() },
-                            style = MaterialTheme.typography.titleMedium)
+                            style = MaterialTheme.typography.titleMedium
+                        )
                     },
                     trailingContent = {
                         IconButton(
-                            onClick = { actions.setStatusExpanded(!state.statusExpanded) },
+                            onClick = { actions.toggleStatusExpanded(!state.statusExpanded) },
                         ) {
                             Icon(
                                 imageVector = if (state.statusExpanded) {
@@ -158,13 +150,13 @@ fun BookDetailsScreen(
                         }
                         DropdownMenu(
                             expanded = state.statusExpanded,
-                            onDismissRequest = { actions.setStatusExpanded(false) }
+                            onDismissRequest = { actions.toggleStatusExpanded(false) }
                         ) {
                             ReadingStatus.entries.forEach { status ->
                                 DropdownMenuItem(
                                     onClick = {
                                         actions.setReadingStatus(status)
-                                        actions.setStatusExpanded(false)
+                                        actions.toggleStatusExpanded(false)
                                     },
                                     text = {
                                         Text(
@@ -184,8 +176,6 @@ fun BookDetailsScreen(
             //progress bar
             item {
                 ListItem(
-                    modifier = Modifier
-                        .padding(bottom = 15.dp),
                     headlineContent = {
                         LinearProgressIndicator(
                             progress = { 0.8f },
@@ -209,10 +199,65 @@ fun BookDetailsScreen(
             }
 
             //book journey
-
-            items(numberOfEntries) { index ->
-                DiaryEntry(navController)
+            items(NUMBER_OF_ENTRIES) { index ->
+                BookJourney(index, state, actions)
             }
+        }
+    }
+}
+
+
+@Composable
+fun BookJourney(index: Int, state: BookDetailsState, actions: BookDetailsAction) {
+    Column (
+        modifier = Modifier
+            .clickable { actions.toggleJourneyEntry(index) },
+    ) {
+        ListItem(
+            headlineContent = {
+                Text(
+                    "dd/mm/aaaa - dd/mm/aaaa",
+                    style = MaterialTheme.typography.titleMedium
+                )
+            },
+            supportingContent = {
+                Text("N. entries: ##")
+            },
+            trailingContent = {
+                IconButton(
+                    onClick = { actions.toggleJourneyEntry(index) },
+                ) {
+                    Icon(
+                        imageVector = if (state.journeyExpanded[index]) {
+                            Icons.Filled.ArrowDropUp
+                        } else {
+                            Icons.Filled.ArrowDropDown
+                        },
+                        contentDescription = "Status options"
+                    )
+                }
+            }
+        )
+
+        AnimatedVisibility(visible = state.journeyExpanded[index]) {
+            Column {
+                repeat(NUMBER_OF_ENTRIES) { entryIndex ->
+                    DiaryEntry(entryIndex, state, actions)
+                    if(entryIndex< NUMBER_OF_ENTRIES-1) {
+                        HorizontalDivider(
+                            modifier = Modifier.padding(bottom = 8.dp),
+                            thickness = 2.dp
+                        )
+                    }
+                }
+            }
+
+        }
+        if(index< NUMBER_OF_ENTRIES-1) {
+            HorizontalDivider(
+                modifier = Modifier.padding(bottom = 8.dp),
+                thickness = 2.dp
+            )
         }
     }
 }
@@ -220,9 +265,8 @@ fun BookDetailsScreen(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiaryEntry(navController: NavController) {
+fun DiaryEntry(index: Int, state: BookDetailsState, actions: BookDetailsAction) {
 
-    var showBottomSheet by remember { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = false,
     )
@@ -230,7 +274,7 @@ fun DiaryEntry(navController: NavController) {
     ListItem(
         modifier = Modifier
             .clickable {
-                showBottomSheet = true
+                actions.openEntry(index, true)
             },
         headlineContent = {
             Text(
@@ -247,15 +291,14 @@ fun DiaryEntry(navController: NavController) {
             )
         }
     )
-    HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp), thickness = 2.dp)
 
-    if (showBottomSheet) {
+    if (state.entryExpanded[index]) {
         ModalBottomSheet(
             modifier = Modifier
                 .fillMaxHeight()
                 .fillMaxWidth(),
             sheetState = sheetState,
-            onDismissRequest = { showBottomSheet = false }
+            onDismissRequest = { actions.openEntry(index, false) }
         ) {
             Column(
                 modifier = Modifier.padding(15.dp)
