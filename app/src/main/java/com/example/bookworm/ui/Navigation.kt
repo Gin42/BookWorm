@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
+import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryScreen
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
 import com.example.bookworm.ui.screens.authentication.LoginScreen
@@ -107,7 +108,9 @@ fun BookWormNavGraph(navController: NavHostController) {
             )
         }
         composable<BookWormRoute.AddBook> {
-            AddBookScreen(navController)
+            val addBookVm = koinViewModel<AddBookViewModel>()
+            val state by addBookVm.state.collectAsStateWithLifecycle()
+            AddBookScreen(navController, state, addBookVm.actions)
         }
         composable<BookWormRoute.UserPage> {
             UserPageScreen(navController)

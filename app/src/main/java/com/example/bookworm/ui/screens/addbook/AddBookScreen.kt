@@ -4,41 +4,101 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material.icons.outlined.Face
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bookworm.ui.composables.AppBar
-import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.R
+import com.example.bookworm.ui.BookWormRoute
+import com.example.bookworm.ui.composables.ImageWithPlaceholder
+import com.example.bookworm.ui.composables.Size
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddBookScreen(navController: NavController) {
+fun AddBookScreen(
+    navController: NavController,
+    state: AddBookState,
+    actions: AddBookActions
+) {
     Scaffold(
-        topBar = { AppBar(navController, goBack = true) },
+        topBar = {
+            CenterAlignedTopAppBar(
+                title = {
+                    Text(
+                        text = "BookWorm",
+                        fontFamily = FontFamily(Font(R.font.alegreya_sans_sc_medium)),
+                        style = MaterialTheme.typography.headlineMedium,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        actions.setShowAlert(true)
+                        actions.setNavDestination(BookWormRoute.Home)
+                    }) {
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go Back")
+                    }
+                },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            actions.setShowAlert(true)
+                            actions.setNavDestination(BookWormRoute.Setting)
+                        }
+                    ) {
+                        Icon(Icons.Filled.Settings, contentDescription = "App Settings")
+                    }
+                }
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                onClick = { /*TODO*/ }
+                onClick = { navController.navigateUp() }
             ) {
                 Icon(Icons.Outlined.Check, "Add Book")
             }
         }
-    ) {contentPadding ->
+    ) { contentPadding ->
+
+        if (state.showAlert) {
+            Alert(actions)
+        }
+
+        LaunchedEffect(state.alertConfirmed) {
+            if (state.alertConfirmed && state.navDestination != null) {
+                navController.navigate(state.navDestination)
+                actions.setAlertConfirmed(false)
+                actions.setNavDestination(null)
+            }
+        }
+
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,19 +108,98 @@ fun AddBookScreen(navController: NavController) {
                 .fillMaxSize()
         ) {
 
+            Text(
+                "Add new book",
+                style = MaterialTheme.typography.titleLarge
+            )
+
+            OutlinedTextField(
+                value = state.title,
+                onValueChange = actions::setTitle,
+                label = { Text("Title") },
+                placeholder = { Text("Title") },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                maxLines = 1,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            OutlinedTextField(
+                value = state.author,
+                onValueChange = actions::setAuthor,
+                label = { Text("Author") },
+                placeholder = { Text("Author") },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                maxLines = 20,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
+            OutlinedTextField(
+                value = state.pages,
+                onValueChange = actions::setPages,
+                label = { Text("Pages") },
+                placeholder = { Text("Pages") },
+                modifier = Modifier
+                    .fillMaxWidth(),
+                maxLines = 20,
+                textStyle = MaterialTheme.typography.bodyMedium
+            )
+
             Button(
                 onClick = { /*TODO*/ },
                 contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
             ) {
                 Icon(
-                    Icons.Outlined.Face,
-                    contentDescription = "Camera icon",
+                    Icons.Outlined.AddPhotoAlternate,
+                    contentDescription = "Add photo icon",
                     modifier = Modifier.size(ButtonDefaults.IconSize)
                 )
                 Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Take a picture")
+                Text("Select a cover")
             }
-
+            Spacer(Modifier.size(8.dp))
+            ImageWithPlaceholder(
+                null, Size.Sm,
+                desc = "Book cover",
+            )
         }
     }
+}
+
+@Composable
+fun Alert(actions: AddBookActions) {
+    AlertDialog(
+        onDismissRequest = {
+            actions.setShowAlert(false)
+        },
+        title = { Text(text = "Warning!") },
+        text = { Text(text = "You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.") },
+        dismissButton = {
+            TextButton (
+                onClick = {
+                    actions.setAlertConfirmed(false) //quindi continui a modificare
+                    actions.setShowAlert(false)
+                }
+            ) {
+                Text(
+                    text = "Cancel",
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    actions.setAlertConfirmed(true)
+                    actions.setShowAlert(false) //quindi esci e te ne freghi
+                },
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text(
+                    text = "Leave Page",
+                    color = MaterialTheme.colorScheme.onError
+                )
+            }
+        }
+    )
 }
