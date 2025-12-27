@@ -32,29 +32,49 @@ import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 
 sealed interface BookWormRoute {
-    @Serializable data object Home : BookWormRoute //library
-    @Serializable data class BookDetails(val bookId: String) : BookWormRoute
-    @Serializable data object AddBook : BookWormRoute
-    @Serializable data object UserPage : BookWormRoute
-    @Serializable data object Setting : BookWormRoute
-    @Serializable data object Statistics : BookWormRoute
-    @Serializable data class DiaryDetails(val entryId: String) : BookWormRoute
-    @Serializable data object AddDiaryEntry : BookWormRoute
-    @Serializable data object Registration: BookWormRoute
-    @Serializable data object Login: BookWormRoute
+    @Serializable
+    data object Home : BookWormRoute //library
+
+    @Serializable
+    data class BookDetails(val bookId: String) : BookWormRoute
+
+    @Serializable
+    data object AddBook : BookWormRoute
+
+    @Serializable
+    data object UserPage : BookWormRoute
+
+    @Serializable
+    data object Setting : BookWormRoute
+
+    @Serializable
+    data object Statistics : BookWormRoute
+
+    @Serializable
+    data class DiaryDetails(val entryId: String) : BookWormRoute
+
+    @Serializable
+    data object AddDiaryEntry : BookWormRoute
+
+    @Serializable
+    data object Registration : BookWormRoute
+
+    @Serializable
+    data object Login : BookWormRoute
 //ToDo
 }
 
 sealed class BottomNavigation(val label: String, val icon: ImageVector, val route: BookWormRoute) {
     data object Library : BottomNavigation("Library", Icons.Outlined.Book, BookWormRoute.Home)
     data object Stats : BottomNavigation("Stats", Icons.Outlined.BarChart, BookWormRoute.Statistics)
-    data object UserPage : BottomNavigation("User Page", Icons.Outlined.Person,
+    data object UserPage : BottomNavigation(
+        "User Page", Icons.Outlined.Person,
         BookWormRoute.UserPage
     )
 }
 
 @Composable
-fun BookWormNavGraph(navController :  NavHostController) {
+fun BookWormNavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
         startDestination = BookWormRoute.Home
@@ -79,7 +99,12 @@ fun BookWormNavGraph(navController :  NavHostController) {
             val route = backStackEntry.toRoute<BookWormRoute.BookDetails>()
             val bookDetailsViewModel = koinViewModel<BookDetailsViewModel>()
             val bookDetailsState by bookDetailsViewModel.state.collectAsStateWithLifecycle()
-            BookDetailsScreen(navController, route.bookId, bookDetailsState, bookDetailsViewModel.actions)
+            BookDetailsScreen(
+                navController,
+                route.bookId,
+                bookDetailsState,
+                bookDetailsViewModel.actions
+            )
         }
         composable<BookWormRoute.AddBook> {
             AddBookScreen(navController)
@@ -91,8 +116,15 @@ fun BookWormNavGraph(navController :  NavHostController) {
         composable<BookWormRoute.Setting> {
             val themeViewModel = koinViewModel<ThemeViewModel>()
             val themeState by themeViewModel.state.collectAsStateWithLifecycle()
+            val settingState by themeViewModel.settingState.collectAsStateWithLifecycle()
 
-            SettingsScreen(navController, themeState, themeViewModel::changeTheme)
+            SettingsScreen(
+                navController,
+                state = themeState,
+                settingState = settingState,
+                actions = themeViewModel.actions,
+                onThemeSelected = themeViewModel::changeTheme
+            )
         }
 
         composable<BookWormRoute.Statistics> {
@@ -102,7 +134,7 @@ fun BookWormNavGraph(navController :  NavHostController) {
         composable<BookWormRoute.AddDiaryEntry> {
             val addDiaryEntryVm = koinViewModel<AddDiaryEntryViewModel>()
             val state by addDiaryEntryVm.state.collectAsStateWithLifecycle()
-            AddDiaryEntryScreen( navController, state, addDiaryEntryVm.actions)
+            AddDiaryEntryScreen(navController, state, addDiaryEntryVm.actions)
         }
     }
 }

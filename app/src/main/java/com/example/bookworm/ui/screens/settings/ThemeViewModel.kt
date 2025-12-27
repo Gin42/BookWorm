@@ -5,16 +5,37 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.data.models.Theme
 import com.example.bookworm.data.repositories.ThemeRepository
+import com.example.bookworm.ui.screens.bookdetails.BookDetailsAction
+import com.example.bookworm.ui.screens.bookdetails.BookDetailsState
+import com.example.bookworm.ui.screens.bookdetails.ReadingStatus
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-data class ThemeState(val theme: Theme)
+data class ThemeState(
+    val theme: Theme,
+)
+
+data class SettingState(
+    val themeExpanded: Boolean = false
+)
+
+interface SettingsAction {
+    fun toggleThemeExpanded(themeExpanded: Boolean)
+}
+
 
 class ThemeViewModel(
     private val repository: ThemeRepository
 ) : ViewModel() {
+
+    private val _settingState = MutableStateFlow(SettingState())
+    val settingState = _settingState.asStateFlow()
+
     val state = repository.theme.map { ThemeState(it) }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -23,6 +44,13 @@ class ThemeViewModel(
 
     fun changeTheme(theme: Theme) = viewModelScope.launch {
         repository.setTheme(theme)
+    }
+
+    val actions = object : SettingsAction {
+        override fun toggleThemeExpanded(themeExpanded: Boolean) {
+            _settingState.update { it.copy(themeExpanded = themeExpanded) }
+
+        }
     }
 }
 
