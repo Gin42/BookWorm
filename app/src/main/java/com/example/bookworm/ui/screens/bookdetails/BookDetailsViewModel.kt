@@ -2,6 +2,7 @@ package com.example.bookworm.ui.screens.bookdetails
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
+import com.example.bookworm.data.models.ReadingStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,12 +15,6 @@ data class BookDetailsState(
     val entryExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
 )
 
-enum class ReadingStatus {
-    READING,
-    FINISHED,
-    PLAN_TO_READ,
-    DROPPED
-}
 
 const val NUMBER_OF_ENTRIES = 5
 
