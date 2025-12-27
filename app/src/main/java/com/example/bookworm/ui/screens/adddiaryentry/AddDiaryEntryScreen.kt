@@ -43,7 +43,6 @@ fun AddDiaryEntryScreen(
 ) {
     Scaffold(
         topBar = { AppBar(navController, goBack = true) },
-        bottomBar = { NavBottom(navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigateUp() }

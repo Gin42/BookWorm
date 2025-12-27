@@ -28,9 +28,7 @@ import com.example.bookworm.ui.composables.NavBottom
 @Composable
 fun AddBookScreen(navController: NavController) {
     Scaffold(
-        topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController) },
-        modifier = Modifier.padding(horizontal = 16.dp),
+        topBar = { AppBar(navController, goBack = true) },
         floatingActionButton = {
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
@@ -46,7 +44,7 @@ fun AddBookScreen(navController: NavController) {
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(12.dp)
+                .padding(8.dp)
                 .fillMaxSize()
         ) {
 

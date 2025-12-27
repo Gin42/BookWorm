@@ -40,7 +40,6 @@ fun SettingsScreen(
 ) {
     Scaffold(
         topBar = { AppBar(navController, true) },
-        bottomBar = { NavBottom(navController) }
     ) { contentPadding ->
         Column(
             Modifier
