@@ -9,7 +9,7 @@ import androidx.room.Index
 import com.example.bookworm.data.models.ReadingStatus
 
 @Entity(
-    tableName = "book",
+    tableName = "books",
     indices = [
         Index(value = ["title", "author"], unique = true), /*eventualemente me ne posso fregare*/
         Index(value = ["book_id", "user_id"], unique = true)
@@ -43,8 +43,8 @@ data class BookEntity(
     @ColumnInfo(name = "favourite")
     val favourite: Boolean = false,
 
-    @ColumnInfo(name = "state")
-    val state: ReadingStatus = ReadingStatus.PLAN_TO_READ,
+    @ColumnInfo(name = "status")
+    val status: ReadingStatus = ReadingStatus.PLAN_TO_READ,
 
     @ColumnInfo(name = "user_id")
     val userId: Long,
