@@ -31,7 +31,6 @@ interface UserDAOs {
     @Query("UPDATE users SET image = :image WHERE user_id = :userId")
     suspend fun upsertImage(userId: Long, image: String)
 
-
     @Query("SELECT * FROM achievements")
     suspend fun getAllAchievements(): List<AchievementEntity>
 

@@ -16,4 +16,6 @@ data class AchievementEntity(
     @ColumnInfo(name = "description")
     val description: String,
 
+    @ColumnInfo(name = "number")
+    val number: Int,
 )

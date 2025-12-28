@@ -28,4 +28,7 @@ interface ReadingJourneyDAOs {
 
     @Upsert
     suspend fun upsertJourney(journey: ReadingJourneyEntity): Long
+
+    @Delete
+    suspend fun deleteJourney(journey: ReadingJourneyEntity)
 }
