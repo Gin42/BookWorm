@@ -2,9 +2,12 @@ package com.example.bookworm.ui.screens.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
@@ -56,26 +59,24 @@ fun SettingsScreen(
                     )
                 },
                 trailingContent = {
-                    Row (
-                        modifier = Modifier
-                            .border(1.dp, Color.Transparent)
-                            .clip(MaterialTheme.shapes.medium)
-                            .background(MaterialTheme.colorScheme.surfaceContainer)
-                            .width(120.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-
+                    Column(
+                        verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            state.theme.toString(),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(start = 12.dp)
-                        )
+                        Row(
+                            modifier = Modifier
+                                .clip(MaterialTheme.shapes.medium)
+                                .background(MaterialTheme.colorScheme.surfaceContainer)
+                                .clickable { actions.toggleThemeExpanded(!settingState.themeExpanded) }
+                                .padding(8.dp)
+                                .width(100.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween
 
-                        IconButton(
-                            onClick = { actions.toggleThemeExpanded(!settingState.themeExpanded) },
                         ) {
+                            Text(
+                                state.theme.toString(),
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(start = 12.dp)
+                            )
                             Icon(
                                 imageVector = if (settingState.themeExpanded) {
                                     Icons.Filled.ArrowDropUp
@@ -85,7 +86,6 @@ fun SettingsScreen(
                                 contentDescription = "Status options"
                             )
                         }
-
                         DropdownMenu(
                             expanded = settingState.themeExpanded,
                             onDismissRequest = { actions.toggleThemeExpanded(false) }

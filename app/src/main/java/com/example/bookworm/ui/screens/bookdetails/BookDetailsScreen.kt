@@ -24,6 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -118,13 +119,23 @@ fun BookDetailsScreen(
                         )
                     },
                     trailingContent = {
-                        IconButton(
-                            onClick = { /* TODO */ }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Outlined.FavoriteBorder,
-                                contentDescription = "Favorite Icon",
-                            )
+                        Row {
+                            IconButton(
+                                onClick = { /* TODO */ }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.FavoriteBorder,
+                                    contentDescription = "Favorite Icon",
+                                )
+                            }
+                            IconButton(
+                                onClick = { /* TODO */ }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Edit,
+                                    contentDescription = "Edit Icon",
+                                )
+                            }
                         }
                     },
                 )

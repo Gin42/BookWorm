@@ -3,6 +3,7 @@ package com.example.bookworm
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import com.example.bookworm.data.repositories.ThemeRepository
+import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
 import com.example.bookworm.ui.screens.authentication.LoginViewModel
 import com.example.bookworm.ui.screens.authentication.RegistrationScreen
@@ -28,4 +29,6 @@ val appModule = module {
     viewModel { LoginViewModel() }
 
     viewModel { BookDetailsViewModel() }
+
+    viewModel { AddBookViewModel() }
 }

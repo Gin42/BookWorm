@@ -38,6 +38,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.ui.BookWormRoute
+import com.example.bookworm.ui.composables.ImageWithPlaceholder
+import com.example.bookworm.ui.composables.Size
 
 @Composable
 fun RegistrationScreen(
@@ -91,6 +93,13 @@ fun RegistrationScreen(
                     style = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+
+                ImageWithPlaceholder(
+                    null, Size.Sm,
+                    desc = "User photo",
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = state.username,
                     onValueChange = actions::setUsername,
