@@ -38,7 +38,7 @@ data class JourneyEntryEntity (
     val pagesRead: Int,
 
     @ColumnInfo(name = "comment")
-    val comment: String? = "",
+    val comment: String?,
 
     @ColumnInfo(name = "journey_id")
     val journeyId: Long,

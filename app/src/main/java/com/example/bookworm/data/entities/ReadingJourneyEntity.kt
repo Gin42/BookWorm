@@ -9,9 +9,6 @@ import java.util.Date
 
 @Entity(
     tableName = "reading_journey",
-    indices = [
-        Index(value = ["start_date", "book_id", "user_id"], unique = true)
-    ],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,

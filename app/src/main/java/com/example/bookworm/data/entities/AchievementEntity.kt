@@ -16,6 +16,4 @@ data class AchievementEntity(
     @ColumnInfo(name = "description")
     val description: String,
 
-    @ColumnInfo(name = "image")
-    val image: String? = null,
 )
