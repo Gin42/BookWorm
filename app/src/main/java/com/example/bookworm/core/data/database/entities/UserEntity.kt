@@ -1,4 +1,4 @@
-package com.example.bookworm.data.entities
+package com.example.bookworm.core.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

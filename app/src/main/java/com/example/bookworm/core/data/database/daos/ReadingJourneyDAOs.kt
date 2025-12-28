@@ -1,13 +1,10 @@
-package com.example.bookworm.data.daos
+package com.example.bookworm.core.data.database.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.example.bookworm.data.entities.BookEntity
-import com.example.bookworm.data.entities.JourneyEntryEntity
-import com.example.bookworm.data.entities.ReadingJourneyEntity
-import com.example.bookworm.data.models.ReadingStatus
+import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import kotlinx.coroutines.flow.Flow
 
 
@@ -23,7 +20,7 @@ interface ReadingJourneyDAOs {
     suspend fun dropJourney(bookId: Long)
 
     //finish journey
-    @Query("UPDATE reading_journey SET endDate = CURRENT_TIMESTAMP WHERE book_id = :bookId")
+    @Query("UPDATE reading_journey SET end_date = CURRENT_TIMESTAMP WHERE book_id = :bookId")
     suspend fun endJourney(bookId: Long)
 
     @Upsert

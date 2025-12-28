@@ -1,15 +1,20 @@
-package com.example.bookworm.data.entities
+package com.example.bookworm.core.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
+
 @Entity(
     tableName = "user_achievements",
+    indices = [
+        Index(value = ["user_id"]),
+    ],
     primaryKeys = ["achievement_id", "user_id"],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
-            parentColumns = ["id"],
+            parentColumns = ["user_id"],
             childColumns = ["user_id"],
             onDelete = ForeignKey.CASCADE
         )

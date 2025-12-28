@@ -17,7 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
-import com.example.bookworm.data.models.Theme
+import com.example.bookworm.core.data.models.Theme
 import com.example.bookworm.ui.BookWormNavGraph
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.theme.BookWormTheme
@@ -34,9 +34,9 @@ class MainActivity : ComponentActivity() {
 
             BookWormTheme(
                 darkTheme = when (themeState.theme) {
-                    Theme.Light -> false
-                    Theme.Dark -> true
-                    Theme.System -> isSystemInDarkTheme()
+                    com.example.bookworm.core.data.models.Theme.Light -> false
+                    com.example.bookworm.core.data.models.Theme.Dark -> true
+                    com.example.bookworm.core.data.models.Theme.System -> isSystemInDarkTheme()
                 }
             ) {
                 val navController = rememberNavController()

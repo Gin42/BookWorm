@@ -2,11 +2,12 @@ package com.example.bookworm
 
 import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.bookworm.data.repositories.ThemeRepository
+import androidx.room.Room
+import com.example.bookworm.core.data.BookWormDatabase
+import com.example.bookworm.core.data.repositories.ThemeRepository
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
 import com.example.bookworm.ui.screens.authentication.LoginViewModel
-import com.example.bookworm.ui.screens.authentication.RegistrationScreen
 import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
@@ -18,6 +19,17 @@ val Context.dataStore by preferencesDataStore("theme")
 
 val appModule = module {
     single { get<Context>().dataStore }
+
+    single {
+        Room.databaseBuilder(
+            get(),
+            BookWormDatabase::class.java,
+            "bookworm"
+        )
+            .fallbackToDestructiveMigration() //to check with ale
+            .build()
+    }
+
     single { ThemeRepository(get()) }
 
     viewModel { ThemeViewModel(get()) }

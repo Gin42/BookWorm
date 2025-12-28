@@ -1,4 +1,4 @@
-package com.example.bookworm.data.daos
+package com.example.bookworm.core.data.database.daos
 
 
 import androidx.room.Dao
@@ -7,9 +7,9 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import com.example.bookworm.data.entities.AchievementEntity
-import com.example.bookworm.data.entities.UserAchievementEntity
-import com.example.bookworm.data.entities.UserEntity
+import com.example.bookworm.core.data.database.entities.AchievementEntity
+import com.example.bookworm.core.data.database.entities.UserAchievementEntity
+import com.example.bookworm.core.data.database.entities.UserEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -19,7 +19,7 @@ interface UserDAOs {
     fun getUserById(userId: Long): Flow<UserEntity?>
 
     @Query("SELECT * FROM users WHERE username = :username  AND password = :password")
-    suspend fun logInUser(username: String, password: String): UserEntity?
+    suspend fun loginUser(username: String, password: String): UserEntity?
 
     //si tratta di un UPDATE-INSERT
     @Upsert
@@ -40,7 +40,12 @@ interface UserDAOs {
     @Transaction
     suspend fun createAccount(user: UserEntity) {
         val userId = upsertUser(user)
-        val achievements = getAllAchievements().map { UserAchievementEntity(it.achievementId, userId) }
+        val achievements = getAllAchievements().map {
+            UserAchievementEntity(
+                it.achievementId,
+                userId
+            )
+        }
         insertUserAchievement(achievements)
     }
 }

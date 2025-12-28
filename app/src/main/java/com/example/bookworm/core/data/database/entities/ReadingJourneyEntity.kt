@@ -1,4 +1,4 @@
-package com.example.bookworm.data.entities
+package com.example.bookworm.core.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -9,16 +9,20 @@ import java.util.Date
 
 @Entity(
     tableName = "reading_journey",
+    indices = [
+        Index(value = ["user_id"]),
+        Index(value = ["book_id"])
+    ],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
-            parentColumns = ["journey_id"],
+            parentColumns = ["user_id"],
             childColumns = ["user_id"],
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
             entity = BookEntity::class,
-            parentColumns = ["journey_id"],
+            parentColumns = ["book_id"],
             childColumns = ["book_id"],
             onDelete = ForeignKey.CASCADE
         )
@@ -29,10 +33,10 @@ data class ReadingJourneyEntity (
     val journeyId: Long,
 
     @ColumnInfo(name = "start_date")
-    val startDate: Date,
+    val startDate: Long,
 
-    @ColumnInfo(name = "endDate")
-    val endDate: Date? = null,
+    @ColumnInfo(name = "end_date")
+    val endDate: Long? = null,
 
     @ColumnInfo(name = "is_dropped")
     val isDropped: Boolean = false,

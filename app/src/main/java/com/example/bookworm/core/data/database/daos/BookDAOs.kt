@@ -1,12 +1,10 @@
-package com.example.bookworm.data.daos
+package com.example.bookworm.core.data.database.daos
 
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
-import com.example.bookworm.data.entities.BookEntity
-import com.example.bookworm.data.models.ReadingStatus
+import com.example.bookworm.core.data.database.entities.BookEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -25,17 +23,17 @@ interface BookDAOs {
 
     //select all book where favourite = TRUE
     @Query("SELECT * FROM books WHERE favourite = 1")
-    suspend fun getAllFavouriteBooks(): Flow<List<BookEntity>>
+    fun getAllFavouriteBooks(): Flow<List<BookEntity>>
 
     //select all book where status = status
     @Query("SELECT * FROM books WHERE status = :status")
-    suspend fun getBooksByStatus(status: ReadingStatus): Flow<List<BookEntity>>
+    fun getBooksByStatus(status: com.example.bookworm.core.data.models.ReadingStatus): Flow<List<BookEntity>>
 
     @Query ("UPDATE books SET favourite = NOT favourite WHERE book_id = :bookId")
     suspend fun toggleFavouriteBook(bookId: Long)
 
     @Query("UPDATE books SET status = :status WHERE book_id = :bookId")
-    suspend fun updateBookStatus(bookId: Long, status: ReadingStatus)
+    suspend fun updateBookStatus(bookId: Long, status: com.example.bookworm.core.data.models.ReadingStatus)
 
     @Upsert
     suspend fun upsertBook(book: BookEntity): Long

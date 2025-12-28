@@ -1,16 +1,21 @@
-package com.example.bookworm.data.entities
+package com.example.bookworm.core.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "notifications",
+    indices = [
+        Index(value = ["user_id"]),
+        Index(value = ["achievement_id"])
+    ],
     foreignKeys = [
         ForeignKey(
             entity = UserEntity::class,
-            parentColumns = ["notification_id"],
+            parentColumns = ["user_id"],
             childColumns = ["user_id"],
             onDelete = ForeignKey.CASCADE
         ),

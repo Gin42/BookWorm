@@ -144,7 +144,9 @@ fun RegistrationScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Button(
-                    onClick = { navController.navigate(BookWormRoute.Home) },
+                    onClick = {
+                        navController.navigate(BookWormRoute.Home)
+                              },
                     modifier = Modifier
                 ) {
                     Text("Sign up", style = MaterialTheme.typography.titleMedium)

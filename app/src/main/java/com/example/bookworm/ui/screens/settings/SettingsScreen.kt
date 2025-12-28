@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bookworm.data.models.Theme
+import com.example.bookworm.core.data.models.Theme
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
 
@@ -39,7 +39,7 @@ fun SettingsScreen(
     state: ThemeState,
     settingState: SettingState,
     actions: SettingsAction,
-    onThemeSelected: (Theme) -> Unit
+    onThemeSelected: (com.example.bookworm.core.data.models.Theme) -> Unit
 ) {
     Scaffold(
         topBar = { AppBar(navController, true) },
@@ -90,7 +90,7 @@ fun SettingsScreen(
                             expanded = settingState.themeExpanded,
                             onDismissRequest = { actions.toggleThemeExpanded(false) }
                         ) {
-                            Theme.entries.forEach { theme ->
+                            com.example.bookworm.core.data.models.Theme.entries.forEach { theme ->
                                 DropdownMenuItem(
                                     onClick = {
                                         onThemeSelected(theme)

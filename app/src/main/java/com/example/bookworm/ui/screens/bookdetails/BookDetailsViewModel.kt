@@ -2,7 +2,7 @@ package com.example.bookworm.ui.screens.bookdetails
 
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
-import com.example.bookworm.data.models.ReadingStatus
+import com.example.bookworm.core.data.models.ReadingStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 
 data class BookDetailsState(
     val statusExpanded: Boolean = false,
-    val readingStatus: ReadingStatus = ReadingStatus.PLAN_TO_READ,
+    val readingStatus: com.example.bookworm.core.data.models.ReadingStatus = com.example.bookworm.core.data.models.ReadingStatus.PLAN_TO_READ,
     val journeyExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
     val entryExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
 )
@@ -20,7 +20,7 @@ const val NUMBER_OF_ENTRIES = 5
 
 interface BookDetailsAction {
     fun toggleStatusExpanded(statusExpanded: Boolean)
-    fun setReadingStatus(readingStatus: ReadingStatus)
+    fun setReadingStatus(readingStatus: com.example.bookworm.core.data.models.ReadingStatus)
     fun toggleJourneyEntry(index: Int)
     fun openEntry(index: Int, value: Boolean)
 }
@@ -34,7 +34,7 @@ class BookDetailsViewModel: ViewModel() {
             _state.update { it.copy(statusExpanded = statusExpanded) }
         }
 
-        override fun setReadingStatus(readingStatus: ReadingStatus) {
+        override fun setReadingStatus(readingStatus: com.example.bookworm.core.data.models.ReadingStatus) {
             _state.update { it.copy(readingStatus = readingStatus) }
         }
 

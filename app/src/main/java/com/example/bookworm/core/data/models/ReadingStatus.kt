@@ -1,4 +1,4 @@
-package com.example.bookworm.data.models
+package com.example.bookworm.core.data.models
 
 enum class ReadingStatus {
     READING,

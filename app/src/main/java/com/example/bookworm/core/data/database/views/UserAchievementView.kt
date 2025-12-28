@@ -1,4 +1,4 @@
-package com.example.bookworm.data.views
+package com.example.bookworm.core.data.database.views
 
 import androidx.room.ColumnInfo
 import androidx.room.DatabaseView

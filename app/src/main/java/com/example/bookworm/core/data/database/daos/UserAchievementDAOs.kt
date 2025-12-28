@@ -1,10 +1,10 @@
-package com.example.bookworm.data.daos
+package com.example.bookworm.core.data.database.daos
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.example.bookworm.data.entities.UserAchievementEntity
 import androidx.room.Upsert
-import com.example.bookworm.data.views.UserAchievementView
+import com.example.bookworm.core.data.database.entities.UserAchievementEntity
+import com.example.bookworm.core.data.database.views.UserAchievementView
 import kotlinx.coroutines.flow.Flow
 
 @Dao

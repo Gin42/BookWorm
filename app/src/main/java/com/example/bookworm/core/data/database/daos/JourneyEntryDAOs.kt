@@ -1,12 +1,13 @@
-package com.example.bookworm.data.daos
+package com.example.bookworm.core.data.database.daos
 
+import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
 import androidx.room.Upsert
-import com.example.bookworm.data.entities.JourneyEntryEntity
-import com.example.bookworm.data.entities.ReadingJourneyEntity
+import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import kotlinx.coroutines.flow.Flow
 
+@Dao
 interface JourneyEntryDAOs {
 
     //get all journey's entry ordered from newest to oldest
