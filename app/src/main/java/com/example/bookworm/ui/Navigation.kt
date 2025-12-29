@@ -14,6 +14,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.bookworm.ui.EntitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryScreen
@@ -76,15 +77,21 @@ sealed class BottomNavigation(val label: String, val icon: ImageVector, val rout
 
 @Composable
 fun BookWormNavGraph(navController: NavHostController) {
+
+    val userViewModel = koinViewModel<UserViewModel>()
     NavHost(
         navController = navController,
-        startDestination = BookWormRoute.Home
+        startDestination = BookWormRoute.Registration
     ) {
 
         composable<BookWormRoute.Registration> {
             val registrationViewModel = koinViewModel<RegistrationViewModel>()
             val registrationState by registrationViewModel.state.collectAsStateWithLifecycle()
-            RegistrationScreen(navController, registrationState, registrationViewModel.actions)
+            RegistrationScreen(
+                navController,
+                state = registrationState,
+                actions = registrationViewModel.actions
+            )
         }
 
         composable<BookWormRoute.Login> {

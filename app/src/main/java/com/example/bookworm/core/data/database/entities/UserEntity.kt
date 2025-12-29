@@ -2,21 +2,26 @@ package com.example.bookworm.core.data.database.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity(tableName = "users")
+@Entity(
+    tableName = "users",
+    indices = [Index(value = ["username"], unique = true)]
+)
 data class UserEntity(
+
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    val userId: Long = 0,
 
     @ColumnInfo(name = "username")
-    val username: String,
+    val username: String = "",
 
     @ColumnInfo(name = "password")
-    val password: String,
+    val password: String = "",
 
     @ColumnInfo(name = "image")
     val image: String? = null,
 
-)
+    )

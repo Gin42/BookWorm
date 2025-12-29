@@ -24,9 +24,7 @@ class UserRepository(private val userDAO: UserDAOs) {
 
     private fun getUserById(userId: Long): Flow<UserEntity?> = userDAO.getUserById(userId)
 
-    suspend fun upsertImage(userId: Long, image: String) = userDAO.upsertImage(userId, image)
-
-    suspend fun createAccount(user: UserEntity) {
-        userDAO.createAccount(user)
+    suspend fun checkUsernameExists(username: String): Boolean {
+        return userDAO.checkUsernameExists(username).firstOrNull() != null
     }
 }
