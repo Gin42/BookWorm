@@ -13,7 +13,7 @@ interface ReadingJourneyDAOs {
 
     //get all book's journeys ordered from newest to oldest
     @Query("SELECT * FROM reading_journey WHERE book_id = :bookId ORDER BY start_date DESC")
-    fun getAllJourneys(bookId: Long): Flow<List<ReadingJourneyEntity>>
+    fun getAllJourneys(bookId: Long): Flow<List<ReadingJourneyEntity?>>
 
     //drop journey
     @Query("UPDATE reading_journey SET is_dropped = 1 WHERE book_id = :bookId")

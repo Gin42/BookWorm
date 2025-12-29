@@ -12,7 +12,7 @@ interface JourneyEntryDAOs {
 
     //get all journey's entry ordered from newest to oldest
     @Query("SELECT * FROM journey_entry WHERE journey_id = :journeyId ORDER BY date DESC")
-    fun getAllEntries(journeyId: Long): Flow<List<JourneyEntryEntity>>
+    fun getAllEntries(journeyId: Long): Flow<List<JourneyEntryEntity?>>
 
     @Upsert
     suspend fun upsertEntry(entry: JourneyEntryEntity): Long

@@ -8,7 +8,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.example.bookworm.core.data.database.entities.AchievementEntity
-import com.example.bookworm.core.data.database.entities.UserAchievementEntity
+import com.example.bookworm.core.data.database.entities.UnlockedAchievementEntity
 import com.example.bookworm.core.data.database.entities.UserEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -19,9 +19,8 @@ interface UserDAOs {
     fun getUserById(userId: Long): Flow<UserEntity?>
 
     @Query("SELECT * FROM users WHERE username = :username  AND password = :password")
-    suspend fun loginUser(username: String, password: String): UserEntity?
+    fun loginUser(username: String, password: String): Flow<UserEntity?>
 
-    //si tratta di un UPDATE-INSERT
     @Upsert
     suspend fun upsertUser(user: UserEntity): Long
 
@@ -35,13 +34,13 @@ interface UserDAOs {
     suspend fun getAllAchievements(): List<AchievementEntity>
 
     @Insert
-    suspend fun insertUserAchievement(achievements: List<UserAchievementEntity>)
+    suspend fun insertUserAchievement(achievements: List<UnlockedAchievementEntity>)
 
     @Transaction
     suspend fun createAccount(user: UserEntity) {
         val userId = upsertUser(user)
         val achievements = getAllAchievements().map {
-            UserAchievementEntity(
+            UnlockedAchievementEntity(
                 it.achievementId,
                 userId
             )

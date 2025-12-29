@@ -16,9 +16,6 @@ data class UserEntity(
     @ColumnInfo(name = "password")
     val password: String,
 
-    @ColumnInfo(name = "salt")
-    val salt: String,
-
     @ColumnInfo(name = "image")
     val image: String? = null,
 

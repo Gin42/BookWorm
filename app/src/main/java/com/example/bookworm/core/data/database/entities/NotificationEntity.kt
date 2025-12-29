@@ -20,7 +20,7 @@ import androidx.room.PrimaryKey
             onDelete = ForeignKey.CASCADE
         ),
         ForeignKey(
-            entity = UserAchievementEntity::class,
+            entity = UnlockedAchievementEntity::class,
             parentColumns = ["achievement_id", "user_id"],
             childColumns = ["achievement_id", "user_id"],
             onDelete = ForeignKey.CASCADE

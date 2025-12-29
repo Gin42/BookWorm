@@ -17,7 +17,7 @@ interface NotificationDAOs {
     fun getAllNotifications(userId: Long): Flow<List<NotificationEntity>>
 
     @Upsert
-    suspend fun upsertNotification(notification: NotificationEntity)
+    suspend fun upsertNotification(notification: NotificationEntity): Long
 
     @Delete
     suspend fun deleteNotification(notification: NotificationEntity)

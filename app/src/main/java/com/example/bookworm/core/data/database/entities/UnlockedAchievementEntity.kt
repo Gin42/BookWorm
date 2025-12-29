@@ -6,7 +6,7 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 
 @Entity(
-    tableName = "user_achievements",
+    tableName = "unlocked_achievements",
     indices = [
         Index(value = ["user_id"]),
     ],
@@ -17,10 +17,16 @@ import androidx.room.Index
             parentColumns = ["user_id"],
             childColumns = ["user_id"],
             onDelete = ForeignKey.CASCADE
+        ),
+        ForeignKey(
+            entity = AchievementEntity::class,
+            parentColumns = ["achievement_id"],
+            childColumns = ["achievement_id"],
+            onDelete = ForeignKey.CASCADE
         )
     ]
 )
-data class UserAchievementEntity(
+data class UnlockedAchievementEntity(
 
     @ColumnInfo(name = "achievement_id")
     val achievementId: Long,
@@ -33,8 +39,5 @@ data class UserAchievementEntity(
 
     @ColumnInfo(name = "is_notified")
     val isNotified: Boolean = false,
-
-    @ColumnInfo(name = "number")
-    val number: Int = 0
 
 )
