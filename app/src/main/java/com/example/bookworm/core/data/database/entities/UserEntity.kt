@@ -23,5 +23,4 @@ data class UserEntity(
 
     @ColumnInfo(name = "image")
     val image: String? = null,
-
-    )
+)

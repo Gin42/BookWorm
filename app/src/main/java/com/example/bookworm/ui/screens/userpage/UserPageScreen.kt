@@ -1,7 +1,9 @@
 package com.example.bookworm.ui.screens.userpage
 
+import android.content.ContentValues.TAG
+import android.net.Uri
+import android.util.Log
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -9,13 +11,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Diamond
-import androidx.compose.material.icons.outlined.Face
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -27,21 +26,25 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
+import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.ui.composables.Size
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun UserPageScreen(navController: NavController) {
+fun UserPageScreen(
+    navController: NavController,
+    userState: LoggedUserState
+) {
     Scaffold(
         topBar = { AppBar(navController) },
         bottomBar = { NavBottom(navController) },
@@ -60,20 +63,20 @@ fun UserPageScreen(navController: NavController) {
                         .padding(top = 30.dp)
                         .fillMaxWidth()
                 ) {
-                    Image(
-                        imageVector = Icons.Outlined.Face,
-                        "Book cover",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(150.dp)
-                            .clip(CircleShape)
-                            .border(2.dp, Color.Gray),
-                        /*DELETE*/
+                    Log.d(TAG, "User Image: ${userState.image}, Username: ${userState.username}")
+                    val imageUriString = userState.image
+                    val imageUri = imageUriString?.let { Uri.parse(it) }
+
+                    ImageWithPlaceholder(
+                        imageUri,
+                        Size.Lg,
+                        desc = "User photo"
                     )
+
                     Text(
-                        "Username",
+                        userState.username,
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
+                        modifier = Modifier.padding(top = 8.dp),
                     )
                 }
             }

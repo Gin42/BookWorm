@@ -1,4 +1,4 @@
-package com.example.bookworm.ui.EntitiesViewModel
+package com.example.bookworm.ui.entitiesViewModel
 
 import android.content.ContentValues.TAG
 import android.util.Log
@@ -9,8 +9,8 @@ import com.example.bookworm.core.data.models.AuthenticationResult
 import com.example.bookworm.core.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 data class LoggedUserState(
@@ -23,11 +23,8 @@ data class LoggedUserState(
 }
 
 interface UserActions {
-
     suspend fun registerUser(user: UserEntity): AuthenticationResult
-
-    fun loginUser(username: String, password: String): Boolean
-
+    fun loginUser(username: String, password: String): AuthenticationResult
 }
 
 class UserViewModel(
@@ -44,7 +41,7 @@ class UserViewModel(
                 repository.checkUsernameExists(user.username)
             }
             return if (!usernameExist) {
-                repository.upsert(user)
+                runBlocking {  repository.upsert(user) }
                 _state.value = LoggedUserState(user)
                 Log.d(
                     TAG,
@@ -54,18 +51,22 @@ class UserViewModel(
             } else AuthenticationResult.UsernameTaken
         }
 
-        override fun loginUser(username: String, password: String): Boolean {
-            val res = runBlocking() { repository.loginUser(password, username) }
-            if (res) {
+        override fun loginUser(username: String, password: String): AuthenticationResult {
+            val res =
+                runBlocking() { repository.loginUser(username = username, password = password) }
+            return if (res != null) {
                 viewModelScope.launch {
                     repository.userFlow.map {
                         LoggedUserState(it ?: UserEntity())
-                    }.collect { _state.value = it }
+                    }.collect {_state.value = it}
                 }
-            }
-            return res
+                Log.d(
+                    TAG,
+                    "User Logged: ID = ${_state.value.id}, Username = ${_state.value.username}, Image = ${_state.value.image}, Password = ${_state.value.password}"
+                )
+                AuthenticationResult.Success
+            } else AuthenticationResult.WrongCredentials
         }
-
-
     }
+
 }

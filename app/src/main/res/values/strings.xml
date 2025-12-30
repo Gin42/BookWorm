@@ -1,3 +1,41 @@
 <resources>
-    <string name="app_name">BookWorm</string>
+    <string name="app_name" translatable="false">BookWorm</string>
+
+    <!-- Top App bar -->
+
+
+
+    <!-- Registration and Login -->
+    <string name="registration_message">Create your account</string>
+    <string name="sign_in_text">You already have an account? </string>
+    <string name="sign_in_link_text">Sign-in</string>
+
+    <string name="login_message">Login to your account</string>
+    <string name="sign_up_text">You don\'t have an account? </string>
+    <string name="sign_up_link_text">Sign-up</string>
+
+    <!-- Images desc -->
+    <string name="user_profile_picture_desc">User profile picture</string>
+
+    <!-- Accessibility -->
+    <string name="app_logo_desc">BookWorm app logo</string>
+
+    <!-- Buttons -->
+    <string name="sign_up_button_desc">Sign up</string>
+    <string name="sign_in_button_desc">Sign in</string>
+
+    <!-- Icons -->
+    <string name="add_image_icon_desc">Add image</string>
+    <string name="password_visibility_icon_desc">Toggle password visibility</string>
+    <string name="go_back_icon_desc">Go Back</string>
+    <string name="settings_icon_desc">Settings</string>
+
+
+    <!-- Labels and Placeholders -->
+    <string name="username_label">Username</string>
+    <string name="username_placeholder">Username</string>
+
+    <string name="password_label">Password</string>
+    <string name="password_placeholder">Password</string>
+
 </resources>

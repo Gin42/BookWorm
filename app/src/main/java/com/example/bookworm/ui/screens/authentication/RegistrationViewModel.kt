@@ -6,30 +6,34 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.UserEntity
 import com.example.bookworm.core.data.models.AuthenticationResult
-import com.example.bookworm.core.data.repositories.UserRepository
-import com.example.bookworm.ui.EntitiesViewModel.UserViewModel
+import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 data class RegistrationState(
     val username: String = "",
     val password: TextFieldState = TextFieldState(initialText = ""),
-    val userPhoto: Uri? = null,
+    val userPhoto: Uri? = Uri.EMPTY,
     val showPassword: Boolean = false,
 ) {
     val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
-}
 
-//val userPhoto: String o URI ?
+    fun toUser() = UserEntity(
+        username = username,
+        password = password.text.toString(),
+        image = userPhoto.toString(),
+    )
+}
 
 interface RegistrationActions {
     fun setUsername(username: String)
     fun setPassword(password: TextFieldState)
+    fun setUserPhoto(userPhoto: Uri?)
+
     fun setShowPassword(showPassword: Boolean)
-    fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit)
+    //fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit)
 }
 
 class RegistrationViewModel(
@@ -47,12 +51,16 @@ class RegistrationViewModel(
             _state.update { it.copy(password = password) }
         }
 
+        override fun setUserPhoto(userPhoto: Uri?) {
+            _state.update { it.copy(userPhoto = userPhoto) }
+        }
+
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
         }
 
 
-        override fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit) {
+        /*override fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit) {
             viewModelScope.launch {
                 val user = UserEntity(
                     username = state.value.username,
@@ -62,7 +70,7 @@ class RegistrationViewModel(
                 val result = userViewModel.actions.registerUser(user)
                 onRegistrationComplete(result)
             }
-        }
+        }*/
     }
 
 }

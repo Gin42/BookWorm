@@ -22,7 +22,7 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     fun getAllBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllBooks(userId)
 
-    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>> = bookDAO.searchBook(searchString)
+    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>> = bookDAO.searchBook(searchString, userId)
 
     fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity?>> = bookDAO.getAllFavouriteBooks(userId)
 

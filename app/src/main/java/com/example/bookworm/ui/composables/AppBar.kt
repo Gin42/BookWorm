@@ -10,6 +10,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.navigation.NavController
@@ -23,7 +24,7 @@ fun AppBar(navController: NavController, goBack: Boolean = false) {
     CenterAlignedTopAppBar(
         title = {
             Text(
-                text = "BookWorm",
+                text = stringResource(R.string.app_name),
                 fontFamily = FontFamily(Font(R.font.alegreya_sans_sc_medium)),
                 style = MaterialTheme.typography.headlineMedium,
             )
@@ -31,7 +32,10 @@ fun AppBar(navController: NavController, goBack: Boolean = false) {
         navigationIcon = {
             if (goBack && navController.previousBackStackEntry != null) {
                 IconButton(onClick = { navController.navigateUp() }) {
-                    Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go Back")
+                    Icon(
+                        Icons.AutoMirrored.Outlined.ArrowBack,
+                        contentDescription = stringResource(R.string.go_back_icon_desc)
+                    )
                 }
             }
         },
@@ -39,7 +43,10 @@ fun AppBar(navController: NavController, goBack: Boolean = false) {
             IconButton(
                 onClick = { navController.navigate(BookWormRoute.Setting) }
             ) {
-                Icon(Icons.Filled.Settings, contentDescription = "App Settings")
+                Icon(
+                    Icons.Filled.Settings,
+                    contentDescription = stringResource(R.string.settings_icon_desc)
+                )
             }
         }
     )

@@ -6,7 +6,6 @@ import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -14,7 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.bookworm.ui.EntitiesViewModel.UserViewModel
+import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryScreen
@@ -53,9 +52,6 @@ sealed interface BookWormRoute {
     data object Statistics : BookWormRoute
 
     @Serializable
-    data class DiaryDetails(val entryId: String) : BookWormRoute
-
-    @Serializable
     data object AddDiaryEntry : BookWormRoute
 
     @Serializable
@@ -79,9 +75,12 @@ sealed class BottomNavigation(val label: String, val icon: ImageVector, val rout
 fun BookWormNavGraph(navController: NavHostController) {
 
     val userViewModel = koinViewModel<UserViewModel>()
+    val userState by userViewModel.state.collectAsStateWithLifecycle()
+
+
     NavHost(
         navController = navController,
-        startDestination = BookWormRoute.Registration
+        startDestination = BookWormRoute.Login
     ) {
 
         composable<BookWormRoute.Registration> {
@@ -90,14 +89,18 @@ fun BookWormNavGraph(navController: NavHostController) {
             RegistrationScreen(
                 navController,
                 state = registrationState,
-                actions = registrationViewModel.actions
+                actions = registrationViewModel.actions,
+                onSignUp = userViewModel.actions::registerUser
             )
         }
 
         composable<BookWormRoute.Login> {
             val loginViewModel = koinViewModel<LoginViewModel>()
             val loginState by loginViewModel.state.collectAsStateWithLifecycle()
-            LoginScreen(navController, loginState, loginViewModel.actions)
+            LoginScreen(navController,
+                state = loginState,
+                actions = loginViewModel.actions,
+                onSignIn = userViewModel.actions::loginUser)
         }
 
         composable<BookWormRoute.Home> {
@@ -120,7 +123,7 @@ fun BookWormNavGraph(navController: NavHostController) {
             AddBookScreen(navController, state, addBookVm.actions)
         }
         composable<BookWormRoute.UserPage> {
-            UserPageScreen(navController)
+            UserPageScreen(navController, userState = userState)
         }
 
         composable<BookWormRoute.Setting> {

@@ -16,24 +16,26 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 
 enum class Size { Sm, Lg }
 
 @Composable
 fun ImageWithPlaceholder(uri: Uri?, size: Size, desc: String) {
-    /*if (uri?.path?.isNotEmpty() == true) {
+    if (uri?.path?.isNotEmpty() == true) {
         AsyncImage(
             ImageRequest.Builder(LocalContext.current)
                 .data(uri)
                 .crossfade(true)
                 .build(),
-            "Travel picture",
-            contentScale = ContentScale.Fit,
+            desc,
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .size(if (size == Size.Sm) 72.dp else 128.dp)
                 .clip(CircleShape)
         )
-    } else {*/
+    } else {
         Image(
             Icons.Outlined.Image,
             desc,
@@ -45,5 +47,5 @@ fun ImageWithPlaceholder(uri: Uri?, size: Size, desc: String) {
                 .background(MaterialTheme.colorScheme.primaryContainer)
                 .padding(if (size == Size.Sm) 20.dp else 36.dp)
         )
-   // }
+    }
 }

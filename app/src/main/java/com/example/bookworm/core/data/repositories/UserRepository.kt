@@ -14,12 +14,14 @@ class UserRepository(private val userDAO: UserDAOs) {
 
     suspend fun upsert(user: UserEntity): Long = userDAO.upsertUser(user)
 
-    suspend fun loginUser(username: String, password: String): Boolean {
+    suspend fun loginUser(username: String, password: String): UserEntity? {
         val foundUser = userDAO.loginUser(username, password).firstOrNull()
-        return if (foundUser != null) {
+        if (foundUser != null) {
             _userFlow = getUserById(foundUser.userId)
-            true
-        } else false
+           return foundUser
+        } else {
+            return null
+        }
     }
 
     private fun getUserById(userId: Long): Flow<UserEntity?> = userDAO.getUserById(userId)

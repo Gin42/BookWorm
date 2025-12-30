@@ -19,8 +19,8 @@ interface BookDAOs {
     fun getAllBooks(userId: Long): Flow<List<BookEntity>>
 
     //select books where author or title are similar to the search query
-    @Query("SELECT * FROM books WHERE title LIKE '%' || :searchString || '%' OR author LIKE '%' || :searchString || '%'")
-    fun searchBook(searchString: String): Flow<List<BookEntity?>>
+    @Query("SELECT * FROM books WHERE title LIKE '%' || :searchString || '%' OR author LIKE '%' || :searchString || '%' AND user_id = :userId")
+    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>>
 
     //select all book where favourite = TRUE
     @Query("SELECT * FROM books WHERE favourite = 1 AND user_id = :userId")
