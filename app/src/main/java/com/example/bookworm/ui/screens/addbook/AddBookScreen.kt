@@ -1,16 +1,19 @@
 package com.example.bookworm.ui.screens.addbook
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.AddPhotoAlternate
+import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -29,14 +32,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
+import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
+import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
+import com.example.bookworm.utils.rememberCameraLauncher
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.runBlocking
+import kotlin.reflect.KFunction1
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,8 +55,13 @@ import com.example.bookworm.ui.composables.Size
 fun AddBookScreen(
     navController: NavController,
     state: AddBookState,
-    actions: AddBookActions
+    actions: AddBookActions,
+    addBook: () -> Unit,
+    userState: LoggedUserState
 ) {
+
+    actions.setUserId(userState.id) /*TODO check with Ale*/
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -80,7 +96,13 @@ fun AddBookScreen(
             FloatingActionButton(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
-                onClick = { navController.navigateUp() }
+                onClick = {
+                    if (state.canSubmit) {
+                        addBook()
+                        navController.navigateUp()
+                        /*TODO understand how to check the success or not of the Job*/
+                    }
+                }
             ) {
                 Icon(Icons.Outlined.Check, "Add Book")
             }
@@ -146,23 +168,30 @@ fun AddBookScreen(
                 textStyle = MaterialTheme.typography.bodyMedium
             )
 
-            Button(
-                onClick = { /*TODO*/ },
-                contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
-            ) {
-                Icon(
-                    Icons.Outlined.AddPhotoAlternate,
-                    contentDescription = "Add photo icon",
-                    modifier = Modifier.size(ButtonDefaults.IconSize)
-                )
-                Spacer(Modifier.size(ButtonDefaults.IconSpacing))
-                Text("Select a cover")
-            }
-            Spacer(Modifier.size(8.dp))
-            ImageWithPlaceholder(
-                null, Size.Sm,
-                desc = "Book cover",
+            val ctx = LocalContext.current
+
+            val cameraLauncher = rememberCameraLauncher(
+                onPictureTaken = { imageUri -> actions.setCover(imageUri) }
             )
+
+            Box(
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                ImageWithPlaceholder(
+                    state.bookCover, Size.Lg,
+                    desc = "Book cover",
+                )
+                Button(
+                    onClick = cameraLauncher::captureImage,
+                    shape = CircleShape,
+                ) {
+                    Icon(
+                        Icons.Outlined.Add,
+                        contentDescription = stringResource(R.string.add_image_icon_desc),
+                        modifier = Modifier.size(ButtonDefaults.IconSize)
+                    )
+                }
+            }
         }
     }
 }
@@ -176,7 +205,7 @@ fun Alert(actions: AddBookActions) {
         title = { Text(text = "Warning!") },
         text = { Text(text = "You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.") },
         dismissButton = {
-            TextButton (
+            TextButton(
                 onClick = {
                     actions.setAlertConfirmed(false) //quindi continui a modificare
                     actions.setShowAlert(false)

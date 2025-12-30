@@ -36,6 +36,9 @@ interface BookDAOs {
     @Query("UPDATE books SET status = :status WHERE book_id = :bookId")
     fun updateBookStatus(bookId: Long, status: ReadingStatus)
 
+    @Query("SELECT * FROM books WHERE title = :title AND author = :author")
+    suspend fun checkValidBook(title: String, author: String): List<BookEntity?>
+
     @Upsert
     suspend fun upsertBook(book: BookEntity): Long
 

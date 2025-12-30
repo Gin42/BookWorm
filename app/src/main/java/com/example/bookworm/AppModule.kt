@@ -4,8 +4,10 @@ import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.bookworm.core.data.BookWormDatabase
+import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ThemeRepository
 import com.example.bookworm.core.data.repositories.UserRepository
+import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
@@ -38,18 +40,24 @@ val appModule = module {
         UserRepository(get<BookWormDatabase>().userDao())
     }
 
+    single {
+        BookRepository(get<BookWormDatabase>().bookDao())
+    }
+
+    viewModel { UserViewModel(get()) }
+
+    viewModel { BookViewModel(get()) }
+
+
     viewModel { ThemeViewModel(get()) }
 
     viewModel { AddDiaryEntryViewModel() }
 
-    viewModel { UserViewModel(get()) }
-
     viewModel { RegistrationViewModel(get()) }
-
 
     viewModel { LoginViewModel(get()) }
 
     viewModel { BookDetailsViewModel() }
 
-    viewModel { AddBookViewModel() }
+    viewModel { AddBookViewModel(get()) }
 }

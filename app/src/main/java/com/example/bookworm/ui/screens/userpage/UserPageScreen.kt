@@ -78,6 +78,12 @@ fun UserPageScreen(
                         style = MaterialTheme.typography.titleLarge,
                         modifier = Modifier.padding(top = 8.dp),
                     )
+
+                    Text(
+                        userState.id.toString(),
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
                 }
             }
 

@@ -27,16 +27,16 @@ import com.example.bookworm.core.data.models.ReadingStatus
 data class BookEntity(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "book_id")
-    val bookId: Long,
+    val bookId: Long = 0,
 
     @ColumnInfo(name = "title")
-    val title: String,
+    val title: String = "",
 
     @ColumnInfo(name = "author")
-    val author: String,
+    val author: String = "",
 
     @ColumnInfo(name = "pages")
-    val pages: Int,
+    val pages: Int = 0,
 
     @ColumnInfo(name = "image")
     val image: String? = null,
@@ -45,8 +45,8 @@ data class BookEntity(
     val favourite: Boolean = false,
 
     @ColumnInfo(name = "status")
-    val status: com.example.bookworm.core.data.models.ReadingStatus = com.example.bookworm.core.data.models.ReadingStatus.PLAN_TO_READ,
+    val status: ReadingStatus = ReadingStatus.PLAN_TO_READ,
 
     @ColumnInfo(name = "user_id")
-    val userId: Long,
+    val userId: Long = 0,
 )

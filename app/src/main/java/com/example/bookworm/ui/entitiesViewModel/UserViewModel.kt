@@ -60,10 +60,6 @@ class UserViewModel(
                         LoggedUserState(it ?: UserEntity())
                     }.collect {_state.value = it}
                 }
-                Log.d(
-                    TAG,
-                    "User Logged: ID = ${_state.value.id}, Username = ${_state.value.username}, Image = ${_state.value.image}, Password = ${_state.value.password}"
-                )
                 AuthenticationResult.Success
             } else AuthenticationResult.WrongCredentials
         }
