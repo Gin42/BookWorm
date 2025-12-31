@@ -11,6 +11,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 data class BookState(
@@ -21,15 +22,16 @@ interface BookActions {
     fun addBook(book: BookEntity): Job
     fun deleteBook(book: BookEntity): Job
 
-    /* fun getAllBooks(userId: Long)
-    *  fun getBookById(bookId: Long)
-    *  fun searchBook(searchString: String, userId: Long)
-    *  fun updateBookStatus(bookId: Long, status: ReadingStatus)
-    * */
+    fun getAllBooks(userId: Long)
+
+    /*
+        *  fun searchBook(searchString: String, userId: Long)
+        *  fun updateBookStatus(bookId: Long, status: ReadingStatus)
+        * */
     fun getFavourites(userId: Long)
     fun getBooksWithStatus(userId: Long, status: ReadingStatus)
 
-    fun toggleFavourite(bookId: Long, userId: Long) : Job
+    fun toggleFavourite(bookId: Long, userId: Long): Job
 
 }
 
@@ -45,8 +47,18 @@ class BookViewModel(
             repository.addBook(book)
         }
 
-        override fun deleteBook(book: BookEntity)= viewModelScope.launch {
+        override fun deleteBook(book: BookEntity) = viewModelScope.launch {
             repository.deleteBook(book)
+        }
+
+        override fun getAllBooks(userId: Long) {
+            viewModelScope.launch {
+                repository.getAllBooks(userId).map {
+                    BookState(
+                        it
+                    )
+                }.collect { _state.value = it }
+            }
         }
 
         override fun getFavourites(userId: Long) {

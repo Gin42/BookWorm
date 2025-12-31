@@ -1,7 +1,5 @@
 package com.example.bookworm.ui.screens.addbook
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,15 +37,10 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
-import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
-import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.utils.rememberCameraLauncher
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
-import kotlin.reflect.KFunction1
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -57,10 +50,12 @@ fun AddBookScreen(
     state: AddBookState,
     actions: AddBookActions,
     addBook: () -> Unit,
-    userState: LoggedUserState
+    bookId: Long?
 ) {
 
-    actions.setUserId(userState.id) /*TODO check with Ale*/
+    LaunchedEffect(bookId) {
+        bookId?.let { actions.setBook(it) }
+    }
 
     Scaffold(
         topBar = {
@@ -180,6 +175,7 @@ fun AddBookScreen(
                 ImageWithPlaceholder(
                     state.bookCover, Size.Lg,
                     desc = "Book cover",
+                    CircleShape
                 )
                 Button(
                     onClick = cameraLauncher::captureImage,

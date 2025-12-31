@@ -14,7 +14,7 @@ import com.example.bookworm.ui.BookWormRoute
 @Composable
 fun AddBookFloatingButton(navController: NavController) {
     FloatingActionButton(
-        onClick = { navController.navigate(BookWormRoute.AddBook) },
+        onClick = { navController.navigate(BookWormRoute.AddBook (null)) },
         shape = CircleShape,
     ) {
         Icon(Icons.Filled.Add, "Add item")

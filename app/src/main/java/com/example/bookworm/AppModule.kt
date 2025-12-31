@@ -57,7 +57,7 @@ val appModule = module {
 
     viewModel { LoginViewModel(get()) }
 
-    viewModel { BookDetailsViewModel() }
+    viewModel { BookDetailsViewModel(get(), get()) }
 
     viewModel { AddBookViewModel(get()) }
 }

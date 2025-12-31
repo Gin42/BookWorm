@@ -3,11 +3,12 @@ package com.example.bookworm.ui.screens.addbook
 import android.content.ContentValues.TAG
 import android.net.Uri
 import android.util.Log
+import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.ui.BookWormRoute
-import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,6 +21,7 @@ data class AddBookState(
     val pages: String = "",
     val bookCover: Uri? = Uri.EMPTY,
     val userId: Long = 0,
+    val bookId: Long? = null,
 
     val showAlert: Boolean = false,
     val alertConfirmed: Boolean = false,
@@ -28,12 +30,19 @@ data class AddBookState(
     val canSubmit get() = title.isNotBlank() && author.isNotBlank() && pages.isNotBlank()
 
     fun toBook() = BookEntity(
+        bookId = bookId
+            ?: generateDefaultId(), // Use a method to generate a default ID if bookId is null
         title = title,
         author = author,
         pages = pages.toInt(),
         image = bookCover.toString(),
         userId = userId,
     )
+
+
+    private fun generateDefaultId(): Long {
+        return System.currentTimeMillis()
+    }
 }
 
 interface AddBookActions {
@@ -42,17 +51,42 @@ interface AddBookActions {
     fun setPages(pages: String)
     fun setCover(bookCover: Uri?)
     fun setUserId(userId: Long)
+    fun setBookId(bookId: Long)
+
+    fun setBook(bookId: Long)
 
     fun setShowAlert(value: Boolean)
     fun setAlertConfirmed(value: Boolean)
     fun setNavDestination(route: BookWormRoute?)
 }
 
-class AddBookViewModel (private val userViewModel: UserViewModel) : ViewModel() {
+class AddBookViewModel(
+    private val repository: BookRepository
+) : ViewModel() {
     private val _state = MutableStateFlow(AddBookState())
     val state = _state.asStateFlow()
 
     val actions = object : AddBookActions {
+
+        override fun setBook(bookId: Long) {
+            viewModelScope.launch {
+                repository.getBookById(bookId).collect { bookEntity ->
+                    if (bookEntity != null) {
+                        setBookId(bookEntity.bookId)
+                        setTitle(bookEntity.title)
+                        setAuthor(bookEntity.author)
+                        setPages(bookEntity.pages.toString())
+                        setCover(bookEntity.image?.toUri())
+                    } else {
+                        Log.e(TAG, "FOO: Book not found with id: $bookId")
+                    }
+                }
+            }
+        }
+
+        override fun setBookId(bookId: Long) {
+            _state.update { it.copy(bookId = bookId) }
+        }
 
         override fun setTitle(title: String) {
             _state.update { it.copy(title = title) }
@@ -71,7 +105,7 @@ class AddBookViewModel (private val userViewModel: UserViewModel) : ViewModel() 
         }
 
         override fun setUserId(userId: Long) {
-            _state.update{ it.copy(userId = userId)}
+            _state.update { it.copy(userId = userId) }
         }
 
         override fun setShowAlert(value: Boolean) {

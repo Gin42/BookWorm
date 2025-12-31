@@ -31,10 +31,10 @@ interface BookDAOs {
     fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity?>>
 
     @Query ("UPDATE books SET favourite = NOT favourite WHERE book_id = :bookId ")
-    fun toggleFavouriteBook(bookId: Long)
+    suspend fun toggleFavouriteBook(bookId: Long)
 
     @Query("UPDATE books SET status = :status WHERE book_id = :bookId")
-    fun updateBookStatus(bookId: Long, status: ReadingStatus)
+    suspend fun updateBookStatus(bookId: Long, status: ReadingStatus)
 
     @Query("SELECT * FROM books WHERE title = :title AND author = :author")
     suspend fun checkValidBook(title: String, author: String): List<BookEntity?>

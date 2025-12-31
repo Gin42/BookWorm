@@ -1,7 +1,9 @@
 package com.example.bookworm.ui.screens.bookdetails
 
+import android.content.ContentValues.TAG
+import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -10,18 +12,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
-import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -38,27 +38,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.ReadingStatus
+import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.AddDiaryFloatingButton
 import com.example.bookworm.ui.composables.AppBar
+import com.example.bookworm.ui.composables.ImageWithPlaceholder
+import com.example.bookworm.ui.composables.Size
 
 
 @Composable
 fun BookDetailsScreen(
     navController: NavController,
-    bookId: String,
     state: BookDetailsState,
-    actions: BookDetailsAction
+    actions: BookDetailsAction,
 ) {
+
     Scaffold(
         topBar = { AppBar(navController = navController, goBack = true) },
         floatingActionButton = { AddDiaryFloatingButton(navController) },
@@ -70,23 +74,16 @@ fun BookDetailsScreen(
             modifier = Modifier.padding(contentPadding)
         ) {
             item {
-                // Image
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .height(400.dp)
-                        .width(250.dp)
-                        .border(2.dp, Color.Gray, RoundedCornerShape(20.dp)), /*DELETE*/
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        imageVector = Icons.Outlined.Book,
-                        contentDescription = "Book cover",
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                    )
-                }
+                // Book cover
+                val imageUriString = state.selectedBook.image
+                val imageUri = imageUriString?.let { Uri.parse(it) }
+
+                ImageWithPlaceholder(
+                    imageUri,
+                    Size.BookDetail,
+                    "Book cover",
+                    RoundedCornerShape(16.dp)
+                )
             }
 
             item {
@@ -97,34 +94,50 @@ fun BookDetailsScreen(
                 )
             }
 
-            //book main info
+            // Book main info
             item {
                 ListItem(
                     headlineContent = {
-                        Text(
-                            "Book Title",
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold
-                        )
+                        state.selectedBook.title.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+
+                            )
+                        }
                     },
                     supportingContent = {
-                        Text(
-                            "Author Name",
-                            style = MaterialTheme.typography.bodyLarge
-                        )
+                        state.selectedBook.author.let {
+                            Text(
+                                it,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
                     },
                     trailingContent = {
                         Row {
                             IconButton(
-                                onClick = { /* TODO */ }
+                                onClick = {
+                                    actions.updateFavourite()
+                                }
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.FavoriteBorder,
+                                    imageVector =
+                                    if (state.favourite) {
+                                        Icons.Filled.Favorite
+                                    } else {
+                                        Icons.Outlined.FavoriteBorder
+                                    },
                                     contentDescription = "Favorite Icon",
                                 )
                             }
                             IconButton(
-                                onClick = { /* TODO */ }
+                                onClick = {
+                                    navController.navigate(BookWormRoute.AddBook(state.selectedBook.bookId))
+                                }
                             ) {
                                 Icon(
                                     imageVector = Icons.Outlined.Edit,
@@ -133,12 +146,16 @@ fun BookDetailsScreen(
                             }
                         }
                     },
-                )
+                    modifier = Modifier
+                        .background(Color.Red)
+                        .padding(0.dp),
+
+                    )
             }
 
             //book status
             item {
-                StatusSelection(state, actions)
+                StatusSelection(state.status, state, actions) /*TODO*/
             }
 
             //progress bar
@@ -175,21 +192,28 @@ fun BookDetailsScreen(
 }
 
 @Composable
-fun StatusSelection(state: BookDetailsState, actions: BookDetailsAction) {
+fun StatusSelection(
+    bookStatus: ReadingStatus,
+    state: BookDetailsState,
+    actions: BookDetailsAction
+) {
     ListItem(
         modifier = Modifier
             .border(1.dp, Color.Transparent)
-            .clip(MaterialTheme.shapes.medium),
+            .clip(MaterialTheme.shapes.medium)
+            .clickable { actions.toggleStatusExpanded(!state.statusExpanded)  },
         headlineContent = {
             Text(
-                state.readingStatus.name.replace('_', ' ').lowercase()
+                bookStatus.name.replace('_', ' ').lowercase()
                     .replaceFirstChar { it.titlecase() },
                 style = MaterialTheme.typography.titleMedium
             )
         },
         trailingContent = {
             IconButton(
-                onClick = { actions.toggleStatusExpanded(!state.statusExpanded) },
+                onClick = {
+                    actions.toggleStatusExpanded(!state.statusExpanded)
+                },
             ) {
                 Icon(
                     imageVector = if (state.statusExpanded) {
@@ -207,7 +231,7 @@ fun StatusSelection(state: BookDetailsState, actions: BookDetailsAction) {
                 ReadingStatus.entries.forEach { status ->
                     DropdownMenuItem(
                         onClick = {
-                            actions.setReadingStatus(status)
+                            actions.updateReadingStatus(status)
                             actions.toggleStatusExpanded(false)
                         },
                         text = {

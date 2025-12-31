@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,14 +64,15 @@ fun UserPageScreen(
                         .padding(top = 30.dp)
                         .fillMaxWidth()
                 ) {
-                    Log.d(TAG, "User Image: ${userState.image}, Username: ${userState.username}")
+
                     val imageUriString = userState.image
                     val imageUri = imageUriString?.let { Uri.parse(it) }
 
                     ImageWithPlaceholder(
                         imageUri,
                         Size.Lg,
-                        desc = "User photo"
+                        desc = "User photo",
+                        CircleShape
                     )
 
                     Text(
@@ -127,8 +129,8 @@ fun UserPageScreen(
                         itemWidth = 150.dp,
                         itemSpacing = 8.dp,
                     ) { i ->
-                        val item = books[i]
-                        BookItem(item, navController)
+                        /*val item = books[i]
+                        BookItem(item, navController)*/
                     }
                 }
             }

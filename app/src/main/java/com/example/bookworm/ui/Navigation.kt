@@ -13,6 +13,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
@@ -32,16 +33,19 @@ import com.example.bookworm.ui.screens.stats.StatsScreen
 import com.example.bookworm.ui.screens.userpage.UserPageScreen
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parameterSetOf
+import org.koin.core.parameter.parametersOf
+
 
 sealed interface BookWormRoute {
     @Serializable
     data object Home : BookWormRoute //library
 
     @Serializable
-    data class BookDetails(val bookId: String) : BookWormRoute
+    data class BookDetails(val bookId: Long) : BookWormRoute
 
     @Serializable
-    data object AddBook : BookWormRoute
+    data class AddBook(val bookId: Long?) : BookWormRoute
 
     @Serializable
     data object UserPage : BookWormRoute
@@ -87,6 +91,11 @@ fun BookWormNavGraph(navController: NavHostController) {
         startDestination = BookWormRoute.Login
     ) {
 
+        fun initializeElementLists() {
+            val userId = userViewModel.state.value.id
+            bookViewModel.actions.getAllBooks(userId)
+        }
+
         composable<BookWormRoute.Registration> {
             val registrationViewModel = koinViewModel<RegistrationViewModel>()
             val registrationState by registrationViewModel.state.collectAsStateWithLifecycle()
@@ -110,12 +119,22 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Home> {
-            LibraryScreen(navController)
+            initializeElementLists()
+            LibraryScreen(
+                navController,
+                bookState = bookState,
+                userState = userState
+            )
         }
 
-        composable<BookWormRoute.AddBook> {
+        composable<BookWormRoute.AddBook> { backStackEntry ->
+            val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
+
             val addBookVm = koinViewModel<AddBookViewModel>()
             val state by addBookVm.state.collectAsStateWithLifecycle()
+
+            addBookVm.actions.setUserId(userState.id)
+
             AddBookScreen(
                 navController,
                 state = state,
@@ -125,19 +144,19 @@ fun BookWormNavGraph(navController: NavHostController) {
                         state.toBook()
                     )
                 },
-                userState = userState
+                bookId = route.bookId,
             )
         }
 
         composable<BookWormRoute.BookDetails> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.BookDetails>()
-            val bookDetailsViewModel = koinViewModel<BookDetailsViewModel>()
+            val bookDetailsViewModel = koinViewModel<BookDetailsViewModel>(parameters = { parametersOf(route.bookId)})
             val bookDetailsState by bookDetailsViewModel.state.collectAsStateWithLifecycle()
+
             BookDetailsScreen(
                 navController,
-                route.bookId,
                 bookDetailsState,
-                bookDetailsViewModel.actions
+                bookDetailsViewModel.actions,
             )
         }
 

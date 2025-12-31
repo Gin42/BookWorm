@@ -58,8 +58,8 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity?>> = bookDAO.getBooksByStatus(status, userId)
 
-    fun toggleFavouriteBook(bookId: Long) = bookDAO.toggleFavouriteBook(bookId)
+    suspend fun toggleFavouriteBook(bookId: Long) = bookDAO.toggleFavouriteBook(bookId)
 
-    fun updateBookStatus(bookId: Long, status: ReadingStatus) = bookDAO.updateBookStatus(bookId, status)
+    suspend fun updateBookStatus(bookId: Long, status: ReadingStatus) = bookDAO.updateBookStatus(bookId, status)
 
 }
