@@ -11,17 +11,7 @@ import kotlinx.coroutines.flow.firstOrNull
 class BookRepository(private val bookDAO: BookDAOs) {
 
     suspend fun addBook(book: BookEntity): Boolean  {
-        Log.println(
-            Log.DEBUG,
-            TAG,
-            "PAPERE $book"
-        )
         if(checkValidBook(book.title, book.author)) {
-            Log.println(
-                Log.DEBUG,
-                TAG,
-                "PAPERE ho checkato e puoi salvare "
-            )
             bookDAO.upsertBook(book)
             return true
         } else {
@@ -40,11 +30,6 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     private suspend fun checkValidBook(title: String, author: String): Boolean {
         val sameBook = bookDAO.checkValidBook(title, author).firstOrNull()
-        Log.println(
-            Log.DEBUG,
-            TAG,
-            "UGO ho checkato e salvataggio == ${sameBook == null}"
-        )
         return sameBook == null
     }
 
@@ -54,7 +39,7 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>> = bookDAO.searchBook(searchString, userId)
 
-    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllFavouriteBooks(userId)
+    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllFavouriteBooks(userId) /*Might be superfluous*/
 
     fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity?>> = bookDAO.getBooksByStatus(status, userId)
 

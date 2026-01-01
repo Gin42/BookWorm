@@ -31,18 +31,13 @@ data class AddBookState(
 
     fun toBook() = BookEntity(
         bookId = bookId
-            ?: generateDefaultId(), // Use a method to generate a default ID if bookId is null
+            ?: 0L,
         title = title,
         author = author,
         pages = pages.toInt(),
         image = bookCover.toString(),
         userId = userId,
     )
-
-
-    private fun generateDefaultId(): Long {
-        return System.currentTimeMillis()
-    }
 }
 
 interface AddBookActions {
@@ -61,6 +56,7 @@ interface AddBookActions {
 }
 
 class AddBookViewModel(
+    userId: Long,
     private val repository: BookRepository
 ) : ViewModel() {
     private val _state = MutableStateFlow(AddBookState())
@@ -119,5 +115,10 @@ class AddBookViewModel(
         override fun setNavDestination(route: BookWormRoute?) {
             _state.update { it.copy(navDestination = route) }
         }
+    }
+
+    init {
+        actions.setUserId(userId = userId)
+        Log.e(TAG, "HELLO: i've set the user id -> ${_state.value.userId}")
     }
 }

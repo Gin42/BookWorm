@@ -5,6 +5,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.bookworm.core.data.BookWormDatabase
 import com.example.bookworm.core.data.repositories.BookRepository
+import com.example.bookworm.core.data.repositories.JourneyEntryRepository
+import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.core.data.repositories.ThemeRepository
 import com.example.bookworm.core.data.repositories.UserRepository
 import com.example.bookworm.ui.entitiesViewModel.BookViewModel
@@ -44,6 +46,17 @@ val appModule = module {
         BookRepository(get<BookWormDatabase>().bookDao())
     }
 
+    single {
+        ReadingJourneyRepository(
+            journeyDAO = get<BookWormDatabase>().readingJourneyDao(),
+            entryDAO = get<BookWormDatabase>().journeyEntryDao()
+        )
+    }
+
+    single {
+        JourneyEntryRepository(get<BookWormDatabase>().journeyEntryDao())
+    }
+
     viewModel { UserViewModel(get()) }
 
     viewModel { BookViewModel(get(), get()) }
@@ -51,13 +64,13 @@ val appModule = module {
 
     viewModel { ThemeViewModel(get()) }
 
-    viewModel { AddDiaryEntryViewModel() }
+    viewModel { AddDiaryEntryViewModel(get(), get(), get(), get()) }
 
     viewModel { RegistrationViewModel(get()) }
 
     viewModel { LoginViewModel(get()) }
 
-    viewModel { BookDetailsViewModel(get(), get()) }
+    viewModel { BookDetailsViewModel(get(), get(), get()) }
 
-    viewModel { AddBookViewModel(get()) }
+    viewModel { AddBookViewModel(get(), get()) }
 }

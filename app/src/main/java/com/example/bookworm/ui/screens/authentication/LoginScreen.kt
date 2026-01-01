@@ -40,8 +40,7 @@ import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AuthenticationResult
 import com.example.bookworm.ui.BookWormRoute
 import kotlinx.coroutines.runBlocking
-import okhttp3.Dispatcher
-import kotlin.reflect.KFunction2
+import kotlin.reflect.KSuspendFunction2
 
 
 @Composable
@@ -49,7 +48,7 @@ fun LoginScreen(
     navController: NavController,
     state: LoginState,
     actions: LoginAction,
-    onSignIn: KFunction2<String, String, AuthenticationResult>
+    onSignIn: KSuspendFunction2<String, String, AuthenticationResult>
 ) {
     Scaffold(
     )

@@ -1,10 +1,16 @@
 package com.example.bookworm.core.data.repositories
 
+import com.example.bookworm.core.data.database.daos.JourneyEntryDAOs
 import com.example.bookworm.core.data.database.daos.ReadingJourneyDAOs
+import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
+import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
 import kotlinx.coroutines.flow.Flow
 
-class ReadingJourneyRepository (private val journeyDAO: ReadingJourneyDAOs) {
+class ReadingJourneyRepository (
+    private val journeyDAO: ReadingJourneyDAOs,
+    private val entryDAO: JourneyEntryDAOs
+) {
 
     suspend fun upsertJourney(journey: ReadingJourneyEntity): Long = journeyDAO.upsertJourney(journey)
 
@@ -17,7 +23,15 @@ class ReadingJourneyRepository (private val journeyDAO: ReadingJourneyDAOs) {
         }
     }
 
+    fun observeJourneys (bookId: Long): Flow<List<ReadingJourneyWithEntries>> = journeyDAO.getJourneysWithEntries(bookId)
+
+    fun observeJourney(journeyId: Long): Flow<ReadingJourneyWithEntries> = journeyDAO.getJourneyWithEntries(journeyId)
+
+    suspend fun addEntry(entry: JourneyEntryEntity) = entryDAO.upsertEntry(entry)
+
     fun getAllJourneys(bookId: Long): Flow<List<ReadingJourneyEntity?>> =  journeyDAO.getAllJourneys(bookId)
+
+    fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries> = journeyDAO.getLastJourney(bookId)
 
     suspend fun dropJourney(bookId: Long) = journeyDAO.dropJourney(bookId)
 

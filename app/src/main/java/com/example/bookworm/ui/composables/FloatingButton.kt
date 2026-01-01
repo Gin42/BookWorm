@@ -22,9 +22,9 @@ fun AddBookFloatingButton(navController: NavController) {
 }
 
 @Composable
-fun AddDiaryFloatingButton(navController: NavController) {
+fun AddDiaryFloatingButton(navController: NavController, bookId: Long) {
     FloatingActionButton(
-        onClick = { navController.navigate(BookWormRoute.AddDiaryEntry) },
+        onClick = { navController.navigate(BookWormRoute.AddDiaryEntry(bookId)) },
         shape = CircleShape,
     ) {
         Icon(Icons.Outlined.AddComment, "Add diary entry")

@@ -45,7 +45,10 @@ fun AddDiaryEntryScreen(
         topBar = { AppBar(navController, goBack = true) },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { navController.navigateUp() }
+                onClick = {
+                    actions.addEntry()
+                    navController.navigateUp()
+                }
             ) {
                 Icon(Icons.Outlined.Check, "Add Diary entry")
             }

@@ -9,7 +9,9 @@ import com.example.bookworm.core.data.models.AuthenticationResult
 import com.example.bookworm.core.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -24,7 +26,7 @@ data class LoggedUserState(
 
 interface UserActions {
     suspend fun registerUser(user: UserEntity): AuthenticationResult
-    fun loginUser(username: String, password: String): AuthenticationResult
+    suspend fun loginUser(username: String, password: String): AuthenticationResult
 }
 
 class UserViewModel(
@@ -36,32 +38,31 @@ class UserViewModel(
     val actions = object : UserActions {
 
         override suspend fun registerUser(user: UserEntity): AuthenticationResult {
-
-            val usernameExist = runBlocking {
-                repository.checkUsernameExists(user.username)
-            }
-            return if (!usernameExist) {
-                runBlocking {  repository.upsert(user) }
+            val usernameExist = repository.checkUsernameExists(user.username)
+            if (!usernameExist) {
+                repository.upsert(user)
                 _state.value = LoggedUserState(user)
-                Log.d(
-                    TAG,
-                    "New User Created: ID = ${_state.value.id}, Username = ${_state.value.username}, Image = ${_state.value.image}, Password = ${_state.value.password}"
-                )
-                AuthenticationResult.Success
-            } else AuthenticationResult.UsernameTaken
+                return AuthenticationResult.Success
+            } else {
+                return AuthenticationResult.UsernameTaken
+            }
         }
 
-        override fun loginUser(username: String, password: String): AuthenticationResult {
-            val res =
-                runBlocking() { repository.loginUser(username = username, password = password) }
-            return if (res != null) {
+        override suspend fun loginUser(username: String, password: String): AuthenticationResult {
+            val foundUser = repository.loginUser(username, password)
+            return if (foundUser != null) {
+                _state.value = LoggedUserState(foundUser)
                 viewModelScope.launch {
-                    repository.userFlow.map {
-                        LoggedUserState(it ?: UserEntity())
-                    }.collect {_state.value = it}
+                    repository.userFlow
+                        .onEach { user ->
+                            _state.value = LoggedUserState(user ?: UserEntity())
+                        }
+                        .launchIn(this)
                 }
                 AuthenticationResult.Success
-            } else AuthenticationResult.WrongCredentials
+            } else {
+                AuthenticationResult.WrongCredentials
+            }
         }
     }
 

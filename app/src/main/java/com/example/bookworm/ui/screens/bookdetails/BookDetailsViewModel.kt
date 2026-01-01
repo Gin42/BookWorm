@@ -6,10 +6,13 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
+import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.ui.entitiesViewModel.BookState
 import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
+import com.example.bookworm.ui.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,19 +27,33 @@ import kotlinx.coroutines.launch
 
 data class BookDetailsState(
     var selectedBook: BookEntity,
-    var favourite: Boolean = false,
-    var status: ReadingStatus = ReadingStatus.PLAN_TO_READ,
+    var bookJourneys: List<Journey> = emptyList(),
+
 
     val statusExpanded: Boolean = false,
     val journeyExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
     val entryExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
 )
 
+data class Journey(
+    val journeyId: Long,
+    val bookId: Long,
+    val startDate: Long,
+    val endDate: Long?,
+    val entries: List<Entry>
+)
+
+data class Entry (
+    val entryId: Long,
+    val date: Long,
+    val pagesRead: Int,
+    val comment: String?
+)
+
 
 const val NUMBER_OF_ENTRIES = 5
 
 interface BookDetailsAction {
-    fun setBook(bookId: Long)
     fun updateReadingStatus(status: ReadingStatus)
     fun updateFavourite()
 
@@ -46,51 +63,30 @@ interface BookDetailsAction {
 }
 
 class BookDetailsViewModel(
-    private val bookId: Long,
-    private val repository: BookRepository
+    bookId: Long,
+    private val bookRepository: BookRepository,
+    private val journeyRepository: ReadingJourneyRepository,
 ) : ViewModel() {
     private val _state: MutableStateFlow<BookDetailsState> = MutableStateFlow(
         BookDetailsState(
-            BookEntity(),
+            selectedBook = BookEntity(),
+            bookJourneys = emptyList()
         )
     )
-    val state: StateFlow<BookDetailsState>
-        get() = _state.onStart { actions.setBook(bookId) }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L), BookDetailsState(
-                BookEntity(),
-            )
-        )
+
+    val state = _state.asStateFlow()
 
     val actions = object : BookDetailsAction {
 
-        override fun setBook(bookId: Long) {
-            viewModelScope.launch {
-                repository.getBookById(bookId).collect { bookEntity ->
-                    if (bookEntity != null) {
-                        _state.update {
-                            it.copy(
-                                selectedBook = bookEntity,
-                                favourite = bookEntity.favourite,
-                                status = bookEntity.status
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
         override fun updateReadingStatus(status: ReadingStatus) {
-            val bookId = _state.value.selectedBook.bookId
             viewModelScope.launch {
-                repository.updateBookStatus(bookId, status)
+                bookRepository.updateBookStatus(bookId, status)
             }
         }
 
         override fun updateFavourite() {
-            val bookId = _state.value.selectedBook.bookId
             viewModelScope.launch {
-                repository.toggleFavouriteBook(bookId)
+                bookRepository.toggleFavouriteBook(bookId)
             }
         }
 
@@ -111,4 +107,28 @@ class BookDetailsViewModel(
             _state.update { it.copy(entryExpanded = currentExpandedState) }
         }
     }
+
+    init {
+        // Collect the selected book
+        viewModelScope.launch {
+            bookRepository.getBookById(bookId)
+                .collect { book ->
+                    book?.let {
+                        _state.update { it.copy(selectedBook = book) }
+                    }
+                }
+        }
+
+        // Collect the journeys
+        viewModelScope.launch {
+            journeyRepository.observeJourneys(bookId)
+                .map { journeys ->
+                    journeys.map { it.toUi() }
+                }
+                .collect { journeyList ->
+                    _state.update { it.copy(bookJourneys = journeyList) }
+                }
+        }
+    }
 }
+

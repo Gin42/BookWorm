@@ -28,7 +28,7 @@ import java.util.Date
         )
     ])
 data class ReadingJourneyEntity (
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name="journey_id")
     val journeyId: Long,
 

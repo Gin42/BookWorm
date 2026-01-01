@@ -29,7 +29,7 @@ import java.util.Date
         )
     ])
 data class JourneyEntryEntity (
-    @PrimaryKey
+    @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name="entry_id")
     val entryId: Long,
 

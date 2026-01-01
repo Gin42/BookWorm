@@ -1,13 +1,14 @@
 package com.example.bookworm.ui
 
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -56,7 +57,7 @@ sealed interface BookWormRoute {
     data object Statistics : BookWormRoute
 
     @Serializable
-    data object AddDiaryEntry : BookWormRoute
+    data class AddDiaryEntry(val bookId: Long) : BookWormRoute
 
     @Serializable
     data object Registration : BookWormRoute
@@ -116,6 +117,11 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Home> {
+            Log.println(
+                Log.DEBUG,
+                TAG,
+                "HELLO: user -> ${userState.user}"
+            )
             LibraryScreen(
                 navController,
                 bookState = bookState,
@@ -126,10 +132,8 @@ fun BookWormNavGraph(navController: NavHostController) {
         composable<BookWormRoute.AddBook> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
 
-            val addBookVm = koinViewModel<AddBookViewModel>()
+            val addBookVm = koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
             val state by addBookVm.state.collectAsStateWithLifecycle()
-
-            addBookVm.actions.setUserId(userState.id)
 
             AddBookScreen(
                 navController,
@@ -183,10 +187,26 @@ fun BookWormNavGraph(navController: NavHostController) {
             StatsScreen(navController)
         }
 
-        composable<BookWormRoute.AddDiaryEntry> {
-            val addDiaryEntryVm = koinViewModel<AddDiaryEntryViewModel>()
+        composable<BookWormRoute.AddDiaryEntry> { backStackEntry ->
+
+            val route = backStackEntry.toRoute<BookWormRoute.AddDiaryEntry>()
+
+            val addDiaryEntryVm = koinViewModel<AddDiaryEntryViewModel>(
+                parameters = {
+                    parametersOf(
+                        route.bookId,
+                        userState.id
+                    )
+                }
+            )
+
             val state by addDiaryEntryVm.state.collectAsStateWithLifecycle()
-            AddDiaryEntryScreen(navController, state, addDiaryEntryVm.actions)
+
+            AddDiaryEntryScreen(
+                navController = navController,
+                state = state,
+                actions = addDiaryEntryVm.actions
+            )
         }
     }
 }
