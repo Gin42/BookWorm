@@ -24,11 +24,11 @@ interface BookDAOs {
 
     //select all book where favourite = TRUE
     @Query("SELECT * FROM books WHERE favourite = 1 AND user_id = :userId")
-    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity?>>
+    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>>
 
     //select all book where status = status
     @Query("SELECT * FROM books WHERE status = :status AND user_id = :userId")
-    fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity?>>
+    fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity>>
 
     @Query ("UPDATE books SET favourite = NOT favourite WHERE book_id = :bookId ")
     suspend fun toggleFavouriteBook(bookId: Long)

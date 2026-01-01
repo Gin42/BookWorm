@@ -46,7 +46,7 @@ val appModule = module {
 
     viewModel { UserViewModel(get()) }
 
-    viewModel { BookViewModel(get()) }
+    viewModel { BookViewModel(get(), get()) }
 
 
     viewModel { ThemeViewModel(get()) }

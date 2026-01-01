@@ -1,7 +1,5 @@
 package com.example.bookworm.ui.entitiesViewModel
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
@@ -9,9 +7,10 @@ import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 data class BookState(
@@ -28,7 +27,6 @@ interface BookActions {
         *  fun searchBook(searchString: String, userId: Long)
         *  fun updateBookStatus(bookId: Long, status: ReadingStatus)
         * */
-    fun getFavourites(userId: Long)
     fun getBooksWithStatus(userId: Long, status: ReadingStatus)
 
     fun toggleFavourite(bookId: Long, userId: Long): Job
@@ -36,10 +34,18 @@ interface BookActions {
 }
 
 class BookViewModel(
+    private val userId: Long,
     private val repository: BookRepository
 ) : ViewModel() {
-    private var _state: MutableStateFlow<BookState> = MutableStateFlow(BookState(emptyList()))
-    val state: StateFlow<BookState> get() = _state.asStateFlow()
+
+    private val _state = MutableStateFlow(BookState(emptyList()))
+    val state: StateFlow<BookState> = _state
+        .onStart { actions.getAllBooks(userId) }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            BookState(emptyList())
+        )
 
     val actions = object : BookActions {
 
@@ -53,16 +59,11 @@ class BookViewModel(
 
         override fun getAllBooks(userId: Long) {
             viewModelScope.launch {
-                repository.getAllBooks(userId).map {
-                    BookState(
-                        it
-                    )
-                }.collect { _state.value = it }
+                repository.getAllBooks(userId)
+                    .collect { books ->
+                        _state.value = BookState(books)
+                    }
             }
-        }
-
-        override fun getFavourites(userId: Long) {
-            TODO("Not yet implemented")
         }
 
         override fun getBooksWithStatus(userId: Long, status: ReadingStatus) {

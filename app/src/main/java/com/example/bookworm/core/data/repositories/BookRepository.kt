@@ -54,7 +54,7 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>> = bookDAO.searchBook(searchString, userId)
 
-    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity?>> = bookDAO.getAllFavouriteBooks(userId)
+    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllFavouriteBooks(userId)
 
     fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity?>> = bookDAO.getBooksByStatus(status, userId)
 
