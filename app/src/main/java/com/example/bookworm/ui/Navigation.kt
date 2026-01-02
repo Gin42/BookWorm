@@ -15,6 +15,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.bookworm.core.data.models.AchievementType
+import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
 import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
@@ -89,6 +91,7 @@ fun BookWormNavGraph(navController: NavHostController) {
     )
     val bookState by bookViewModel.state.collectAsStateWithLifecycle()
 
+    val achievementViewModel: AchievementViewModel = koinViewModel<AchievementViewModel>(parameters = { parametersOf(userState.id) })
 
     NavHost(
         navController = navController,
@@ -133,7 +136,8 @@ fun BookWormNavGraph(navController: NavHostController) {
         composable<BookWormRoute.AddBook> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
 
-            val addBookVm = koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
+            val addBookVm =
+                koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
             val state by addBookVm.state.collectAsStateWithLifecycle()
 
             AddBookScreen(
@@ -143,6 +147,11 @@ fun BookWormNavGraph(navController: NavHostController) {
                 addBook = {
                     bookViewModel.actions.addBook(
                         state.toBook()
+
+                    )
+                    achievementViewModel.actions.updateAchievement(
+                        type = AchievementType.BookAdded,
+                        amount = 1
                     )
                 },
                 bookId = route.bookId,
@@ -166,7 +175,8 @@ fun BookWormNavGraph(navController: NavHostController) {
             UserPageScreen(
                 navController,
                 userState = userState,
-                favourites = bookState.books.filter { it.favourite }
+                favourites = bookState.books.filter { it.favourite },
+                userAchievements = achievementViewModel.state.value.achievementsWithProgress
             )
         }
 

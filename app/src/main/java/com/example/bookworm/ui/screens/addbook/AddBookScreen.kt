@@ -50,7 +50,7 @@ fun AddBookScreen(
     state: AddBookState,
     actions: AddBookActions,
     addBook: () -> Unit,
-    bookId: Long?
+    bookId: Long?,
 ) {
 
     LaunchedEffect(bookId) {
