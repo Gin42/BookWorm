@@ -107,12 +107,6 @@ class StatsViewModel(
             }
         }
 
-        private fun Long.toDayString(): String {
-            val formatter = java.time.format.DateTimeFormatter.ofPattern("dd MMM")
-                .withZone(java.time.ZoneId.systemDefault())
-            return formatter.format(Instant.ofEpochMilli(this))
-        }
-
     }
 }
 
