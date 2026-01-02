@@ -119,6 +119,5 @@ class AddBookViewModel(
 
     init {
         actions.setUserId(userId = userId)
-        Log.e(TAG, "HELLO: i've set the user id -> ${_state.value.userId}")
     }
 }

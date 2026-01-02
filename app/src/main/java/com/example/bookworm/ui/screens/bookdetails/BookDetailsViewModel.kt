@@ -12,7 +12,7 @@ import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.ui.entitiesViewModel.BookState
 import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
-import com.example.bookworm.ui.mapper.toUi
+import com.example.bookworm.ui.utils.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,13 +26,13 @@ import kotlinx.coroutines.launch
 
 
 data class BookDetailsState(
-    var selectedBook: BookEntity,
+    var selectedBook: BookEntity = BookEntity(),
     var bookJourneys: List<Journey> = emptyList(),
 
 
     val statusExpanded: Boolean = false,
-    val journeyExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
-    val entryExpanded: List<Boolean> = List(NUMBER_OF_ENTRIES) { false },
+    val journeyExpanded: List<Boolean> = emptyList(),
+    val entryExpanded: Map<Long, Boolean> = emptyMap(),
 )
 
 data class Journey(
@@ -43,15 +43,12 @@ data class Journey(
     val entries: List<Entry>
 )
 
-data class Entry (
+data class Entry(
     val entryId: Long,
     val date: Long,
     val pagesRead: Int,
     val comment: String?
 )
-
-
-const val NUMBER_OF_ENTRIES = 5
 
 interface BookDetailsAction {
     fun updateReadingStatus(status: ReadingStatus)
@@ -59,28 +56,47 @@ interface BookDetailsAction {
 
     fun toggleStatusExpanded(statusExpanded: Boolean)
     fun toggleJourneyEntry(index: Int)
-    fun openEntry(index: Int, value: Boolean)
+    fun openEntry(entryId: Long, open: Boolean)
 }
 
 class BookDetailsViewModel(
-    bookId: Long,
+    private val bookId: Long,
     private val bookRepository: BookRepository,
     private val journeyRepository: ReadingJourneyRepository,
 ) : ViewModel() {
-    private val _state: MutableStateFlow<BookDetailsState> = MutableStateFlow(
-        BookDetailsState(
-            selectedBook = BookEntity(),
-            bookJourneys = emptyList()
-        )
-    )
 
+    private val _state: MutableStateFlow<BookDetailsState> = MutableStateFlow(
+        BookDetailsState()
+    )
     val state = _state.asStateFlow()
 
     val actions = object : BookDetailsAction {
 
         override fun updateReadingStatus(status: ReadingStatus) {
+
             viewModelScope.launch {
                 bookRepository.updateBookStatus(bookId, status)
+
+                val currentJourney = currentJourney() ?: return@launch
+                val now = System.currentTimeMillis()
+
+                when (status) {
+                    ReadingStatus.FINISHED -> {
+                        journeyRepository.endJourney(
+                            journeyId = currentJourney.journeyId,
+                            endDate = now
+                        )
+                    }
+
+                    ReadingStatus.DROPPED -> {
+                        journeyRepository.dropJourney(
+                            journeyId = currentJourney.journeyId,
+                            endDate = now
+                        )
+                    }
+
+                    else -> Unit
+                }
             }
         }
 
@@ -96,39 +112,59 @@ class BookDetailsViewModel(
 
 
         override fun toggleJourneyEntry(index: Int) {
-            val currentExpandedState = _state.value.journeyExpanded.toMutableList()
-            currentExpandedState[index] = !currentExpandedState[index]
-            _state.update { it.copy(journeyExpanded = currentExpandedState) }
+            _state.update { state ->
+                val expanded = state.journeyExpanded.toMutableList()
+                if (index in expanded.indices) {
+                    expanded[index] = !expanded[index]
+                }
+                state.copy(journeyExpanded = expanded)
+            }
         }
 
-        override fun openEntry(index: Int, value: Boolean) {
-            val currentExpandedState = _state.value.entryExpanded.toMutableList()
-            currentExpandedState[index] = value
-            _state.update { it.copy(entryExpanded = currentExpandedState) }
+        override fun openEntry(entryId: Long, open: Boolean) {
+            _state.update { state ->
+                state.copy(
+                    entryExpanded = state.entryExpanded.toMutableMap().apply {
+                        this[entryId] = open
+                    }
+                )
+            }
         }
     }
 
     init {
-        // Collect the selected book
+        observeBook()
+        observeJourneys()
+    }
+
+    private fun observeBook() {
         viewModelScope.launch {
-            bookRepository.getBookById(bookId)
-                .collect { book ->
-                    book?.let {
-                        _state.update { it.copy(selectedBook = book) }
+            bookRepository.getBookById(bookId).collect { book ->
+                book?.let {
+                    _state.update { it.copy(selectedBook = book) }
+                }
+            }
+        }
+    }
+
+    private fun observeJourneys() {
+        viewModelScope.launch {
+            journeyRepository.observeJourneys(bookId)
+                .collect { journeys ->
+                    val uiJourneys = journeys.map { it.toUi() }
+
+                    _state.update {
+                        it.copy(
+                            bookJourneys = uiJourneys,
+                            journeyExpanded = List(uiJourneys.size) { false }
+                        )
                     }
                 }
         }
+    }
 
-        // Collect the journeys
-        viewModelScope.launch {
-            journeyRepository.observeJourneys(bookId)
-                .map { journeys ->
-                    journeys.map { it.toUi() }
-                }
-                .collect { journeyList ->
-                    _state.update { it.copy(bookJourneys = journeyList) }
-                }
-        }
+    private fun currentJourney(): Journey? {
+        return _state.value.bookJourneys.lastOrNull { it.endDate == null }
     }
 }
 

@@ -1,11 +1,12 @@
 package com.example.bookworm.ui.screens.bookdetails
 
+import android.content.ContentValues.TAG
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -42,17 +43,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bookworm.R
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.AddDiaryFloatingButton
@@ -70,7 +65,6 @@ fun BookDetailsScreen(
     state: BookDetailsState,
     actions: BookDetailsAction,
 ) {
-
     Scaffold(
         topBar = { AppBar(navController = navController, goBack = true) },
         floatingActionButton = {
@@ -78,8 +72,7 @@ fun BookDetailsScreen(
                 navController,
                 state.selectedBook.bookId
             )
-        },
-        /*TODO*/
+        }
     ) { contentPadding ->
 
         LazyColumn(
@@ -87,6 +80,7 @@ fun BookDetailsScreen(
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
+
             item {
                 state.selectedBook.image?.let {
                     ImageWithPlaceholder(
@@ -99,14 +93,12 @@ fun BookDetailsScreen(
             }
 
             item {
-                // Divider
                 HorizontalDivider(
                     modifier = Modifier.padding(vertical = 15.dp),
                     thickness = 2.dp
                 )
             }
 
-            // Book main info
             item {
                 ListItem(
                     headlineContent = {
@@ -124,75 +116,85 @@ fun BookDetailsScreen(
                     },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = { actions.updateFavourite() }) {
+                            IconButton(onClick = actions::updateFavourite) {
                                 Icon(
-                                    imageVector = if (state.selectedBook.favourite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                                    contentDescription = "Favorite Icon"
+                                    imageVector =
+                                    if (state.selectedBook.favourite)
+                                        Icons.Filled.Favorite
+                                    else Icons.Outlined.FavoriteBorder,
+                                    contentDescription = "Favorite"
                                 )
                             }
-                            IconButton(onClick = {
-                                navController.navigate(BookWormRoute.AddBook(state.selectedBook.bookId))
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Edit,
-                                    contentDescription = "Edit Icon"
-                                )
+                            IconButton(
+                                onClick = {
+                                    navController.navigate(
+                                        BookWormRoute.AddBook(state.selectedBook.bookId)
+                                    )
+                                }
+                            ) {
+                                Icon(Icons.Outlined.Edit, contentDescription = "Edit")
                             }
                         }
                     }
                 )
             }
 
-            //book status
-            item {
-                StatusSelection(state, actions)
-            }
+            item { StatusSelection(state, actions) }
 
-            //progress bar
             item {
+
+                val totalPages = state.selectedBook.pages
+
+                Log.println(
+                    Log.DEBUG,
+                    TAG,
+                    "JOURNEY: ${state.bookJourneys.firstOrNull()}\n" +
+                            "ENTRY: ${state.bookJourneys
+                                .firstOrNull()  
+                                ?.entries
+                                ?.lastOrNull()}"
+                )
+
+                val lastPagesRead = state.bookJourneys
+                    .firstOrNull()
+                    ?.entries
+                    ?.lastOrNull()
+                    ?.pagesRead ?: 0
+
+                val progressFraction =
+                    if (totalPages > 0) lastPagesRead.toFloat() / totalPages else 0f
+
+                val progressPercent = (progressFraction * 100).toInt()
+
                 ListItem(
                     headlineContent = {
                         LinearProgressIndicator(
-                            progress = { 0.8f },
-                            modifier = Modifier
-                                .fillMaxWidth()
+                            progress = { progressFraction.coerceIn(0f, 1f) },
+                            modifier = Modifier.fillMaxWidth()
                         )
                     },
                     leadingContent = {
-                        Text(
-                            "Progress:",
-                            style = MaterialTheme.typography.labelLarge,
-                        )
+                        Text("Progress:", style = MaterialTheme.typography.labelLarge)
                     },
                     trailingContent = {
-                        Text(
-                            "80%",
-                            style = MaterialTheme.typography.labelLarge,
-                        )
-                    },
+                        Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
+                    }
                 )
             }
 
-            //book journey
             if (state.bookJourneys.isNotEmpty()) {
-                items(state.bookJourneys.size) { journeyIndex ->
-                    BookJourney(journeyIndex, state, actions)
+                items(state.bookJourneys.size) { index ->
+                    BookJourney(index, state, actions)
                 }
             } else {
                 item {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(
-                            imageVector = Icons.Outlined.Book,
-                            contentDescription = "Book icon",
-                            modifier = Modifier.size(64.dp)
-                        )
+                        Icon(Icons.Outlined.Book, null, modifier = Modifier.size(64.dp))
                         Text(
-                            text = "It seems like you haven't started this journey yet.\nStart reading.",
-                            style = MaterialTheme.typography.bodyMedium,
+                            "It seems like you haven't started this journey yet.\nStart reading.",
                             textAlign = TextAlign.Center
                         )
                     }
@@ -260,57 +262,51 @@ fun StatusSelection(
 }
 
 @Composable
-fun BookJourney(journeyIndex: Int, state: BookDetailsState, actions: BookDetailsAction) {
-
+fun BookJourney(
+    journeyIndex: Int,
+    state: BookDetailsState,
+    actions: BookDetailsAction
+) {
     val journey = state.bookJourneys[journeyIndex]
+    val expanded = state.journeyExpanded.getOrNull(journeyIndex) == true
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 8.dp)
             .clickable { actions.toggleJourneyEntry(journeyIndex) }
-            .border(1.dp, Color.Transparent)
             .clip(MaterialTheme.shapes.medium)
-            .background(MaterialTheme.colorScheme.surfaceContainer),
+            .background(MaterialTheme.colorScheme.surfaceContainer)
     ) {
         Column {
             ListItem(
                 headlineContent = {
                     Text(
-                        text = "${journey.startDate.toFormattedDate()} - ${
-                            journey.endDate?.toFormattedDate() ?: "Current"
-                        }",
-                        style = MaterialTheme.typography.titleMedium
+                        "${journey.startDate.toFormattedDate()} - " +
+                                (journey.endDate?.toFormattedDate() ?: "Current")
                     )
                 },
                 supportingContent = {
                     Text("Number of entries: ${journey.entries.size}")
                 },
                 trailingContent = {
-                    IconButton(
-                        onClick = { actions.toggleJourneyEntry(journeyIndex) },
-                    ) {
-                        Icon(
-                            imageVector = if (state.journeyExpanded[journeyIndex]) {
-                                Icons.Filled.ArrowDropUp
-                            } else {
-                                Icons.Filled.ArrowDropDown
-                            },
-                            contentDescription = "Status options" /*TODO*/
-                        )
-                    }
+                    Icon(
+                        imageVector =
+                        if (expanded) Icons.Filled.ArrowDropUp
+                        else Icons.Filled.ArrowDropDown,
+                        contentDescription = null
+                    )
                 },
                 colors = ListItemDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
             )
 
-            AnimatedVisibility(visible = state.journeyExpanded[journeyIndex]) {
+            AnimatedVisibility(visible = expanded) {
                 Column {
-
-                    repeat(state.bookJourneys[journeyIndex].entries.size) { entryIndex ->
-                        DiaryEntry(journeyIndex, entryIndex, state, actions)
-                        if (entryIndex < state.bookJourneys[journeyIndex].entries.size - 1) {
+                    journey.entries.forEachIndexed { index, entry ->
+                        DiaryEntry(entry, state, actions)
+                        if (index < journey.entries.lastIndex) {
                             HorizontalDivider(thickness = 2.dp)
                         }
                     }
@@ -322,32 +318,26 @@ fun BookJourney(journeyIndex: Int, state: BookDetailsState, actions: BookDetails
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DiaryEntry(journeyIndex: Int, entryIndex: Int, state: BookDetailsState, actions: BookDetailsAction) {
+fun DiaryEntry(
+    entry: Entry,
+    state: BookDetailsState,
+    actions: BookDetailsAction
+) {
+    val expanded = state.entryExpanded[entry.entryId] == true
 
-    val journey = state.bookJourneys[journeyIndex]
-    val entry = journey.entries[entryIndex]
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         ListItem(
-            modifier = Modifier
-                .clickable {
-                    actions.openEntry(entryIndex, true)
-                },
+            modifier = Modifier.clickable {
+                actions.openEntry(entry.entryId, true)
+            },
             headlineContent = {
-                Text(
-                    entry.date.toFormattedDate(),
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Text(entry.date.toFormattedDate())
             },
             supportingContent = {
                 Text(
-                    entry.comment ?: "",
+                    entry.comment.orEmpty(),
                     maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    style = MaterialTheme.typography.bodyMedium
+                    overflow = TextOverflow.Ellipsis
                 )
             },
             colors = ListItemDefaults.colors(
@@ -355,32 +345,22 @@ fun DiaryEntry(journeyIndex: Int, entryIndex: Int, state: BookDetailsState, acti
             )
         )
 
-        if (state.entryExpanded[entryIndex]) {
+        if (expanded) {
             ModalBottomSheet(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(),
-                sheetState = rememberModalBottomSheetState(
-                    skipPartiallyExpanded = false,
-                ),
-                onDismissRequest = { actions.openEntry(entryIndex, false) }
+                modifier = Modifier.fillMaxHeight(),
+                sheetState = rememberModalBottomSheetState(),
+                onDismissRequest = {
+                    actions.openEntry(entry.entryId, false)
+                }
             ) {
-                Column(modifier = Modifier.padding(horizontal = 15.dp)) {
+                Column(modifier = Modifier.padding(16.dp)) {
                     Text(
                         entry.date.toFormattedDate(),
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        "Pages read: ${entry.pagesRead.toString()}",
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                    Text(
-                        entry.comment ?: "",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Text("Pages read: ${entry.pagesRead}")
+                    Text(entry.comment.orEmpty())
                 }
             }
         }

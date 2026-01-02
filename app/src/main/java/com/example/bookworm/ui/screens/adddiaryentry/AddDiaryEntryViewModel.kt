@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
+import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
+import com.example.bookworm.ui.utils.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
@@ -18,26 +20,27 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 data class AddDiaryEntryState(
-    val date: Long = LocalDate.now()
-        .atStartOfDay(ZoneId.systemDefault())
-        .toInstant()
-        .toEpochMilli(),
-
-    val showDatePicker: Boolean = false,
+    val date: Long = TimeUtils.startOfDay(TimeUtils.now()),
     val pages: String = "",
     val comment: String = "",
+
+
     val bookId: Long = 0,
-    val totalPages: Int = 0,
     val userId: Long = 0,
-    val journey: ReadingJourneyWithEntries? = null
+    val totalPages: Int = 0,
+    val journey: ReadingJourneyWithEntries? = null,
+
+    val showDatePicker: Boolean = false,
 ) {
 
     fun toJourney(): ReadingJourneyEntity {
+        val normalizedDate = TimeUtils.startOfDay(date)
+
         return ReadingJourneyEntity(
             journeyId = 0L,
             bookId = bookId,
             userId = userId,
-            startDate = date,
+            startDate = normalizedDate,
             endDate = null,
             isDropped = false
         )
@@ -121,16 +124,25 @@ class AddDiaryEntryViewModel(
         }
 
         override fun checkFields(): Boolean {
-            val selectedDateMillis = _state.value.date ?: return false
+            val selectedDateMillis = _state.value.date
 
             val todayMillis = LocalDate.now()
                 .atStartOfDay(ZoneId.systemDefault())
                 .toInstant()
                 .toEpochMilli()
 
-            return (selectedDateMillis <= todayMillis &&
-                    _state.value.pages.toInt() <= _state.value.totalPages
-                    )
+            val lastDate = _state.value.journey?.entries?.last()?.date
+            val lastPage = _state.value.journey?.entries?.last()?.pagesRead
+
+            if (lastDate != null && lastPage != null) {
+                return selectedDateMillis <= todayMillis &&
+                        selectedDateMillis > lastDate &&
+                        _state.value.pages.toInt() <= _state.value.totalPages &&
+                        _state.value.pages.toInt() > lastPage
+            } else {
+                return selectedDateMillis <= todayMillis &&
+                        _state.value.pages.toInt() <= _state.value.totalPages
+            }
         }
 
         override fun addEntry() {
@@ -138,21 +150,33 @@ class AddDiaryEntryViewModel(
 
             viewModelScope.launch {
                 val currentJourney = _state.value.journey
-                // No journey or journey already ended → create new
-                val journeyId = if (
-                    currentJourney == null ||
-                    currentJourney.journey.endDate != null
-                ) {
-                    journeyRepository.upsertJourney(
-                        _state.value.toJourney()
-                    )
-                } else {
-                    currentJourney.journey.journeyId
-                }
 
+                // No journey or journey already ended → create new
+                val journeyId = currentJourney
+                    ?.takeIf { it.journey.endDate == null }
+                    ?.journey
+                    ?.journeyId
+                    ?: run {
+                        // Create a new Journey and mark book as READING
+                        val newJourneyId = journeyRepository.upsertJourney(
+                            _state.value.toJourney()
+                        )
+                        bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
+                        newJourneyId
+                    }
+
+                /* If the user finished the book it is marked in the status ad FINISHED*/
                 journeyRepository.addEntry(
                     _state.value.toEntry(journeyId)
                 )
+
+                if(_state.value.pages.toInt() == _state.value.totalPages ) {
+                    bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
+                    journeyRepository.endJourney(
+                        journeyId = journeyId,
+                        endDate = TimeUtils.now()
+                    )
+                }
 
                 val updatedJourney =
                     journeyRepository.observeJourney(journeyId).first()

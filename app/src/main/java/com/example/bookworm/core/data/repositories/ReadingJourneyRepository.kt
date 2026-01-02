@@ -33,8 +33,14 @@ class ReadingJourneyRepository (
 
     fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries> = journeyDAO.getLastJourney(bookId)
 
-    suspend fun dropJourney(bookId: Long) = journeyDAO.dropJourney(bookId)
+    suspend fun dropJourney(
+        journeyId: Long,
+        endDate: Long
+    ) = journeyDAO.dropJourney(journeyId, endDate)
 
-    suspend fun endJourney(bookId: Long) = journeyDAO.endJourney(bookId)
+    suspend fun endJourney(
+        journeyId: Long,
+        endDate: Long
+    ) = journeyDAO.endJourney(journeyId, endDate)
 
 }

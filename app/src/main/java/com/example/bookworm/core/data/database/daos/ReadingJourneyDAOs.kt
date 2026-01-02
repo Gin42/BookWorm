@@ -20,7 +20,7 @@ interface ReadingJourneyDAOs {
 
     @Transaction
     @Query("SELECT * FROM reading_journey WHERE book_id= :bookId ORDER BY start_date DESC")
-    fun getJourneysWithEntries (bookId: Long): Flow<List<ReadingJourneyWithEntries>>
+    fun getJourneysWithEntries(bookId: Long): Flow<List<ReadingJourneyWithEntries>>
 
     @Transaction
     @Query("SELECT * FROM reading_journey WHERE journey_id = :journeyId")
@@ -31,12 +31,18 @@ interface ReadingJourneyDAOs {
     fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries>
 
     //drop journey
-    @Query("UPDATE reading_journey SET is_dropped = 1 WHERE journey_id = :journeyId")
-    suspend fun dropJourney(journeyId: Long)
+    @Query("UPDATE reading_journey SET is_dropped = 1 AND end_date =:endDate WHERE journey_id = :journeyId")
+    suspend fun dropJourney(
+        journeyId: Long,
+        endDate: Long
+    )
 
     //finish journey
-    @Query("UPDATE reading_journey SET end_date = CURRENT_TIMESTAMP WHERE journey_id = :journeyId")
-    suspend fun endJourney(journeyId: Long)
+    @Query("UPDATE reading_journey SET end_date = :endDate WHERE journey_id = :journeyId")
+    suspend fun endJourney(
+        journeyId: Long,
+        endDate: Long
+    )
 
     @Upsert
     suspend fun upsertJourney(journey: ReadingJourneyEntity): Long

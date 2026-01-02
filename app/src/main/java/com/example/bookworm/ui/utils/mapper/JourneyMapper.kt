@@ -1,4 +1,4 @@
-package com.example.bookworm.ui.mapper
+package com.example.bookworm.ui.utils.mapper
 
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
