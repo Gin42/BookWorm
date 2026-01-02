@@ -31,6 +31,7 @@ import com.example.bookworm.ui.screens.home.LibraryScreen
 import com.example.bookworm.ui.screens.settings.SettingsScreen
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
+import com.example.bookworm.ui.screens.stats.StatsViewModel
 import com.example.bookworm.ui.screens.userpage.UserPageScreen
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
@@ -184,7 +185,16 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Statistics> {
-            StatsScreen(navController)
+            val statsVm = koinViewModel<StatsViewModel>(
+                parameters = {
+                    parametersOf(
+                        userState.id
+                    )
+                }
+            )
+            val state by statsVm.state.collectAsStateWithLifecycle()
+
+            StatsScreen(navController, state, statsVm.actions)
         }
 
         composable<BookWormRoute.AddDiaryEntry> { backStackEntry ->

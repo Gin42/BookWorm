@@ -1,6 +1,5 @@
 package com.example.bookworm.core.data.database.daos
 
-import androidx.core.location.LocationRequestCompat.Quality
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Query
@@ -15,8 +14,8 @@ import kotlinx.coroutines.flow.Flow
 interface ReadingJourneyDAOs {
 
     //get all book's journeys ordered from newest to oldest
-    @Query("SELECT * FROM reading_journey WHERE book_id = :bookId ORDER BY start_date DESC")
-    fun getAllJourneys(bookId: Long): Flow<List<ReadingJourneyEntity>>
+    @Query("SELECT * FROM reading_journey WHERE user_id = :userId ORDER BY start_date ASC")
+    fun getAllJourneys(userId: Long): Flow<List<ReadingJourneyWithEntries>>
 
     @Transaction
     @Query("SELECT * FROM reading_journey WHERE book_id= :bookId ORDER BY start_date DESC")

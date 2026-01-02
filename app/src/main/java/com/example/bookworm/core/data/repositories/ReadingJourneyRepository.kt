@@ -29,7 +29,7 @@ class ReadingJourneyRepository (
 
     suspend fun addEntry(entry: JourneyEntryEntity) = entryDAO.upsertEntry(entry)
 
-    fun getAllJourneys(bookId: Long): Flow<List<ReadingJourneyEntity?>> =  journeyDAO.getAllJourneys(bookId)
+    fun getAllJourneys(userId: Long): Flow<List<ReadingJourneyWithEntries>> =  journeyDAO.getAllJourneys(userId)
 
     fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries> = journeyDAO.getLastJourney(bookId)
 

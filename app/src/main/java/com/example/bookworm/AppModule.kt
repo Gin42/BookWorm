@@ -17,6 +17,7 @@ import com.example.bookworm.ui.screens.authentication.LoginViewModel
 import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
+import com.example.bookworm.ui.screens.stats.StatsViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -73,4 +74,6 @@ val appModule = module {
     viewModel { BookDetailsViewModel(get(), get(), get()) }
 
     viewModel { AddBookViewModel(get(), get()) }
+
+    viewModel { StatsViewModel(get(), get()) }
 }
