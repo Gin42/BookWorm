@@ -29,6 +29,7 @@ import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsScreen
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.home.LibraryScreen
+import com.example.bookworm.ui.screens.home.LibraryViewModel
 import com.example.bookworm.ui.screens.settings.SettingsScreen
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
@@ -119,15 +120,14 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Home> {
-            Log.println(
-                Log.DEBUG,
-                TAG,
-                "HELLO: user -> ${userState.user}"
-            )
+            val libraryVm = koinViewModel<LibraryViewModel>(parameters = { parametersOf(bookState) })
+            val state by libraryVm.state.collectAsStateWithLifecycle()
+
             LibraryScreen(
                 navController,
                 bookState = bookState,
-                userState = userState
+                state = state,
+                actions = libraryVm.actions
             )
         }
 

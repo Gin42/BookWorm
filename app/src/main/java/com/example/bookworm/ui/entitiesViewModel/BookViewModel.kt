@@ -6,9 +6,11 @@ import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -22,15 +24,7 @@ interface BookActions {
     fun deleteBook(book: BookEntity): Job
 
     fun getAllBooks(userId: Long)
-
-    /*
-        *  fun searchBook(searchString: String, userId: Long)
-        *  fun updateBookStatus(bookId: Long, status: ReadingStatus)
-        * */
-    fun getBooksWithStatus(userId: Long, status: ReadingStatus)
-
-    fun toggleFavourite(bookId: Long, userId: Long): Job
-
+    fun searchBook(searchString: String): Flow<List<BookEntity>>
 }
 
 class BookViewModel(
@@ -39,13 +33,8 @@ class BookViewModel(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(BookState(emptyList()))
-    val state: StateFlow<BookState> = _state
-        .onStart { actions.getAllBooks(userId) }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
-            BookState(emptyList())
-        )
+    val state = _state.asStateFlow()
+
 
     val actions = object : BookActions {
 
@@ -66,13 +55,12 @@ class BookViewModel(
             }
         }
 
-        override fun getBooksWithStatus(userId: Long, status: ReadingStatus) {
-            TODO("Not yet implemented")
-        }
+        override fun searchBook(searchString: String): Flow<List<BookEntity>> =
+            repository.searchBook(searchString, userId)
 
-        override fun toggleFavourite(bookId: Long, userId: Long): Job {
-            TODO("Not yet implemented")
-        }
+    }
 
+    init {
+        actions.getAllBooks(userId)
     }
 }

@@ -17,6 +17,7 @@ import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
 import com.example.bookworm.ui.screens.authentication.LoginViewModel
 import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
+import com.example.bookworm.ui.screens.home.LibraryViewModel
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsViewModel
 import org.koin.core.module.dsl.viewModel
@@ -63,20 +64,57 @@ val appModule = module {
 
     viewModel { UserViewModel(get()) }
 
-    viewModel { BookViewModel(get(), get()) }
+    viewModel { LibraryViewModel(get()) }
 
+    viewModel { (userId: Long) ->
+        BookViewModel(
+            userId = userId,
+            repository = get()
+        )
+    }
 
     viewModel { ThemeViewModel(get()) }
 
-    viewModel { AddDiaryEntryViewModel(get(), get(), get(), get()) }
+    viewModel { (
+                    bookId: Long,
+                    userId: Long,
+                ) ->
+        AddDiaryEntryViewModel(
+            bookId = bookId,
+            userId = userId,
+            bookRepository = get(),
+            journeyRepository = get()
+        )
+    }
 
     viewModel { RegistrationViewModel(get()) }
 
     viewModel { LoginViewModel(get()) }
 
-    viewModel { BookDetailsViewModel(get(), get(), get(), get(), get()) }
+    viewModel { (
+                    bookId: Long,
+                    userId: Long,
+                ) ->
+        BookDetailsViewModel(
+            bookId = bookId,
+            userId = userId,
+            stateMachine = get(),
+            bookRepository = get(),
+            journeyRepository = get()
+        )
+    }
 
-    viewModel { AddBookViewModel(get(), get()) }
+    viewModel { (userId: Long) ->
+        AddBookViewModel(
+            userId = userId,
+            repository = get()
+        )
+    }
 
-    viewModel { StatsViewModel(get(), get()) }
+    viewModel { (userId: Long) ->
+        StatsViewModel(
+            userId = userId,
+            repository = get()
+        )
+    }
 }
