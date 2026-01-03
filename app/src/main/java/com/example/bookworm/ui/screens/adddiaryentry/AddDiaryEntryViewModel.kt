@@ -1,23 +1,22 @@
 package com.example.bookworm.ui.screens.adddiaryentry
 
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
-import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
-import com.example.bookworm.ui.utils.TimeUtils
+import com.example.bookworm.utils.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.ZoneId
 
 data class AddDiaryEntryState(
     val date: Long = TimeUtils.startOfDay(TimeUtils.now()),
@@ -32,20 +31,6 @@ data class AddDiaryEntryState(
 
     val showDatePicker: Boolean = false,
 ) {
-
-    fun toJourney(): ReadingJourneyEntity {
-        val normalizedDate = TimeUtils.startOfDay(date)
-
-        return ReadingJourneyEntity(
-            journeyId = 0L,
-            bookId = bookId,
-            userId = userId,
-            startDate = normalizedDate,
-            endDate = null,
-            isDropped = false
-        )
-    }
-
     fun toEntry(journeyId: Long): JourneyEntryEntity {
         return JourneyEntryEntity(
             entryId = 0L,
@@ -67,15 +52,13 @@ interface AddDiaryEntryActions {
     fun setUserId(userId: Long)
     fun setJourney()
 
-
-    fun checkFields(): Boolean
     fun addEntry()
 
 }
 
 class AddDiaryEntryViewModel(
-    bookId: Long,
-    userId: Long,
+    private val bookId: Long,
+    private val userId: Long,
     private val bookRepository: BookRepository,
     private val journeyRepository: ReadingJourneyRepository
 ) : ViewModel() {
@@ -115,38 +98,17 @@ class AddDiaryEntryViewModel(
 
         override fun setJourney() {
             viewModelScope.launch {
-                val journey = journeyRepository.getLastJourney(_state.value.bookId).firstOrNull()
-
-                if (journey != null) {
+                journeyRepository.getLastJourney(bookId).collect { journey ->
                     _state.update { it.copy(journey = journey) }
                 }
             }
         }
 
-        override fun checkFields(): Boolean {
-            val selectedDateMillis = _state.value.date
-
-            val todayMillis = LocalDate.now()
-                .atStartOfDay(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli()
-
-            val lastDate = _state.value.journey?.entries?.last()?.date
-            val lastPage = _state.value.journey?.entries?.last()?.pagesRead
-
-            if (lastDate != null && lastPage != null) {
-                return selectedDateMillis <= todayMillis &&
-                        selectedDateMillis > lastDate &&
-                        _state.value.pages.toInt() <= _state.value.totalPages &&
-                        _state.value.pages.toInt() > lastPage
-            } else {
-                return selectedDateMillis <= todayMillis &&
-                        _state.value.pages.toInt() <= _state.value.totalPages
-            }
-        }
-
         override fun addEntry() {
-            if (!checkFields()) return
+            if (!checkFields()) {
+                Log.d(TAG, "CHECK: ${checkFields()}")
+                return
+            }
 
             viewModelScope.launch {
                 val currentJourney = _state.value.journey
@@ -158,19 +120,19 @@ class AddDiaryEntryViewModel(
                     ?.journeyId
                     ?: run {
                         // Create a new Journey and mark book as READING
-                        val newJourneyId = journeyRepository.upsertJourney(
-                            _state.value.toJourney()
-                        )
+                        val newJourneyId = journeyRepository.upsertJourney(bookId, userId)
                         bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
                         newJourneyId
                     }
 
-                /* If the user finished the book it is marked in the status ad FINISHED*/
+
+
                 journeyRepository.addEntry(
                     _state.value.toEntry(journeyId)
                 )
 
-                if(_state.value.pages.toInt() == _state.value.totalPages ) {
+                /* If the user finished the book it is marked in the status ad FINISHED*/
+                if (_state.value.pages.toInt() == _state.value.totalPages) {
                     bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
                     journeyRepository.endJourney(
                         journeyId = journeyId,
@@ -180,6 +142,7 @@ class AddDiaryEntryViewModel(
 
                 val updatedJourney =
                     journeyRepository.observeJourney(journeyId).first()
+
 
                 _state.update { it.copy(journey = updatedJourney) }
             }
@@ -206,4 +169,39 @@ class AddDiaryEntryViewModel(
             }
         }
     }
+
+    private fun checkFields(): Boolean {
+
+        val state = _state.value
+        val selectedDate = state.date
+        val today = TimeUtils.startOfDay(TimeUtils.now())
+        val journey = state.journey ?: return false
+        val startDate = journey.journey.startDate
+        val totalPages = state.totalPages
+        val pages = state.pages.toInt()
+
+        if (pages > totalPages || selectedDate > today){
+            Log.d(TAG, "CHECK FIELDS")
+            return false
+        }
+
+        // If journey has no entries
+        if (journey.entries.isEmpty()) {
+            Log.d(TAG, "CHECK DATE")
+            return selectedDate >= startDate
+        }
+
+        // If journey has entries
+        val lastPage = journey.journey.endDate?.let { null } ?: journey.entries.lastOrNull()?.pagesRead
+
+        lastPage?.let {
+            val result = pages > it
+            Log.d(TAG, "CHECK PAGE: pages=$pages, lastPage=$it, result=$result")
+            return result
+        } ?: run {
+            Log.d(TAG, "CHECK PAGE: lastPage is null, automatically passing")
+            return true
+        }
+    }
+
 }

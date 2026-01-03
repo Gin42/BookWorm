@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.bookworm.core.data.BookWormDatabase
+import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.JourneyEntryRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
@@ -58,6 +59,8 @@ val appModule = module {
         JourneyEntryRepository(get<BookWormDatabase>().journeyEntryDao())
     }
 
+    single { ReadingStatusStateMachine() }
+
     viewModel { UserViewModel(get()) }
 
     viewModel { BookViewModel(get(), get()) }
@@ -71,7 +74,7 @@ val appModule = module {
 
     viewModel { LoginViewModel(get()) }
 
-    viewModel { BookDetailsViewModel(get(), get(), get()) }
+    viewModel { BookDetailsViewModel(get(), get(), get(), get(), get()) }
 
     viewModel { AddBookViewModel(get(), get()) }
 

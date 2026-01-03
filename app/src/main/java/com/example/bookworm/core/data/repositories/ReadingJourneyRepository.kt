@@ -5,6 +5,7 @@ import com.example.bookworm.core.data.database.daos.ReadingJourneyDAOs
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
+import com.example.bookworm.utils.TimeUtils
 import kotlinx.coroutines.flow.Flow
 
 class ReadingJourneyRepository (
@@ -12,16 +13,21 @@ class ReadingJourneyRepository (
     private val entryDAO: JourneyEntryDAOs
 ) {
 
-    suspend fun upsertJourney(journey: ReadingJourneyEntity): Long = journeyDAO.upsertJourney(journey)
-
-    suspend fun deleteJourney(journey: ReadingJourneyEntity): Boolean {
-        return try {
-            journeyDAO.deleteJourney(journey)
-            true
-        } catch (e: Exception) {
-            false
-        }
+    suspend fun upsertJourney(bookId: Long, userId: Long): Long {
+        val journey = toJourney(bookId, userId)
+        val journeyId = journeyDAO.upsertJourney(journey)
+        return journeyId
     }
+
+    suspend fun dropJourney(
+        journeyId: Long,
+        endDate: Long
+    ) = journeyDAO.dropJourney(journeyId, endDate)
+
+    suspend fun endJourney(
+        journeyId: Long,
+        endDate: Long
+    ) = journeyDAO.endJourney(journeyId, endDate)
 
     fun observeJourneys (bookId: Long): Flow<List<ReadingJourneyWithEntries>> = journeyDAO.getJourneysWithEntries(bookId)
 
@@ -33,14 +39,24 @@ class ReadingJourneyRepository (
 
     fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries> = journeyDAO.getLastJourney(bookId)
 
-    suspend fun dropJourney(
-        journeyId: Long,
-        endDate: Long
-    ) = journeyDAO.dropJourney(journeyId, endDate)
+    suspend fun deleteJourney(journey: ReadingJourneyEntity): Boolean {
+        return try {
+            journeyDAO.deleteJourney(journey)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 
-    suspend fun endJourney(
-        journeyId: Long,
-        endDate: Long
-    ) = journeyDAO.endJourney(journeyId, endDate)
+    private fun toJourney(bookId: Long, userId: Long): ReadingJourneyEntity {
+        return ReadingJourneyEntity(
+            journeyId = 0L,
+            bookId = bookId,
+            userId = userId,
+            startDate = TimeUtils.startOfDay(TimeUtils.now()),
+            endDate = null,
+            isDropped = false
+        )
+    }
 
 }

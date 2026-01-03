@@ -145,16 +145,6 @@ fun BookDetailsScreen(
 
                 val totalPages = state.selectedBook.pages
 
-                Log.println(
-                    Log.DEBUG,
-                    TAG,
-                    "JOURNEY: ${state.bookJourneys.firstOrNull()}\n" +
-                            "ENTRY: ${state.bookJourneys
-                                .firstOrNull()  
-                                ?.entries
-                                ?.lastOrNull()}"
-                )
-
                 val lastPagesRead = state.bookJourneys
                     .firstOrNull()
                     ?.entries

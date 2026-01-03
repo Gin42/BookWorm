@@ -2,22 +2,16 @@ package com.example.bookworm.ui.screens.stats
 
 import android.content.ContentValues.TAG
 import android.util.Log
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.ui.screens.bookdetails.Journey
-import com.example.bookworm.ui.screens.bookdetails.toFormattedDate
-import com.example.bookworm.ui.utils.mapper.toUi
-import ir.ehsannarmani.compose_charts.models.Line
+import com.example.bookworm.utils.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
-import java.time.Instant
-import java.time.Duration
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale

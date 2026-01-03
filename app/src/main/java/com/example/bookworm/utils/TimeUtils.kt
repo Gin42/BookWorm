@@ -1,4 +1,4 @@
-package com.example.bookworm.ui.utils
+package com.example.bookworm.utils
 
 import java.time.Instant
 import java.time.ZoneId

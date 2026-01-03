@@ -26,7 +26,7 @@ import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
         UnlockedAchievementEntity::class,
         NotificationEntity::class
     ],
-    version = 2
+    version = 3
 )
 abstract class BookWormDatabase : RoomDatabase() {
     abstract fun userDao(): UserDAOs

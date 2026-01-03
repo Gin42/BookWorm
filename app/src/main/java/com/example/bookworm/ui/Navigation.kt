@@ -15,6 +15,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
 import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
@@ -133,7 +134,8 @@ fun BookWormNavGraph(navController: NavHostController) {
         composable<BookWormRoute.AddBook> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
 
-            val addBookVm = koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
+            val addBookVm =
+                koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
             val state by addBookVm.state.collectAsStateWithLifecycle()
 
             AddBookScreen(
@@ -152,7 +154,12 @@ fun BookWormNavGraph(navController: NavHostController) {
         composable<BookWormRoute.BookDetails> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.BookDetails>()
             val bookDetailsViewModel =
-                koinViewModel<BookDetailsViewModel>(parameters = { parametersOf(route.bookId) })
+                koinViewModel<BookDetailsViewModel>(parameters = {
+                    parametersOf(
+                        route.bookId,
+                        userState.user.userId
+                    )
+                })
             val bookDetailsState by bookDetailsViewModel.state.collectAsStateWithLifecycle()
 
             BookDetailsScreen(
