@@ -28,9 +28,9 @@ import com.example.bookworm.ui.BookWormRoute
 
 
 @Composable
-fun BookItem(book: BookEntity, navController: NavController) {
+fun BookItem(book: BookEntity, onBookClick: (Long) -> Unit) {
     Card(
-        onClick = { navController.navigate(BookWormRoute.BookDetails(book.bookId)) },
+        onClick = { onBookClick(book.bookId) },
         shape = RoundedCornerShape(16.dp),
     ) {
         Column(

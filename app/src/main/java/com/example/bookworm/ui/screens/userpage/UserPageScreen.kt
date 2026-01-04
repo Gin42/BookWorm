@@ -56,6 +56,7 @@ fun UserPageScreen(
     userState: LoggedUserState,
     favourites: List<BookEntity>,
     onSeeFavourites: () -> Unit,
+    onBookClick: (Long) -> Unit,
 ) {
 
     Scaffold(
@@ -138,7 +139,7 @@ fun UserPageScreen(
                             itemSpacing = 8.dp,
                         ) {index ->
                             val item = favourites[index]
-                            BookItem(item, navController)
+                            BookItem(item, onBookClick)
                         }
                     } else {
                         Column(

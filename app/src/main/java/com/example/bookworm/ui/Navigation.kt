@@ -11,7 +11,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navOptions
@@ -150,12 +149,15 @@ fun BookWormNavGraph(navController: NavHostController) {
                 navController,
                 state = libraryState,
                 books = libraryViewModel.filteredBooks.collectAsState(),
-                actions = libraryViewModel.actions
+                actions = libraryViewModel.actions,
+                onBookClick = { bookId ->
+                    navController.navigate(BookWormRoute.BookDetails(bookId))
+                },
             )
         }
 
         composable<BookWormRoute.AddBook> { backStackEntry ->
-            val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
+            val route = backStackEntry.toRoute<BookWormRoute.AddBook>()
 
             val addBookVm =
                 koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
@@ -206,6 +208,9 @@ fun BookWormNavGraph(navController: NavHostController) {
                 onSeeFavourites = {
                     libraryViewModel.actions.filterByFavourites(true)
                     navController.navigate(BookWormRoute.Home)
+                },
+                onBookClick = { bookId ->
+                    navController.navigate(BookWormRoute.BookDetails(bookId))
                 }
             )
         }

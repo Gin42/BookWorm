@@ -28,7 +28,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
@@ -51,6 +50,7 @@ import com.example.bookworm.ui.composables.NavBottom
 @Composable
 fun LibraryScreen(
     navController: NavController,
+    onBookClick: (Long) -> Unit,
     state: LibraryState,
     books: State<List<BookEntity>>,
     actions: LibraryActions,
@@ -126,47 +126,39 @@ fun LibraryScreen(
             }
 
             if (books.value.isNotEmpty()) {
-                BookList(navController, books.value)
-            } else {
-
-                Icon(
-                    imageVector = Icons.Outlined.Book,
-                    contentDescription = "Book icon",
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier
-                        .size(64.dp)
-                        .align(Alignment.CenterHorizontally)
+                        .fillMaxHeight()
                         .padding(top = 16.dp)
-                )
-                Text(
-                    text = "There seems to be a shortage of books.\nAdd some.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterHorizontally)
-                )
-
+                ) {
+                    items(books.value) { book ->
+                        BookItem(book, onBookClick)
+                    }
+                }
+            } else {
+                Column (
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(8.dp).fillMaxSize()
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Book,
+                        contentDescription = "Book icon",
+                        modifier = Modifier
+                            .size(64.dp)
+                    )
+                    Text(
+                        text = "There seems to be a shortage of books.\nAdd some.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    )
+                }
             }
-        }
-    }
-}
-
-
-@Composable
-fun BookList(
-    navController: NavController,
-    books: List<BookEntity>
-) {
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = Modifier
-            .fillMaxHeight()
-            .padding(top = 16.dp)
-    ) {
-        items(books) { book ->
-            BookItem(book, navController)
         }
     }
 }
