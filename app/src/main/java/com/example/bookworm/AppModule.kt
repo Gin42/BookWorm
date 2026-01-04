@@ -10,7 +10,6 @@ import com.example.bookworm.core.data.repositories.JourneyEntryRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.core.data.repositories.ThemeRepository
 import com.example.bookworm.core.data.repositories.UserRepository
-import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
@@ -64,10 +63,8 @@ val appModule = module {
 
     viewModel { UserViewModel(get()) }
 
-    viewModel { LibraryViewModel(get()) }
-
     viewModel { (userId: Long) ->
-        BookViewModel(
+        LibraryViewModel(
             userId = userId,
             repository = get()
         )

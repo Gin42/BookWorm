@@ -1,13 +1,12 @@
 package com.example.bookworm.ui
 
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -15,8 +14,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
-import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
@@ -85,11 +82,11 @@ fun BookWormNavGraph(navController: NavHostController) {
     val userViewModel = koinViewModel<UserViewModel>()
     val userState by userViewModel.state.collectAsStateWithLifecycle()
 
-    val bookViewModel: BookViewModel = koinViewModel(
+    val libraryViewModel: LibraryViewModel = koinViewModel(
         parameters = { parametersOf(userState.id) },
         key = "book_vm_user_${userState.id}"
     )
-    val bookState by bookViewModel.state.collectAsStateWithLifecycle()
+    val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
 
 
     NavHost(
@@ -120,14 +117,11 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Home> {
-            val libraryVm = koinViewModel<LibraryViewModel>(parameters = { parametersOf(bookState) })
-            val state by libraryVm.state.collectAsStateWithLifecycle()
-
             LibraryScreen(
                 navController,
-                bookState = bookState,
-                state = state,
-                actions = libraryVm.actions
+                state = libraryState,
+                books = libraryViewModel.filteredBooks.collectAsState(),
+                actions = libraryViewModel.actions
             )
         }
 
@@ -143,7 +137,7 @@ fun BookWormNavGraph(navController: NavHostController) {
                 state = state,
                 actions = addBookVm.actions,
                 addBook = {
-                    bookViewModel.actions.addBook(
+                    libraryViewModel.actions.addBook(
                         state.toBook()
                     )
                 },
@@ -173,7 +167,7 @@ fun BookWormNavGraph(navController: NavHostController) {
             UserPageScreen(
                 navController,
                 userState = userState,
-                favourites = bookState.books.filter { it.favourite }
+                favourites =  libraryViewModel.filteredBooks.collectAsState().value.filter { it.favourite },
             )
         }
 

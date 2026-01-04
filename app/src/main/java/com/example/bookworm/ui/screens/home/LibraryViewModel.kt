@@ -1,27 +1,40 @@
 package com.example.bookworm.ui.screens.home
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
-import com.example.bookworm.ui.entitiesViewModel.BookState
+import com.example.bookworm.core.data.models.ReadingStatus
+import com.example.bookworm.core.data.repositories.BookRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 data class LibraryState(
     val query: String = "",
-    val onSearch: String? = null,
-    val filteredBooks: List<BookEntity> = emptyList()
+
+    val openFilters: Boolean = false,
+    val selectedStatus: ReadingStatus? = null,
+    val favouritesOnly: Boolean = false
 )
 
 interface LibraryActions {
+    fun addBook(book: BookEntity): Job
+    fun openFilters(value: Boolean)
+
     fun setQuery(query: String)
-    fun setOnSearch(onSearch: String?)
+    fun filterByFavourites(enabled: Boolean)
+    fun filterByStatus(status: ReadingStatus?)
 }
 
 class LibraryViewModel(
-    private val bookState: BookState
+    private val repository: BookRepository,
+    private val userId: Long
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LibraryState> = MutableStateFlow(
@@ -29,37 +42,76 @@ class LibraryViewModel(
     )
     val state = _state.asStateFlow()
 
+    private val books: StateFlow<List<BookEntity>> =
+        repository.getAllBooks(userId)
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+    val filteredBooks: StateFlow<List<BookEntity>> =
+        combine(
+            books,
+            state
+        ) { books, state ->
+
+            books
+                .filterByQuery(state.query)
+                .filterByFavourites(state.favouritesOnly)
+                .filterByStatus(state.selectedStatus)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList()
+            )
+
+
     val actions = object : LibraryActions {
+
+
         override fun setQuery(query: String) {
             _state.update { it.copy(query = query) }
-            setFilteredBooksByQuery()
         }
 
-        override fun setOnSearch(onSearch: String?) {
-            _state.update { it.copy(onSearch = onSearch) }
+        override fun filterByFavourites(enabled: Boolean) {
+            _state.update { it.copy(favouritesOnly = enabled) }
         }
 
+        override fun filterByStatus(status: ReadingStatus?) {
+            _state.update { it.copy(selectedStatus = status) }
+        }
+
+        override fun openFilters(value: Boolean) {
+            _state.update { it.copy(openFilters = value) }
+        }
+
+        override fun addBook(book: BookEntity) = viewModelScope.launch {
+            repository.addBook(book)
+        }
     }
 
-    init {
-        setFilteredBooksByQuery()
+    private fun List<BookEntity>.filterByQuery(query: String): List<BookEntity> {
+        if (query.isBlank()) return this
+
+        val lower = query.trim().lowercase()
+        return filter {
+            it.title.lowercase().contains(lower) ||
+                    it.author.lowercase().contains(lower)
+        }
     }
 
-    private fun setFilteredBooksByQuery() {
-        val lowerQuery = _state.value.query.trim().lowercase()
-        _state.update {
-            it.copy(
-                filteredBooks = if (lowerQuery.isNotBlank()) {
-                    bookState.books.filter { book ->
-                        book.title.lowercase().contains(lowerQuery) ||
-                                book.author.lowercase().contains(lowerQuery)
-                    }
-                } else {
-                    bookState.books
-                }
-            )
-        }
-        Log.d(TAG, "HEYLA: ${_state.value.filteredBooks} +  ${_state.value.query} + ${bookState.books}")
+    private fun List<BookEntity>.filterByFavourites(enabled: Boolean): List<BookEntity> {
+        return if (enabled) filter { it.favourite } else this
+    }
+
+    private fun List<BookEntity>.filterByStatus(
+        status: ReadingStatus?
+    ): List<BookEntity> {
+        return status?.let { s ->
+            filter { it.status == s }
+        } ?: this
     }
 }
 
