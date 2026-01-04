@@ -58,7 +58,6 @@ import kotlin.reflect.KSuspendFunction1
 
 @Composable
 fun RegistrationScreen(
-    navController: NavController,
     state: RegistrationState,
     actions: RegistrationActions,
     onSignUp: KSuspendFunction1<UserEntity, AuthenticationResult>,
@@ -177,7 +176,7 @@ fun RegistrationScreen(
             Button(
                 onClick = {
                     if (state.canSubmit) {
-                        val signupResult = runBlocking(Dispatchers.IO) { onSignUp(state.toUser()) }
+                        val signupResult = runBlocking { onSignUp(state.toUser()) }
                         if (signupResult == AuthenticationResult.Success) {
                             onNavigateToHome()
                         }

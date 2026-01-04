@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.utils.TimeUtils.convertMillisToDate
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,7 +71,7 @@ fun AddDiaryEntryScreen(
             )
             //entry date
             OutlinedTextField(
-                value = state.date?.let { convertMillisToDate(it) } ?: "",
+                value = convertMillisToDate(state.date),
                 onValueChange = { },
                 label = { Text("Date") },
                 placeholder = { Text("DD/MM/YYYY") },
@@ -125,12 +126,6 @@ fun AddDiaryEntryScreen(
         }
     }
 }
-
-fun convertMillisToDate(millis: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-    return formatter.format(Date(millis))
-}
-
 
 @Composable
 fun DatePickerModal(

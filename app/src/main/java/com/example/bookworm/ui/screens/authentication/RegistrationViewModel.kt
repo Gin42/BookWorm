@@ -21,6 +21,7 @@ data class RegistrationState(
     val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
 
     fun toUser() = UserEntity(
+        userId = 0L,
         username = username,
         password = password.text.toString(),
         image = userPhoto.toString(),
@@ -33,11 +34,9 @@ interface RegistrationActions {
     fun setUserPhoto(userPhoto: Uri?)
 
     fun setShowPassword(showPassword: Boolean)
-    //fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit)
 }
 
 class RegistrationViewModel(
-    private val userViewModel: UserViewModel,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RegistrationState())
     val state = _state.asStateFlow()
@@ -58,19 +57,6 @@ class RegistrationViewModel(
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
         }
-
-
-        /*override fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit) {
-            viewModelScope.launch {
-                val user = UserEntity(
-                    username = state.value.username,
-                    password = state.value.password.text.toString(),
-                    image = state.value.userPhoto?.toString()
-                )
-                val result = userViewModel.actions.registerUser(user)
-                onRegistrationComplete(result)
-            }
-        }*/
     }
 
 }

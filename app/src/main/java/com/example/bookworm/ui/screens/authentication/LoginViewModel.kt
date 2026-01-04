@@ -19,19 +19,14 @@ data class LoginState(
     val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
 }
 
-
-//val userPhoto: String o URI ?
-
 interface LoginAction {
     fun setUsername(username: String)
     fun setPassword(password: TextFieldState)
 
     fun setShowPassword(showPassword: Boolean)
-    //fun performLogin(onLoginComplete: (AuthenticationResult) -> Unit)
 }
 
 class LoginViewModel(
-    private val userViewModel: UserViewModel
 ) : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
@@ -48,15 +43,5 @@ class LoginViewModel(
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
         }
-
-        /*override fun performLogin(onLoginComplete: (AuthenticationResult) -> Unit) {
-            viewModelScope.launch {
-                val result = userViewModel.actions.loginUser(
-                    state.value.username,
-                    state.value.password.text.toString()
-                )
-                onLoginComplete(result)
-            }
-        }*/
     }
 }

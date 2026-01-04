@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class AddDiaryEntryState(
-    val date: Long = TimeUtils.startOfDay(TimeUtils.now()),
+    val date: Long = TimeUtils.now(),
     val pages: String = "",
     val comment: String = "",
 
@@ -120,12 +120,10 @@ class AddDiaryEntryViewModel(
                     ?.journeyId
                     ?: run {
                         // Create a new Journey and mark book as READING
-                        val newJourneyId = journeyRepository.upsertJourney(bookId, userId)
+                        val newJourneyId = journeyRepository.upsertJourney(bookId, userId, _state.value.date)
                         bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
                         newJourneyId
                     }
-
-
 
                 journeyRepository.addEntry(
                     _state.value.toEntry(journeyId)
@@ -136,7 +134,7 @@ class AddDiaryEntryViewModel(
                     bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
                     journeyRepository.endJourney(
                         journeyId = journeyId,
-                        endDate = TimeUtils.now()
+                        endDate = _state.value.date /*TODO check*/
                     )
                 }
 
@@ -152,9 +150,7 @@ class AddDiaryEntryViewModel(
 
     init {
         actions.setBookInfo(bookId)
-
         actions.setUserId(userId = userId)
-
         actions.setJourney()
     }
 
@@ -174,34 +170,42 @@ class AddDiaryEntryViewModel(
 
         val state = _state.value
         val selectedDate = state.date
-        val today = TimeUtils.startOfDay(TimeUtils.now())
-        val journey = state.journey ?: return false
-        val startDate = journey.journey.startDate
+        val today = TimeUtils.now()
+        val journey = state.journey
         val totalPages = state.totalPages
         val pages = state.pages.toInt()
 
-        if (pages > totalPages || selectedDate > today){
-            Log.d(TAG, "CHECK FIELDS")
-            return false
-        }
+        if (journey == null) {
+            if (pages > totalPages || selectedDate > today) {
+                Log.d(TAG, "CHECK FIELDS")
+                return false
+            } else {
+                return true
+            }
+        } else {
 
-        // If journey has no entries
-        if (journey.entries.isEmpty()) {
-            Log.d(TAG, "CHECK DATE")
-            return selectedDate >= startDate
-        }
+            val startDate = journey.journey.startDate
 
-        // If journey has entries
-        val lastPage = journey.journey.endDate?.let { null } ?: journey.entries.lastOrNull()?.pagesRead
+            // If journey has no entries
+            if (journey.entries.isEmpty()) {
+                Log.d(TAG, "CHECK DATE")
+                return selectedDate >= startDate
+            } else {
+                // If journey has entries
 
-        lastPage?.let {
-            val result = pages > it
-            Log.d(TAG, "CHECK PAGE: pages=$pages, lastPage=$it, result=$result")
-            return result
-        } ?: run {
-            Log.d(TAG, "CHECK PAGE: lastPage is null, automatically passing")
-            return true
+                val lastPage = if (journey.journey.endDate == null) {
+                    journey.entries.lastOrNull()?.pagesRead
+                } else {
+                    null
+                }
+
+                if(lastPage!=null) {
+                    val result = pages > lastPage
+                    return result
+                } else{
+                    return true
+                }
+            }
         }
     }
-
 }

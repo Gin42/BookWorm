@@ -41,7 +41,7 @@ class UserViewModel(
             val usernameExist = repository.checkUsernameExists(user.username)
             if (!usernameExist) {
                 repository.upsert(user)
-                _state.value = LoggedUserState(user)
+                loginUser(user.username, user.password)
                 return AuthenticationResult.Success
             } else {
                 return AuthenticationResult.UsernameTaken

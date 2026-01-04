@@ -98,7 +98,6 @@ fun BookWormNavGraph(navController: NavHostController) {
             val registrationViewModel = koinViewModel<RegistrationViewModel>()
             val registrationState by registrationViewModel.state.collectAsStateWithLifecycle()
             RegistrationScreen(
-                navController,
                 state = registrationState,
                 actions = registrationViewModel.actions,
                 onSignUp = userViewModel.actions::registerUser,

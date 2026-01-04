@@ -33,6 +33,19 @@ class ReadingStatusStateMachine {
                     )
                 )
 
+            //PLAN_TO_READ -> FINISHED
+            ReadingStatus.PLAN_TO_READ to ReadingStatus.FINISHED ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.FINISHED,
+                    sideEffects = emptyList()
+                )
+            //PLAN_TO_READ -> DROPPED
+            ReadingStatus.PLAN_TO_READ to ReadingStatus.DROPPED ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.DROPPED,
+                    sideEffects = emptyList()
+                )
+
             // READING -> FINISHED
             ReadingStatus.READING to ReadingStatus.FINISHED ->
                 StatusTransitionResult(
@@ -70,6 +83,20 @@ class ReadingStatusStateMachine {
                     )
                 )
 
+            // FINISHED -> PLAN_TO_READ
+            ReadingStatus.FINISHED to ReadingStatus.PLAN_TO_READ ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.PLAN_TO_READ,
+                    sideEffects = emptyList()
+                )
+
+            // FINISHED -> DROPPED
+            ReadingStatus.FINISHED to ReadingStatus.DROPPED ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.DROPPED,
+                    sideEffects = emptyList()
+                )
+
             // DROPPED -> READING
             ReadingStatus.DROPPED to ReadingStatus.READING ->
                 StatusTransitionResult(
@@ -77,6 +104,20 @@ class ReadingStatusStateMachine {
                     sideEffects = listOf(
                         StatusSideEffect.CreateJourney
                     )
+                )
+
+            // DROPPED -> FINISHED
+            ReadingStatus.DROPPED to ReadingStatus.FINISHED ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.FINISHED,
+                    sideEffects = emptyList()
+                )
+
+            // DROPPED -> PLAN_TO_READ
+            ReadingStatus.DROPPED to ReadingStatus.PLAN_TO_READ ->
+                StatusTransitionResult(
+                    newStatus = ReadingStatus.PLAN_TO_READ,
+                    sideEffects = emptyList()
                 )
 
             else -> {

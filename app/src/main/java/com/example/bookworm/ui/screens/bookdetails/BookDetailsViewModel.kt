@@ -83,7 +83,8 @@ class BookDetailsViewModel(
                         is StatusSideEffect.CreateJourney ->
                             journeyRepository.upsertJourney(
                                 bookId = _state.value.selectedBook.bookId,
-                                userId = userId
+                                userId = userId,
+                                startDate = TimeUtils.now()
                             )
 
                         is StatusSideEffect.CloseJourney ->

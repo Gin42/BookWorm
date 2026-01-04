@@ -13,8 +13,8 @@ class ReadingJourneyRepository (
     private val entryDAO: JourneyEntryDAOs
 ) {
 
-    suspend fun upsertJourney(bookId: Long, userId: Long): Long {
-        val journey = toJourney(bookId, userId)
+    suspend fun upsertJourney(bookId: Long, userId: Long, startDate: Long): Long {
+        val journey = toJourney(bookId, userId, startDate)
         val journeyId = journeyDAO.upsertJourney(journey)
         return journeyId
     }
@@ -48,12 +48,12 @@ class ReadingJourneyRepository (
         }
     }
 
-    private fun toJourney(bookId: Long, userId: Long): ReadingJourneyEntity {
+    private fun toJourney(bookId: Long, userId: Long, startDate: Long): ReadingJourneyEntity {
         return ReadingJourneyEntity(
             journeyId = 0L,
             bookId = bookId,
             userId = userId,
-            startDate = TimeUtils.startOfDay(TimeUtils.now()),
+            startDate = startDate,
             endDate = null,
             isDropped = false
         )

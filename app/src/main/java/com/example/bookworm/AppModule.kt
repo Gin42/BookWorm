@@ -84,9 +84,9 @@ val appModule = module {
         )
     }
 
-    viewModel { RegistrationViewModel(get()) }
+    viewModel { RegistrationViewModel() }
 
-    viewModel { LoginViewModel(get()) }
+    viewModel { LoginViewModel() }
 
     viewModel { (
                     bookId: Long,
