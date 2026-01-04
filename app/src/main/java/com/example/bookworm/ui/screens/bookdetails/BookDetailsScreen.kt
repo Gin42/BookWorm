@@ -144,31 +144,44 @@ fun BookDetailsScreen(
 
                 val totalPages = state.selectedBook.pages
 
-                val lastPagesRead = state.bookJourneys
+                val bookStatus = state.selectedBook.status
+
+                var lastPagesRead = state.bookJourneys
                     .firstOrNull()
                     ?.entries
                     ?.lastOrNull()
                     ?.pagesRead ?: 0
+
+                if (bookStatus == ReadingStatus.DROPPED || bookStatus == ReadingStatus.PLAN_TO_READ) {
+                    actions.showProgress(false)
+                } else if (bookStatus == ReadingStatus.FINISHED) {
+                    actions.showProgress(true)
+                    lastPagesRead = state.selectedBook.pages
+                } else if (bookStatus == ReadingStatus.READING) {
+                    actions.showProgress(true)
+                }
 
                 val progressFraction =
                     if (totalPages > 0) lastPagesRead.toFloat() / totalPages else 0f
 
                 val progressPercent = (progressFraction * 100).toInt()
 
-                ListItem(
-                    headlineContent = {
-                        LinearProgressIndicator(
-                            progress = { progressFraction.coerceIn(0f, 1f) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    },
-                    leadingContent = {
-                        Text("Progress:", style = MaterialTheme.typography.labelLarge)
-                    },
-                    trailingContent = {
-                        Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
-                    }
-                )
+                if (state.showProgress) {
+                    ListItem(
+                        headlineContent = {
+                            LinearProgressIndicator(
+                                progress = { progressFraction.coerceIn(0f, 1f) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        leadingContent = {
+                            Text("Progress:", style = MaterialTheme.typography.labelLarge)
+                        },
+                        trailingContent = {
+                            Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
+                        }
+                    )
+                }
             }
 
             if (state.bookJourneys.isNotEmpty()) {
@@ -178,7 +191,7 @@ fun BookDetailsScreen(
             } else {
                 item {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(Icons.Outlined.Book, null, modifier = Modifier.size(64.dp))

@@ -24,6 +24,7 @@ data class BookDetailsState(
     val statusExpanded: Boolean = false,
     val journeyExpanded: List<Boolean> = emptyList(),
     val entryExpanded: Map<Long, Boolean> = emptyMap(),
+    val showProgress: Boolean = false
 )
 
 data class Journey(
@@ -48,6 +49,7 @@ interface BookDetailsAction {
     fun toggleStatusExpanded(statusExpanded: Boolean)
     fun toggleJourneyEntry(index: Int)
     fun openEntry(entryId: Long, open: Boolean)
+    fun showProgress(value: Boolean)
 }
 
 class BookDetailsViewModel(
@@ -137,6 +139,10 @@ class BookDetailsViewModel(
                     }
                 )
             }
+        }
+
+        override fun showProgress(value: Boolean) {
+            _state.update { it.copy(showProgress = value) }
         }
     }
 
