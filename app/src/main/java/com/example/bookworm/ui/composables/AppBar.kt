@@ -41,7 +41,7 @@ fun AppBar(navController: NavController, goBack: Boolean = false) {
         },
         actions = {
             IconButton(
-                onClick = { navController.navigate(BookWormRoute.Setting) }
+                onClick = { navController.navigate(BookWormRoute.Settings) }
             ) {
                 Icon(
                     Icons.Filled.Settings,

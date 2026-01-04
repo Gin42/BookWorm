@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
@@ -53,7 +54,8 @@ import org.koin.core.parameter.parametersOf
 fun UserPageScreen(
     navController: NavController,
     userState: LoggedUserState,
-    favourites: List<BookEntity>
+    favourites: List<BookEntity>,
+    onSeeFavourites: () -> Unit,
 ) {
 
     Scaffold(
@@ -114,9 +116,9 @@ fun UserPageScreen(
                         trailingContent = {
                             if (favourites.isNotEmpty()) {
                                 TextButton(
-                                    onClick = { /*TODO must go to library passing an
-                                argument that specify that i want to see
-                                only the favourite books*/
+                                    onClick = {
+                                        onSeeFavourites()
+
                                     }
                                 ) {
                                     Text("Show all")

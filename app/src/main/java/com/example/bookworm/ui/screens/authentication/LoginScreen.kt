@@ -48,7 +48,9 @@ fun LoginScreen(
     navController: NavController,
     state: LoginState,
     actions: LoginAction,
-    onSignIn: KSuspendFunction2<String, String, AuthenticationResult>
+    onSignIn: KSuspendFunction2<String, String, AuthenticationResult>,
+    onNavigateToHome: () -> Unit,
+    onNavigateToRegistration: () -> Unit
 ) {
     Scaffold(
     )
@@ -144,7 +146,7 @@ fun LoginScreen(
                                     TAG,
                                     "Success!"
                                 )
-                                navController.navigate(BookWormRoute.Home)
+                                onNavigateToHome()
                             }
 
                             AuthenticationResult.WrongCredentials -> {
@@ -202,7 +204,7 @@ fun LoginScreen(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable(onClick = {
-                        navController.navigate(BookWormRoute.Registration)
+                        onNavigateToRegistration()
                     })
             )
         }

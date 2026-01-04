@@ -1,6 +1,7 @@
 package com.example.bookworm.ui.screens.authentication
 
 import android.content.ContentValues.TAG
+import android.icu.number.NumberFormatter.UnitWidth
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -60,7 +61,9 @@ fun RegistrationScreen(
     navController: NavController,
     state: RegistrationState,
     actions: RegistrationActions,
-    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResult>
+    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResult>,
+    onNavigateToHome: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     Scaffold(
     )
@@ -176,7 +179,7 @@ fun RegistrationScreen(
                     if (state.canSubmit) {
                         val signupResult = runBlocking(Dispatchers.IO) { onSignUp(state.toUser()) }
                         if (signupResult == AuthenticationResult.Success) {
-                            navController.navigate(BookWormRoute.Home)
+                            onNavigateToHome()
                         }
                     } else {
                         Log.println(
@@ -218,7 +221,7 @@ fun RegistrationScreen(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable(onClick = {
-                        navController.navigate(BookWormRoute.Login)
+                        onNavigateToLogin()
                     })
             )
         }

@@ -37,7 +37,7 @@ import com.example.bookworm.ui.composables.NavBottom
 fun SettingsScreen(
     navController: NavController,
     state: ThemeState,
-    settingState: SettingState,
+    settingsState: SettingsState,
     actions: SettingsAction,
     onThemeSelected: (com.example.bookworm.core.data.models.Theme) -> Unit
 ) {
@@ -66,7 +66,7 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .clip(MaterialTheme.shapes.medium)
                                 .background(MaterialTheme.colorScheme.surfaceContainer)
-                                .clickable { actions.toggleThemeExpanded(!settingState.themeExpanded) }
+                                .clickable { actions.toggleThemeExpanded(!settingsState.themeExpanded) }
                                 .padding(8.dp)
                                 .width(100.dp),
                             horizontalArrangement = Arrangement.SpaceBetween
@@ -78,7 +78,7 @@ fun SettingsScreen(
                                 modifier = Modifier.padding(start = 12.dp)
                             )
                             Icon(
-                                imageVector = if (settingState.themeExpanded) {
+                                imageVector = if (settingsState.themeExpanded) {
                                     Icons.Filled.ArrowDropUp
                                 } else {
                                     Icons.Filled.ArrowDropDown
@@ -87,7 +87,7 @@ fun SettingsScreen(
                             )
                         }
                         DropdownMenu(
-                            expanded = settingState.themeExpanded,
+                            expanded = settingsState.themeExpanded,
                             onDismissRequest = { actions.toggleThemeExpanded(false) }
                         ) {
                             com.example.bookworm.core.data.models.Theme.entries.forEach { theme ->

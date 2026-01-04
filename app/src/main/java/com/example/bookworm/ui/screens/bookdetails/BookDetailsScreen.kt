@@ -64,6 +64,7 @@ fun BookDetailsScreen(
     navController: NavController,
     state: BookDetailsState,
     actions: BookDetailsAction,
+    onNavigateToAddBook: () -> Unit
 ) {
     Scaffold(
         topBar = { AppBar(navController = navController, goBack = true) },
@@ -127,9 +128,7 @@ fun BookDetailsScreen(
                             }
                             IconButton(
                                 onClick = {
-                                    navController.navigate(
-                                        BookWormRoute.AddBook(state.selectedBook.bookId)
-                                    )
+                                    onNavigateToAddBook()
                                 }
                             ) {
                                 Icon(Icons.Outlined.Edit, contentDescription = "Edit")

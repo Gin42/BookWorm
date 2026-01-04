@@ -50,7 +50,8 @@ fun AddBookScreen(
     state: AddBookState,
     actions: AddBookActions,
     addBook: () -> Unit,
-    bookId: Long?
+    bookId: Long?,
+    onNavigateUp: () -> Unit,
 ) {
 
     LaunchedEffect(bookId) {
@@ -79,7 +80,7 @@ fun AddBookScreen(
                     IconButton(
                         onClick = {
                             actions.setShowAlert(true)
-                            actions.setNavDestination(BookWormRoute.Setting)
+                            actions.setNavDestination(BookWormRoute.Settings)
                         }
                     ) {
                         Icon(Icons.Filled.Settings, contentDescription = "App Settings")
@@ -94,7 +95,7 @@ fun AddBookScreen(
                 onClick = {
                     if (state.canSubmit) {
                         addBook()
-                        navController.navigateUp()
+                        onNavigateUp()
                         /*TODO understand how to check the success or not of the Job*/
                     }
                 }

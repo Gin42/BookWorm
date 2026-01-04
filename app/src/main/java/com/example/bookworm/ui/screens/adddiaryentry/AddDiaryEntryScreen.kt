@@ -39,7 +39,8 @@ import java.util.Locale
 fun AddDiaryEntryScreen(
     navController: NavController,
     state: AddDiaryEntryState,
-    actions: AddDiaryEntryActions
+    actions: AddDiaryEntryActions,
+    onNavigateUp: () -> Unit
 ) {
     Scaffold(
         topBar = { AppBar(navController, goBack = true) },
@@ -47,7 +48,7 @@ fun AddDiaryEntryScreen(
             FloatingActionButton(
                 onClick = {
                     actions.addEntry()
-                    navController.navigateUp()
+                    onNavigateUp()
                 }
             ) {
                 Icon(Icons.Outlined.Check, "Add Diary entry")
