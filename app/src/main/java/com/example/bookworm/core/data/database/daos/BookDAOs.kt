@@ -20,7 +20,7 @@ interface BookDAOs {
 
     //select books where author or title are similar to the search query
     @Query("SELECT * FROM books WHERE title LIKE '%' || :searchString || '%' OR author LIKE '%' || :searchString || '%' AND user_id = :userId")
-    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>>
+    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity>>
 
     //select all book where favourite = TRUE
     @Query("SELECT * FROM books WHERE favourite = 1 AND user_id = :userId")
@@ -36,8 +36,8 @@ interface BookDAOs {
     @Query("UPDATE books SET status = :status WHERE book_id = :bookId")
     suspend fun updateBookStatus(bookId: Long, status: ReadingStatus)
 
-    @Query("SELECT * FROM books WHERE title = :title AND author = :author")
-    suspend fun checkValidBook(title: String, author: String): List<BookEntity?>
+    @Query("SELECT * FROM books WHERE title = :title AND author = :author AND user_id = :userId")
+    suspend fun checkValidBook(title: String, author: String, userId: Long): List<BookEntity?>
 
     @Upsert
     suspend fun upsertBook(book: BookEntity): Long

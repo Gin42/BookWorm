@@ -1,6 +1,7 @@
 package com.example.bookworm.ui.screens.authentication
 
 import android.content.ContentValues.TAG
+import android.icu.number.NumberFormatter.UnitWidth
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -24,8 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
+
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,13 +42,16 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.UserEntity
-import com.example.bookworm.core.data.models.AuthenticationResult
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
@@ -57,10 +62,11 @@ import kotlin.reflect.KSuspendFunction1
 
 @Composable
 fun RegistrationScreen(
-    navController: NavController,
     state: RegistrationState,
     actions: RegistrationActions,
-    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResult>
+    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResults>,
+    onNavigateToHome: () -> Unit,
+    onNavigateToLogin: () -> Unit
 ) {
     Scaffold(
     )
@@ -128,30 +134,53 @@ fun RegistrationScreen(
             // Username
             OutlinedTextField(
                 value = state.username,
-                onValueChange = actions::setUsername,
+                onValueChange = {
+                    actions.setUsername(it)
+                    actions.setUsernameError(false)
+                    actions.setPasswordError(false)
+                },
                 label = { Text(stringResource(R.string.username_label)) },
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.usernameError) {
+                        when (state.errorMessage) {
+                            AuthenticationResults.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AuthenticationResults.UsernameTaken -> {
+                                Text("Username already taken!")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.usernameError,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             // Password
-            OutlinedSecureTextField(
-                state = state.password,
+            OutlinedTextField(
+                value = state.password,
+                onValueChange = {
+                    actions.setPassword(it)
+                    actions.setUsernameError(false)
+                    actions.setPasswordError(false)
+                },
                 label = { Text(stringResource(R.string.password_label)) },
                 placeholder = { Text(stringResource(R.string.password_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
-                textObfuscationMode =
-                if (state.showPassword) {
-                    TextObfuscationMode.Visible
-                } else {
-                    TextObfuscationMode.RevealLastTyped
-                },
+                maxLines = 1,
+                visualTransformation = if (state.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     Icon(
                         if (state.showPassword) {
@@ -166,6 +195,12 @@ fun RegistrationScreen(
                             .clickable { actions.setShowPassword(!state.showPassword) }
                     )
                 },
+                supportingText = {
+                    if (state.passwordError && state.errorMessage == AuthenticationResults.CannotSubmit) {
+                        Text("Fill all fields please")
+                    }
+                },
+                isError = state.passwordError
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -174,16 +209,17 @@ fun RegistrationScreen(
             Button(
                 onClick = {
                     if (state.canSubmit) {
-                        val signupResult = runBlocking(Dispatchers.IO) { onSignUp(state.toUser()) }
-                        if (signupResult == AuthenticationResult.Success) {
-                            navController.navigate(BookWormRoute.Home)
+                        val signupResult = runBlocking { onSignUp(state.toUser()) }
+                        if (signupResult == AuthenticationResults.Success) {
+                            onNavigateToHome()
+                        } else if (signupResult == AuthenticationResults.UsernameTaken) {
+                            actions.setUsernameError(true)
+                            actions.setErrorMessage(AuthenticationResults.UsernameTaken)
                         }
                     } else {
-                        Log.println(
-                            Log.DEBUG,
-                            TAG,
-                            "Nope, unfilled credentials"
-                        )
+                        actions.setUsernameError(true)
+                        actions.setPasswordError(true)
+                        actions.setErrorMessage(AuthenticationResults.CannotSubmit)
                     }
                 },
                 modifier = Modifier
@@ -218,7 +254,7 @@ fun RegistrationScreen(
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable(onClick = {
-                        navController.navigate(BookWormRoute.Login)
+                        onNavigateToLogin()
                     })
             )
         }

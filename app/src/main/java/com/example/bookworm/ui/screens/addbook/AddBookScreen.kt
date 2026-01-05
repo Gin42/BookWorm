@@ -37,10 +37,15 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
+import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
 import com.example.bookworm.utils.rememberCameraLauncher
+import kotlinx.coroutines.runBlocking
+import kotlin.reflect.KSuspendFunction1
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,8 +54,9 @@ fun AddBookScreen(
     navController: NavController,
     state: AddBookState,
     actions: AddBookActions,
-    addBook: () -> Unit,
+    addBook: KSuspendFunction1<BookEntity, AddBookResults>,
     bookId: Long?,
+    onNavigateUp: () -> Unit,
 ) {
 
     LaunchedEffect(bookId) {
@@ -79,7 +85,7 @@ fun AddBookScreen(
                     IconButton(
                         onClick = {
                             actions.setShowAlert(true)
-                            actions.setNavDestination(BookWormRoute.Setting)
+                            actions.setNavDestination(BookWormRoute.Settings)
                         }
                     ) {
                         Icon(Icons.Filled.Settings, contentDescription = "App Settings")
@@ -93,9 +99,38 @@ fun AddBookScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
                     if (state.canSubmit) {
-                        addBook()
-                        navController.navigateUp()
-                        /*TODO understand how to check the success or not of the Job*/
+
+                        if (state.validPages) {
+
+                            val result = runBlocking {
+                                addBook(state.toBook())
+                            }
+                            when (result) {
+                                AddBookResults.BookPresent -> {
+                                    actions.setError(true)
+                                    actions.setErrorMessage(AddBookResults.BookPresent)
+                                }
+
+                                AddBookResults.Success -> {
+                                    onNavigateUp()
+                                }
+
+                                AddBookResults.CannotSubmit -> {
+                                    actions.setError(true)
+                                    actions.setPagesError(true)
+                                    actions.setErrorMessage(AddBookResults.CannotSubmit)
+                                }
+
+                                AddBookResults.InvalidPages -> {}
+                            }
+                        } else {
+                            actions.setPagesError(true)
+                            actions.setErrorMessage(AddBookResults.InvalidPages)
+                        }
+                    } else {
+                        actions.setError(true)
+                        actions.setPagesError(true)
+                        actions.setErrorMessage(AddBookResults.CannotSubmit)
                     }
                 }
             ) {
@@ -105,7 +140,7 @@ fun AddBookScreen(
     ) { contentPadding ->
 
         if (state.showAlert) {
-            Alert(actions)
+            BookAlert(actions)
         }
 
         LaunchedEffect(state.alertConfirmed) {
@@ -132,35 +167,96 @@ fun AddBookScreen(
 
             OutlinedTextField(
                 value = state.title,
-                onValueChange = actions::setTitle,
+                onValueChange = {
+                    actions.setTitle(it)
+                    actions.setError(false)
+                },
                 label = { Text("Title") },
                 placeholder = { Text("Title") },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.error) {
+                        when (state.errorMessage) {
+                            AddBookResults.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AddBookResults.BookPresent -> {
+                                Text("Book already added")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.error
             )
 
             OutlinedTextField(
                 value = state.author,
-                onValueChange = actions::setAuthor,
+                onValueChange = {
+                    actions.setAuthor(it)
+                    actions.setError(false)
+                },
                 label = { Text("Author") },
                 placeholder = { Text("Author") },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 20,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.error) {
+                        when (state.errorMessage) {
+                            AddBookResults.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AddBookResults.BookPresent -> {
+                                Text("Book already added")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.error
             )
 
             OutlinedTextField(
                 value = state.pages,
-                onValueChange = actions::setPages,
+                onValueChange = {
+                    actions.setPages(it)
+                    actions.setError(false)
+                    actions.setPagesError(false)
+                },
                 label = { Text("Pages") },
                 placeholder = { Text("Pages") },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 20,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.pagesError) {
+                        when (state.errorMessage) {
+                            AddBookResults.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AddBookResults.InvalidPages -> {
+                                Text("Enter a valid number of pages")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.pagesError
             )
 
             val ctx = LocalContext.current
@@ -193,7 +289,7 @@ fun AddBookScreen(
 }
 
 @Composable
-fun Alert(actions: AddBookActions) {
+fun BookAlert(actions: AddBookActions) {
     AlertDialog(
         onDismissRequest = {
             actions.setShowAlert(false)

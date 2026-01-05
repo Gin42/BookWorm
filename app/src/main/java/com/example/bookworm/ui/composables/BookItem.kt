@@ -21,6 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.core.data.database.entities.BookEntity
@@ -28,9 +29,9 @@ import com.example.bookworm.ui.BookWormRoute
 
 
 @Composable
-fun BookItem(book: BookEntity, navController: NavController) {
+fun BookItem(book: BookEntity, onBookClick: (Long) -> Unit) {
     Card(
-        onClick = { navController.navigate(BookWormRoute.BookDetails(book.bookId)) },
+        onClick = { onBookClick(book.bookId) },
         shape = RoundedCornerShape(16.dp),
     ) {
         Column(
@@ -53,7 +54,9 @@ fun BookItem(book: BookEntity, navController: NavController) {
                 book.title,
                 style = MaterialTheme.typography.titleSmall,
                 textAlign = TextAlign.Left,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

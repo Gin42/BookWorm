@@ -16,7 +16,7 @@ data class ThemeState(
     val theme: com.example.bookworm.core.data.models.Theme,
 )
 
-data class SettingState(
+data class SettingsState(
     val themeExpanded: Boolean = false
 )
 
@@ -29,8 +29,8 @@ class ThemeViewModel(
     private val repository: ThemeRepository
 ) : ViewModel() {
 
-    private val _settingState = MutableStateFlow(SettingState())
-    val settingState = _settingState.asStateFlow()
+    private val _settingsState = MutableStateFlow(SettingsState())
+    val settingsState = _settingsState.asStateFlow()
 
     val state = repository.theme.map { ThemeState(it) }.stateIn(
         scope = viewModelScope,
@@ -44,7 +44,7 @@ class ThemeViewModel(
 
     val actions = object : SettingsAction {
         override fun toggleThemeExpanded(themeExpanded: Boolean) {
-            _settingState.update { it.copy(themeExpanded = themeExpanded) }
+            _settingsState.update { it.copy(themeExpanded = themeExpanded) }
 
         }
     }

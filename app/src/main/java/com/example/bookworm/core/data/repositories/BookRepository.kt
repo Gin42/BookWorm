@@ -4,18 +4,24 @@ import android.content.ContentValues.TAG
 import android.util.Log
 import com.example.bookworm.core.data.database.daos.BookDAOs
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.models.AddBookResults
 import com.example.bookworm.core.data.models.ReadingStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 
 class BookRepository(private val bookDAO: BookDAOs) {
 
-    suspend fun addBook(book: BookEntity): Boolean  {
-        if(checkValidBook(book.title, book.author)) {
+    suspend fun addBook(book: BookEntity): AddBookResults {
+        if(book.bookId == 0L) { /** If the book does not exist */
+            if (checkValidBook(book.title, book.author, book.userId)) {
+                bookDAO.upsertBook(book)
+                return AddBookResults.Success
+            } else {
+                return AddBookResults.BookPresent
+            }
+        } else { /** If the book does exist */
             bookDAO.upsertBook(book)
-            return true
-        } else {
-            return false
+            return AddBookResults.Success
         }
     }
 
@@ -28,8 +34,8 @@ class BookRepository(private val bookDAO: BookDAOs) {
         }
     }
 
-    private suspend fun checkValidBook(title: String, author: String): Boolean {
-        val sameBook = bookDAO.checkValidBook(title, author).firstOrNull()
+    private suspend fun checkValidBook(title: String, author: String, userId: Long): Boolean {
+        val sameBook = bookDAO.checkValidBook(title, author, userId).firstOrNull()
         return sameBook == null
     }
 
@@ -37,7 +43,7 @@ class BookRepository(private val bookDAO: BookDAOs) {
 
     fun getAllBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllBooks(userId)
 
-    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity?>> = bookDAO.searchBook(searchString, userId)
+    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity>> = bookDAO.searchBook(searchString, userId)
 
     fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>> = bookDAO.getAllFavouriteBooks(userId) /*Might be superfluous*/
 

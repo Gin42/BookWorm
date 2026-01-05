@@ -1,26 +1,17 @@
 package com.example.bookworm.ui.screens.bookdetails
 
-import android.content.ContentValues.TAG
-import android.util.Log
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
-import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.models.ReadingStatus
+import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
+import com.example.bookworm.core.data.models.usecase.StatusSideEffect
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
-import com.example.bookworm.ui.entitiesViewModel.BookState
-import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
-import com.example.bookworm.ui.utils.mapper.toUi
+import com.example.bookworm.utils.TimeUtils
+import com.example.bookworm.utils.mapper.toUi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -33,6 +24,7 @@ data class BookDetailsState(
     val statusExpanded: Boolean = false,
     val journeyExpanded: List<Boolean> = emptyList(),
     val entryExpanded: Map<Long, Boolean> = emptyMap(),
+    val showProgress: Boolean = false
 )
 
 data class Journey(
@@ -51,16 +43,21 @@ data class Entry(
 )
 
 interface BookDetailsAction {
-    fun updateReadingStatus(status: ReadingStatus)
+    fun updateReadingStatus(target: ReadingStatus)
     fun updateFavourite()
 
     fun toggleStatusExpanded(statusExpanded: Boolean)
     fun toggleJourneyEntry(index: Int)
     fun openEntry(entryId: Long, open: Boolean)
+    fun showProgress(value: Boolean)
 }
 
 class BookDetailsViewModel(
     private val bookId: Long,
+    private val userId: Long,
+
+    private val stateMachine: ReadingStatusStateMachine,
+
     private val bookRepository: BookRepository,
     private val journeyRepository: ReadingJourneyRepository,
 ) : ViewModel() {
@@ -72,30 +69,43 @@ class BookDetailsViewModel(
 
     val actions = object : BookDetailsAction {
 
-        override fun updateReadingStatus(status: ReadingStatus) {
+        override fun updateReadingStatus(target: ReadingStatus) {
+
+            val result = stateMachine.transition(
+                current = _state.value.selectedBook.status,
+                target = target,
+            ) ?: return
 
             viewModelScope.launch {
-                bookRepository.updateBookStatus(bookId, status)
 
-                val currentJourney = currentJourney() ?: return@launch
-                val now = System.currentTimeMillis()
+                bookRepository.updateBookStatus(bookId, result.newStatus)
 
-                when (status) {
-                    ReadingStatus.FINISHED -> {
-                        journeyRepository.endJourney(
-                            journeyId = currentJourney.journeyId,
-                            endDate = now
-                        )
+                result.sideEffects.forEach { effect ->
+                    when (effect) {
+                        is StatusSideEffect.CreateJourney ->
+                            journeyRepository.upsertJourney(
+                                bookId = _state.value.selectedBook.bookId,
+                                userId = userId,
+                                startDate = TimeUtils.now()
+                            )
+
+                        is StatusSideEffect.CloseJourney ->
+                            currentJourney()?.let {
+                                journeyRepository.endJourney(
+                                    journeyId = it.journeyId,
+                                    endDate = TimeUtils.now()
+                                )
+                            }
+
+                        is StatusSideEffect.DropJourney ->
+                            currentJourney()?.let {
+                                journeyRepository.dropJourney(
+                                    journeyId = it.journeyId,
+                                    endDate = TimeUtils.now()
+                                )
+                            }
                     }
 
-                    ReadingStatus.DROPPED -> {
-                        journeyRepository.dropJourney(
-                            journeyId = currentJourney.journeyId,
-                            endDate = now
-                        )
-                    }
-
-                    else -> Unit
                 }
             }
         }
@@ -130,6 +140,10 @@ class BookDetailsViewModel(
                 )
             }
         }
+
+        override fun showProgress(value: Boolean) {
+            _state.update { it.copy(showProgress = value) }
+        }
     }
 
     init {
@@ -152,7 +166,6 @@ class BookDetailsViewModel(
             journeyRepository.observeJourneys(bookId)
                 .collect { journeys ->
                     val uiJourneys = journeys.map { it.toUi() }
-
                     _state.update {
                         it.copy(
                             bookJourneys = uiJourneys,

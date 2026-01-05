@@ -1,7 +1,10 @@
-package com.example.bookworm.ui.utils
+package com.example.bookworm.utils
 
+import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.ZoneId
+import java.util.Date
+import java.util.Locale
 
 object TimeUtils {
 
@@ -16,5 +19,10 @@ object TimeUtils {
             .atStartOfDay(ZoneId.systemDefault())
             .toInstant()
             .toEpochMilli()
+    }
+
+    fun convertMillisToDate(millis: Long): String {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return formatter.format(Date(millis))
     }
 }

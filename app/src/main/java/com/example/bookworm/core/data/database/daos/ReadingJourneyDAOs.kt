@@ -30,7 +30,7 @@ interface ReadingJourneyDAOs {
     fun getLastJourney(bookId: Long): Flow<ReadingJourneyWithEntries>
 
     //drop journey
-    @Query("UPDATE reading_journey SET is_dropped = 1 AND end_date =:endDate WHERE journey_id = :journeyId")
+    @Query("UPDATE reading_journey SET is_dropped = 1, end_date = :endDate WHERE journey_id = :journeyId")
     suspend fun dropJourney(
         journeyId: Long,
         endDate: Long

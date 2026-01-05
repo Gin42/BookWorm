@@ -5,7 +5,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.UserEntity
-import com.example.bookworm.core.data.models.AuthenticationResult
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,30 +14,37 @@ import kotlinx.coroutines.launch
 
 data class RegistrationState(
     val username: String = "",
-    val password: TextFieldState = TextFieldState(initialText = ""),
+    val password: String = "",
     val userPhoto: Uri? = Uri.EMPTY,
     val showPassword: Boolean = false,
+
+    val usernameError: Boolean = false,
+    val passwordError: Boolean = false,
+    val errorMessage: AuthenticationResults = AuthenticationResults.CannotSubmit
 ) {
-    val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
+    val canSubmit get() = username.isNotBlank() && password.isNotBlank()
 
     fun toUser() = UserEntity(
-        username = username,
-        password = password.text.toString(),
+        userId = 0L,
+        username = username.trim(),
+        password = password.trim(),
         image = userPhoto.toString(),
     )
 }
 
 interface RegistrationActions {
     fun setUsername(username: String)
-    fun setPassword(password: TextFieldState)
+    fun setPassword(password: String)
     fun setUserPhoto(userPhoto: Uri?)
 
+    fun setUsernameError(value: Boolean)
+    fun setPasswordError(value: Boolean)
+    fun setErrorMessage(errorMessage: AuthenticationResults)
+
     fun setShowPassword(showPassword: Boolean)
-    //fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit)
 }
 
 class RegistrationViewModel(
-    private val userViewModel: UserViewModel,
 ) : ViewModel() {
     private val _state = MutableStateFlow(RegistrationState())
     val state = _state.asStateFlow()
@@ -47,7 +54,7 @@ class RegistrationViewModel(
             _state.update { it.copy(username = username) }
         }
 
-        override fun setPassword(password: TextFieldState) {
+        override fun setPassword(password: String) {
             _state.update { it.copy(password = password) }
         }
 
@@ -55,22 +62,21 @@ class RegistrationViewModel(
             _state.update { it.copy(userPhoto = userPhoto) }
         }
 
+        override fun setUsernameError(value: Boolean) {
+            _state.update { it.copy(usernameError = value) }
+        }
+
+        override fun setPasswordError(value: Boolean) {
+            _state.update { it.copy(passwordError = value) }
+        }
+
+        override fun setErrorMessage(errorMessage: AuthenticationResults) {
+            _state.update { it.copy(errorMessage = errorMessage) }
+        }
+
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
         }
-
-
-        /*override fun performRegistration(onRegistrationComplete: (AuthenticationResult) -> Unit) {
-            viewModelScope.launch {
-                val user = UserEntity(
-                    username = state.value.username,
-                    password = state.value.password.text.toString(),
-                    image = state.value.userPhoto?.toString()
-                )
-                val result = userViewModel.actions.registerUser(user)
-                onRegistrationComplete(result)
-            }
-        }*/
     }
 
 }

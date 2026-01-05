@@ -1,23 +1,20 @@
 package com.example.bookworm.ui
 
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navOptions
 import androidx.navigation.toRoute
-import com.example.bookworm.core.data.models.AchievementType
-import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
-import com.example.bookworm.ui.entitiesViewModel.BookViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
@@ -30,6 +27,7 @@ import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsScreen
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.home.LibraryScreen
+import com.example.bookworm.ui.screens.home.LibraryViewModel
 import com.example.bookworm.ui.screens.settings.SettingsScreen
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
@@ -54,7 +52,7 @@ sealed interface BookWormRoute {
     data object UserPage : BookWormRoute
 
     @Serializable
-    data object Setting : BookWormRoute
+    data object Settings : BookWormRoute
 
     @Serializable
     data object Statistics : BookWormRoute
@@ -67,7 +65,6 @@ sealed interface BookWormRoute {
 
     @Serializable
     data object Login : BookWormRoute
-//ToDo
 }
 
 sealed class BottomNavigation(val label: String, val icon: ImageVector, val route: BookWormRoute) {
@@ -85,13 +82,12 @@ fun BookWormNavGraph(navController: NavHostController) {
     val userViewModel = koinViewModel<UserViewModel>()
     val userState by userViewModel.state.collectAsStateWithLifecycle()
 
-    val bookViewModel: BookViewModel = koinViewModel(
+    val libraryViewModel: LibraryViewModel = koinViewModel(
         parameters = { parametersOf(userState.id) },
         key = "book_vm_user_${userState.id}"
     )
-    val bookState by bookViewModel.state.collectAsStateWithLifecycle()
+    val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
 
-    val achievementViewModel: AchievementViewModel = koinViewModel<AchievementViewModel>(parameters = { parametersOf(userState.id) })
 
     NavHost(
         navController = navController,
@@ -102,10 +98,22 @@ fun BookWormNavGraph(navController: NavHostController) {
             val registrationViewModel = koinViewModel<RegistrationViewModel>()
             val registrationState by registrationViewModel.state.collectAsStateWithLifecycle()
             RegistrationScreen(
-                navController,
                 state = registrationState,
                 actions = registrationViewModel.actions,
-                onSignUp = userViewModel.actions::registerUser
+                onSignUp = userViewModel.actions::registerUser,
+                onNavigateToHome = {
+                    navController.navigate(route = BookWormRoute.Home,
+                        navOptions = navOptions {
+                            popUpTo(BookWormRoute.Registration) { inclusive = true }
+                        })
+                },
+                onNavigateToLogin = {
+                    navController.navigate(BookWormRoute.Login,
+                        navOptions = navOptions {
+                            popUpTo(BookWormRoute.Registration) { inclusive = true }
+                        }
+                    )
+                },
             )
         }
 
@@ -116,25 +124,39 @@ fun BookWormNavGraph(navController: NavHostController) {
                 navController,
                 state = loginState,
                 actions = loginViewModel.actions,
-                onSignIn = userViewModel.actions::loginUser
+                onSignIn = userViewModel.actions::loginUser,
+                onNavigateToHome = {
+                    navController.navigate(BookWormRoute.Home,
+                        navOptions = navOptions {
+                            popUpTo(BookWormRoute.Login) { inclusive = true }
+                        })
+                },
+                onNavigateToRegistration = {
+                    navController.navigate(BookWormRoute.Registration,
+                        navOptions = navOptions {
+                            popUpTo(BookWormRoute.Login) { inclusive = true }
+                        })
+                },
             )
         }
 
+        /*TODO navigation
+        *  To navigate to the details -> popUpTo("home") launchSingleTop = true
+        * */
         composable<BookWormRoute.Home> {
-            Log.println(
-                Log.DEBUG,
-                TAG,
-                "HELLO: user -> ${userState.user}"
-            )
             LibraryScreen(
                 navController,
-                bookState = bookState,
-                userState = userState
+                state = libraryState,
+                books = libraryViewModel.filteredBooks.collectAsState(),
+                actions = libraryViewModel.actions,
+                onBookClick = { bookId ->
+                    navController.navigate(BookWormRoute.BookDetails(bookId))
+                },
             )
         }
 
         composable<BookWormRoute.AddBook> { backStackEntry ->
-            val route = backStackEntry.toRoute<BookWormRoute.AddBook>() // bookId
+            val route = backStackEntry.toRoute<BookWormRoute.AddBook>()
 
             val addBookVm =
                 koinViewModel<AddBookViewModel>(parameters = { parametersOf(userState.id) })
@@ -144,30 +166,32 @@ fun BookWormNavGraph(navController: NavHostController) {
                 navController,
                 state = state,
                 actions = addBookVm.actions,
-                addBook = {
-                    bookViewModel.actions.addBook(
-                        state.toBook()
-
-                    )
-                    achievementViewModel.actions.updateAchievement(
-                        type = AchievementType.BookAdded,
-                        amount = 1
-                    )
-                },
+                addBook = libraryViewModel.actions::addBook,
                 bookId = route.bookId,
+                onNavigateUp = { navController.navigateUp() },
             )
         }
 
         composable<BookWormRoute.BookDetails> { backStackEntry ->
             val route = backStackEntry.toRoute<BookWormRoute.BookDetails>()
             val bookDetailsViewModel =
-                koinViewModel<BookDetailsViewModel>(parameters = { parametersOf(route.bookId) })
+                koinViewModel<BookDetailsViewModel>(parameters = {
+                    parametersOf(
+                        route.bookId,
+                        userState.user.userId
+                    )
+                })
             val bookDetailsState by bookDetailsViewModel.state.collectAsStateWithLifecycle()
 
             BookDetailsScreen(
                 navController,
                 bookDetailsState,
                 bookDetailsViewModel.actions,
+                onNavigateToAddBook = {
+                    navController.navigate(
+                        BookWormRoute.AddBook(bookDetailsState.selectedBook.bookId)
+                    )
+                }
             )
         }
 
@@ -175,20 +199,26 @@ fun BookWormNavGraph(navController: NavHostController) {
             UserPageScreen(
                 navController,
                 userState = userState,
-                favourites = bookState.books.filter { it.favourite },
-                userAchievements = achievementViewModel.state.value.achievementsWithProgress
+                favourites = libraryViewModel.filteredBooks.collectAsState().value.filter { it.favourite },
+                onSeeFavourites = {
+                    libraryViewModel.actions.filterByFavourites(true)
+                    navController.navigate(BookWormRoute.Home)
+                },
+                onBookClick = { bookId ->
+                    navController.navigate(BookWormRoute.BookDetails(bookId))
+                }
             )
         }
 
-        composable<BookWormRoute.Setting> {
+        composable<BookWormRoute.Settings> {
             val themeViewModel = koinViewModel<ThemeViewModel>()
             val themeState by themeViewModel.state.collectAsStateWithLifecycle()
-            val settingState by themeViewModel.settingState.collectAsStateWithLifecycle()
+            val settingsState by themeViewModel.settingsState.collectAsStateWithLifecycle()
 
             SettingsScreen(
                 navController,
                 state = themeState,
-                settingState = settingState,
+                settingsState = settingsState,
                 actions = themeViewModel.actions,
                 onThemeSelected = themeViewModel::changeTheme
             )
@@ -225,7 +255,10 @@ fun BookWormNavGraph(navController: NavHostController) {
             AddDiaryEntryScreen(
                 navController = navController,
                 state = state,
-                actions = addDiaryEntryVm.actions
+                actions = addDiaryEntryVm.actions,
+                onNavigateUp = {
+                    navController.navigateUp()
+                }
             )
         }
     }

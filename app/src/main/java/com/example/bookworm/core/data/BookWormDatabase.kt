@@ -1,10 +1,7 @@
 package com.example.bookworm.core.data
 
-import android.content.Context
 import androidx.room.Database
-import androidx.room.Room
 import androidx.room.RoomDatabase
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.bookworm.core.data.database.daos.BookDAOs
 import com.example.bookworm.core.data.database.daos.JourneyEntryDAOs
 import com.example.bookworm.core.data.database.daos.NotificationDAOs
@@ -18,11 +15,6 @@ import com.example.bookworm.core.data.database.entities.AchievementEntity
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.entities.NotificationEntity
 import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
-import com.example.bookworm.core.data.models.AchievementName
-import com.example.bookworm.core.data.models.AchievementType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 @Database(
     entities = [
@@ -34,7 +26,7 @@ import kotlinx.coroutines.launch
         UnlockedAchievementEntity::class,
         NotificationEntity::class
     ],
-    version = 4
+    version = 5
 )
 abstract class BookWormDatabase : RoomDatabase() {
     abstract fun userDao(): UserDAOs

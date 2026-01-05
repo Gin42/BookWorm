@@ -64,6 +64,7 @@ fun BookDetailsScreen(
     navController: NavController,
     state: BookDetailsState,
     actions: BookDetailsAction,
+    onNavigateToAddBook: () -> Unit
 ) {
     Scaffold(
         topBar = { AppBar(navController = navController, goBack = true) },
@@ -127,9 +128,7 @@ fun BookDetailsScreen(
                             }
                             IconButton(
                                 onClick = {
-                                    navController.navigate(
-                                        BookWormRoute.AddBook(state.selectedBook.bookId)
-                                    )
+                                    onNavigateToAddBook()
                                 }
                             ) {
                                 Icon(Icons.Outlined.Edit, contentDescription = "Edit")
@@ -145,41 +144,44 @@ fun BookDetailsScreen(
 
                 val totalPages = state.selectedBook.pages
 
-                Log.println(
-                    Log.DEBUG,
-                    TAG,
-                    "JOURNEY: ${state.bookJourneys.firstOrNull()}\n" +
-                            "ENTRY: ${state.bookJourneys
-                                .firstOrNull()  
-                                ?.entries
-                                ?.lastOrNull()}"
-                )
+                val bookStatus = state.selectedBook.status
 
-                val lastPagesRead = state.bookJourneys
+                var lastPagesRead = state.bookJourneys
                     .firstOrNull()
                     ?.entries
                     ?.lastOrNull()
                     ?.pagesRead ?: 0
+
+                if (bookStatus == ReadingStatus.DROPPED || bookStatus == ReadingStatus.PLAN_TO_READ) {
+                    actions.showProgress(false)
+                } else if (bookStatus == ReadingStatus.FINISHED) {
+                    actions.showProgress(true)
+                    lastPagesRead = state.selectedBook.pages
+                } else if (bookStatus == ReadingStatus.READING) {
+                    actions.showProgress(true)
+                }
 
                 val progressFraction =
                     if (totalPages > 0) lastPagesRead.toFloat() / totalPages else 0f
 
                 val progressPercent = (progressFraction * 100).toInt()
 
-                ListItem(
-                    headlineContent = {
-                        LinearProgressIndicator(
-                            progress = { progressFraction.coerceIn(0f, 1f) },
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    },
-                    leadingContent = {
-                        Text("Progress:", style = MaterialTheme.typography.labelLarge)
-                    },
-                    trailingContent = {
-                        Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
-                    }
-                )
+                if (state.showProgress) {
+                    ListItem(
+                        headlineContent = {
+                            LinearProgressIndicator(
+                                progress = { progressFraction.coerceIn(0f, 1f) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        leadingContent = {
+                            Text("Progress:", style = MaterialTheme.typography.labelLarge)
+                        },
+                        trailingContent = {
+                            Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
+                        }
+                    )
+                }
             }
 
             if (state.bookJourneys.isNotEmpty()) {
@@ -189,7 +191,7 @@ fun BookDetailsScreen(
             } else {
                 item {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Icon(Icons.Outlined.Book, null, modifier = Modifier.size(64.dp))

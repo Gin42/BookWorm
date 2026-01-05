@@ -8,19 +8,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.StarOutline
+import androidx.compose.material.icons.outlined.Diamond
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -31,23 +29,24 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.example.bookworm.core.data.database.entities.AchievementEntity
 import com.example.bookworm.core.data.database.entities.BookEntity
-import com.example.bookworm.core.data.database.entities.UnlockedAchievementEntity
+import com.example.bookworm.ui.BookWormRoute
+import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.NavBottom
 import com.example.bookworm.ui.composables.Size
-import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
+import org.koin.core.parameter.parametersOf
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -56,7 +55,8 @@ fun UserPageScreen(
     navController: NavController,
     userState: LoggedUserState,
     favourites: List<BookEntity>,
-    userAchievements: List<Pair<AchievementEntity, UnlockedAchievementEntity?>>,
+    onSeeFavourites: () -> Unit,
+    onBookClick: (Long) -> Unit,
 ) {
 
     Scaffold(
@@ -117,9 +117,9 @@ fun UserPageScreen(
                         trailingContent = {
                             if (favourites.isNotEmpty()) {
                                 TextButton(
-                                    onClick = { /*TODO must go to library passing an
-                                argument that specify that i want to see
-                                only the favourite books*/
+                                    onClick = {
+                                        onSeeFavourites()
+
                                     }
                                 ) {
                                     Text("Show all")
@@ -137,9 +137,9 @@ fun UserPageScreen(
                                 .padding(top = 16.dp, bottom = 16.dp),
                             itemWidth = 150.dp,
                             itemSpacing = 8.dp,
-                        ) { index ->
+                        ) {index ->
                             val item = favourites[index]
-                            BookItem(item, navController)
+                            BookItem(item, onBookClick)
                         }
                     } else {
                         Column(
@@ -166,6 +166,15 @@ fun UserPageScreen(
             }
             //user badges
             item {
+
+                val badges = listOf(
+                    BadgeItem(0, Icons.Outlined.Diamond),
+                    BadgeItem(1, Icons.Outlined.Diamond),
+                    BadgeItem(2, Icons.Outlined.Diamond),
+                    BadgeItem(3, Icons.Outlined.Diamond),
+                    BadgeItem(4, Icons.Outlined.Diamond),
+                )
+
                 Column(
                     horizontalAlignment = Alignment.Start,
                     modifier = Modifier
@@ -179,50 +188,58 @@ fun UserPageScreen(
                         modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
                     )
 
-                    Row {
-                        userAchievements.forEach{ item ->
-                            Badge(item)
+
+                    val columns = 2
+                    for (i in badges.indices step columns) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp, bottom = 16.dp),
+                            horizontalArrangement = Arrangement.SpaceEvenly
+                        ) {
+                            for (j in 0 until columns) {
+                                if (i + j < badges.size) {
+                                    Badge(badges[i + j])
+                                }
+                            }
                         }
                     }
+
                 }
+
             }
+
         }
     }
 }
 
-@Composable
-fun Badge(item: Pair<AchievementEntity, UnlockedAchievementEntity?>) {
-    val (achievement, userProgress) = item
-    val isCompleted = userProgress?.isCompleted ?: false
+data class BadgeItem(
+    val id: Int,
+    val icon: ImageVector
+)
 
+@Composable
+fun Badge(item: BadgeItem) {
     Column(
         modifier = Modifier
-            .padding(8.dp)
-            .width(100.dp),
+            .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // For simplicity, using a default icon; you can customize per achievement
         Image(
             modifier = Modifier
-                .height(100.dp)
-                .fillMaxWidth(),
-            imageVector = if (isCompleted) Icons.Outlined.AutoAwesome else Icons.Outlined.StarOutline,
-            contentDescription = achievement.description,
+                .height(100.dp),
+            imageVector = item.icon,
+            contentDescription = "Badge description",
             contentScale = ContentScale.Crop
         )
         Text(
-            achievement.name,
+            "Badge title",
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
         )
         Text(
-            achievement.description,
+            "Badge description",
             style = MaterialTheme.typography.bodySmall,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis
         )
     }
 }
-
