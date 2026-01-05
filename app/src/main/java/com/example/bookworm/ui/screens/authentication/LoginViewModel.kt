@@ -15,6 +15,9 @@ data class LoginState(
     val username: String = "",
     val password: TextFieldState = TextFieldState(initialText = ""),
     val showPassword: Boolean = false,
+
+    val error: Boolean = false,
+    val errorMessage: AuthenticationResult = AuthenticationResult.CannotSubmit
 ) {
     val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
 }
@@ -22,6 +25,9 @@ data class LoginState(
 interface LoginAction {
     fun setUsername(username: String)
     fun setPassword(password: TextFieldState)
+
+    fun setError(value: Boolean)
+    fun setErrorMessage(errorMessage: AuthenticationResult)
 
     fun setShowPassword(showPassword: Boolean)
 }
@@ -42,6 +48,14 @@ class LoginViewModel(
 
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
+        }
+
+        override fun setError(value: Boolean) {
+            _state.update { it.copy(error = value) }
+        }
+
+        override fun setErrorMessage(errorMessage: AuthenticationResult) {
+            _state.update { it.copy(errorMessage = errorMessage) }
         }
     }
 }

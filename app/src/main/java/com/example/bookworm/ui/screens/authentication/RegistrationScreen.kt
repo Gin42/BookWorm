@@ -41,6 +41,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
@@ -130,13 +131,33 @@ fun RegistrationScreen(
             // Username
             OutlinedTextField(
                 value = state.username,
-                onValueChange = actions::setUsername,
+                onValueChange = {
+                    actions.setUsername(it)
+                    actions.setUsernameError(false)
+                },
                 label = { Text(stringResource(R.string.username_label)) },
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.usernameError) {
+                        when (state.errorMessage) {
+                            AuthenticationResult.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AuthenticationResult.UsernameTaken -> {
+                                Text("Username already taken!")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.usernameError,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -168,6 +189,12 @@ fun RegistrationScreen(
                             .clickable { actions.setShowPassword(!state.showPassword) }
                     )
                 },
+                supportingText = {
+                    if (state.passwordError && state.errorMessage == AuthenticationResult.CannotSubmit) {
+                        Text("Fill all fields please")
+                    }
+                },
+                isError = state.passwordError
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -179,13 +206,14 @@ fun RegistrationScreen(
                         val signupResult = runBlocking { onSignUp(state.toUser()) }
                         if (signupResult == AuthenticationResult.Success) {
                             onNavigateToHome()
+                        } else if (signupResult == AuthenticationResult.UsernameTaken) {
+                            actions.setUsernameError(true)
+                            actions.setErrorMessage(AuthenticationResult.UsernameTaken)
                         }
                     } else {
-                        Log.println(
-                            Log.DEBUG,
-                            TAG,
-                            "Nope, unfilled credentials"
-                        )
+                        actions.setUsernameError(true)
+                        actions.setPasswordError(true)
+                        actions.setErrorMessage(AuthenticationResult.CannotSubmit)
                     }
                 },
                 modifier = Modifier

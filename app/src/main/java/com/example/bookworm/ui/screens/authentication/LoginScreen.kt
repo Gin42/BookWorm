@@ -88,13 +88,33 @@ fun LoginScreen(
             // Username
             OutlinedTextField(
                 value = state.username,
-                onValueChange = actions::setUsername,
+                onValueChange = {
+                    actions.setUsername(it)
+                    actions.setError(false)
+                },
                 label = { Text(stringResource(R.string.username_label)) },
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
-                textStyle = MaterialTheme.typography.bodyMedium
+                textStyle = MaterialTheme.typography.bodyMedium,
+                supportingText = {
+                    if (state.error) {
+                        when (state.errorMessage) {
+                            AuthenticationResult.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AuthenticationResult.WrongCredentials -> {
+                                Text("Wrong credentials, try again")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.error
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -126,6 +146,23 @@ fun LoginScreen(
                             .clickable { actions.setShowPassword(!state.showPassword) }
                     )
                 },
+                supportingText = {
+                    if (state.error){
+                        when (state.errorMessage) {
+                            AuthenticationResult.CannotSubmit -> {
+                                Text("Fill all fields please")
+                            }
+
+                            AuthenticationResult.WrongCredentials -> {
+                                Text("Wrong credentials, try again")
+                            }
+
+                            else -> {
+                            }
+                        }
+                    }
+                },
+                isError = state.error
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -141,36 +178,20 @@ fun LoginScreen(
                         }
                         when (signInResult) {
                             AuthenticationResult.Success -> {
-                                Log.println(
-                                    Log.DEBUG,
-                                    TAG,
-                                    "Success!"
-                                )
                                 onNavigateToHome()
                             }
 
                             AuthenticationResult.WrongCredentials -> {
-                                Log.println(
-                                    Log.DEBUG,
-                                    TAG,
-                                    "Nope, wrong credentials"
-                                )
+                                actions.setError(true)
+                                actions.setErrorMessage(AuthenticationResult.WrongCredentials)
                             }
 
                             else -> {
-                                Log.println(
-                                    Log.DEBUG,
-                                    TAG,
-                                    "Nope, login failed"
-                                )
                             }
                         }
                     } else {
-                        Log.println(
-                            Log.DEBUG,
-                            TAG,
-                            "Nope, unfilled credentials"
-                        )
+                        actions.setError(true)
+                        actions.setErrorMessage(AuthenticationResult.CannotSubmit)
                     }
                 },
                 modifier = Modifier

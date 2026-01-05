@@ -4,5 +4,5 @@ enum class AuthenticationResult {
     UsernameTaken,
     CannotSubmit,
     WrongCredentials,
-    Success
+    Success,
 }
