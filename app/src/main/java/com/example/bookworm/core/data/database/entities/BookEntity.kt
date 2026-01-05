@@ -11,7 +11,7 @@ import com.example.bookworm.core.data.models.ReadingStatus
 @Entity(
     tableName = "books",
     indices = [
-        Index(value = ["title", "author"], unique = true), /*eventualemente me ne posso fregare*/
+        Index(value = ["title", "author", "user_id"], unique = true), /*eventualemente me ne posso fregare*/
         Index(value = ["book_id", "user_id"], unique = true),
         Index(value = ["user_id"])
     ],

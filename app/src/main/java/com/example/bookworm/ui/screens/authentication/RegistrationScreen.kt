@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -25,8 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
+
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,8 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
@@ -48,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.UserEntity
-import com.example.bookworm.core.data.models.AuthenticationResult
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
@@ -61,7 +64,7 @@ import kotlin.reflect.KSuspendFunction1
 fun RegistrationScreen(
     state: RegistrationState,
     actions: RegistrationActions,
-    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResult>,
+    onSignUp: KSuspendFunction1<UserEntity, AuthenticationResults>,
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
@@ -134,6 +137,7 @@ fun RegistrationScreen(
                 onValueChange = {
                     actions.setUsername(it)
                     actions.setUsernameError(false)
+                    actions.setPasswordError(false)
                 },
                 label = { Text(stringResource(R.string.username_label)) },
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
@@ -144,11 +148,11 @@ fun RegistrationScreen(
                 supportingText = {
                     if (state.usernameError) {
                         when (state.errorMessage) {
-                            AuthenticationResult.CannotSubmit -> {
+                            AuthenticationResults.CannotSubmit -> {
                                 Text("Fill all fields please")
                             }
 
-                            AuthenticationResult.UsernameTaken -> {
+                            AuthenticationResults.UsernameTaken -> {
                                 Text("Username already taken!")
                             }
 
@@ -163,18 +167,20 @@ fun RegistrationScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Password
-            OutlinedSecureTextField(
-                state = state.password,
+            OutlinedTextField(
+                value = state.password,
+                onValueChange = {
+                    actions.setPassword(it)
+                    actions.setUsernameError(false)
+                    actions.setPasswordError(false)
+                },
                 label = { Text(stringResource(R.string.password_label)) },
                 placeholder = { Text(stringResource(R.string.password_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
-                textObfuscationMode =
-                if (state.showPassword) {
-                    TextObfuscationMode.Visible
-                } else {
-                    TextObfuscationMode.RevealLastTyped
-                },
+                maxLines = 1,
+                visualTransformation = if (state.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     Icon(
                         if (state.showPassword) {
@@ -190,7 +196,7 @@ fun RegistrationScreen(
                     )
                 },
                 supportingText = {
-                    if (state.passwordError && state.errorMessage == AuthenticationResult.CannotSubmit) {
+                    if (state.passwordError && state.errorMessage == AuthenticationResults.CannotSubmit) {
                         Text("Fill all fields please")
                     }
                 },
@@ -204,16 +210,16 @@ fun RegistrationScreen(
                 onClick = {
                     if (state.canSubmit) {
                         val signupResult = runBlocking { onSignUp(state.toUser()) }
-                        if (signupResult == AuthenticationResult.Success) {
+                        if (signupResult == AuthenticationResults.Success) {
                             onNavigateToHome()
-                        } else if (signupResult == AuthenticationResult.UsernameTaken) {
+                        } else if (signupResult == AuthenticationResults.UsernameTaken) {
                             actions.setUsernameError(true)
-                            actions.setErrorMessage(AuthenticationResult.UsernameTaken)
+                            actions.setErrorMessage(AuthenticationResults.UsernameTaken)
                         }
                     } else {
                         actions.setUsernameError(true)
                         actions.setPasswordError(true)
-                        actions.setErrorMessage(AuthenticationResult.CannotSubmit)
+                        actions.setErrorMessage(AuthenticationResults.CannotSubmit)
                     }
                 },
                 modifier = Modifier

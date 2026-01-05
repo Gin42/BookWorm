@@ -166,11 +166,7 @@ fun BookWormNavGraph(navController: NavHostController) {
                 navController,
                 state = state,
                 actions = addBookVm.actions,
-                addBook = {
-                    libraryViewModel.actions.addBook(
-                        state.toBook()
-                    )
-                },
+                addBook = libraryViewModel.actions::addBook,
                 bookId = route.bookId,
                 onNavigateUp = { navController.navigateUp() },
             )

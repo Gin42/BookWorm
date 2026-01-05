@@ -1,7 +1,5 @@
 package com.example.bookworm.ui.screens.authentication
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,14 +8,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedSecureTextField
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,13 +29,15 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
-import com.example.bookworm.core.data.models.AuthenticationResult
-import com.example.bookworm.ui.BookWormRoute
+import com.example.bookworm.core.data.models.AuthenticationResults
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction2
 
@@ -48,7 +47,7 @@ fun LoginScreen(
     navController: NavController,
     state: LoginState,
     actions: LoginAction,
-    onSignIn: KSuspendFunction2<String, String, AuthenticationResult>,
+    onSignIn: KSuspendFunction2<String, String, AuthenticationResults>,
     onNavigateToHome: () -> Unit,
     onNavigateToRegistration: () -> Unit
 ) {
@@ -101,11 +100,11 @@ fun LoginScreen(
                 supportingText = {
                     if (state.error) {
                         when (state.errorMessage) {
-                            AuthenticationResult.CannotSubmit -> {
+                            AuthenticationResults.CannotSubmit -> {
                                 Text("Fill all fields please")
                             }
 
-                            AuthenticationResult.WrongCredentials -> {
+                            AuthenticationResults.WrongCredentials -> {
                                 Text("Wrong credentials, try again")
                             }
 
@@ -120,18 +119,20 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             // Password
-            OutlinedSecureTextField(
-                state = state.password,
+
+            OutlinedTextField(
+                value = state.password,
+                onValueChange = {
+                    actions.setPassword(it)
+                    actions.setError(false)
+                },
                 label = { Text(stringResource(R.string.password_label)) },
                 placeholder = { Text(stringResource(R.string.password_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
-                textObfuscationMode =
-                if (state.showPassword) {
-                    TextObfuscationMode.Visible
-                } else {
-                    TextObfuscationMode.RevealLastTyped
-                },
+                maxLines = 1,
+                visualTransformation = if (state.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 trailingIcon = {
                     Icon(
                         if (state.showPassword) {
@@ -147,13 +148,13 @@ fun LoginScreen(
                     )
                 },
                 supportingText = {
-                    if (state.error){
+                    if (state.error) {
                         when (state.errorMessage) {
-                            AuthenticationResult.CannotSubmit -> {
+                            AuthenticationResults.CannotSubmit -> {
                                 Text("Fill all fields please")
                             }
 
-                            AuthenticationResult.WrongCredentials -> {
+                            AuthenticationResults.WrongCredentials -> {
                                 Text("Wrong credentials, try again")
                             }
 
@@ -173,17 +174,17 @@ fun LoginScreen(
                         val signInResult = runBlocking {
                             onSignIn(
                                 state.username,
-                                state.password.text.toString()
+                                state.password.toString()
                             )
                         }
                         when (signInResult) {
-                            AuthenticationResult.Success -> {
+                            AuthenticationResults.Success -> {
                                 onNavigateToHome()
                             }
 
-                            AuthenticationResult.WrongCredentials -> {
+                            AuthenticationResults.WrongCredentials -> {
                                 actions.setError(true)
-                                actions.setErrorMessage(AuthenticationResult.WrongCredentials)
+                                actions.setErrorMessage(AuthenticationResults.WrongCredentials)
                             }
 
                             else -> {
@@ -191,7 +192,7 @@ fun LoginScreen(
                         }
                     } else {
                         actions.setError(true)
-                        actions.setErrorMessage(AuthenticationResult.CannotSubmit)
+                        actions.setErrorMessage(AuthenticationResults.CannotSubmit)
                     }
                 },
                 modifier = Modifier

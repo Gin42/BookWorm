@@ -7,6 +7,8 @@ import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.ui.BookWormRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,9 +27,14 @@ data class AddBookState(
 
     val showAlert: Boolean = false,
     val alertConfirmed: Boolean = false,
-    val navDestination: BookWormRoute? = null
+    val navDestination: BookWormRoute? = null,
+
+    val error: Boolean = false,
+    val pagesError: Boolean = false,
+    val errorMessage: AddBookResults = AddBookResults.CannotSubmit
 ) {
     val canSubmit get() = title.isNotBlank() && author.isNotBlank() && pages.isNotBlank()
+    val validPages get () = pages.toInt() >= 0
 
     fun toBook() = BookEntity(
         bookId = bookId
@@ -49,6 +56,10 @@ interface AddBookActions {
     fun setBookId(bookId: Long)
 
     fun setBook(bookId: Long)
+
+    fun setError(value: Boolean)
+    fun setPagesError(value: Boolean)
+    fun setErrorMessage(errorMessage: AddBookResults)
 
     fun setShowAlert(value: Boolean)
     fun setAlertConfirmed(value: Boolean)
@@ -114,6 +125,18 @@ class AddBookViewModel(
 
         override fun setNavDestination(route: BookWormRoute?) {
             _state.update { it.copy(navDestination = route) }
+        }
+
+        override fun setError(value: Boolean) {
+            _state.update { it.copy(error = value) }
+        }
+
+        override fun setPagesError(value: Boolean) {
+            _state.update { it.copy(pagesError = value) }
+        }
+
+        override fun setErrorMessage(errorMessage: AddBookResults) {
+            _state.update { it.copy(errorMessage = errorMessage) }
         }
     }
 

@@ -5,7 +5,7 @@ import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.UserEntity
-import com.example.bookworm.core.data.models.AuthenticationResult
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -14,32 +14,32 @@ import kotlinx.coroutines.launch
 
 data class RegistrationState(
     val username: String = "",
-    val password: TextFieldState = TextFieldState(initialText = ""),
+    val password: String = "",
     val userPhoto: Uri? = Uri.EMPTY,
     val showPassword: Boolean = false,
 
     val usernameError: Boolean = false,
     val passwordError: Boolean = false,
-    val errorMessage: AuthenticationResult = AuthenticationResult.CannotSubmit
+    val errorMessage: AuthenticationResults = AuthenticationResults.CannotSubmit
 ) {
-    val canSubmit get() = username.isNotBlank() && password.text.isNotBlank()
+    val canSubmit get() = username.isNotBlank() && password.isNotBlank()
 
     fun toUser() = UserEntity(
         userId = 0L,
         username = username,
-        password = password.text.toString(),
+        password = password,
         image = userPhoto.toString(),
     )
 }
 
 interface RegistrationActions {
     fun setUsername(username: String)
-    fun setPassword(password: TextFieldState)
+    fun setPassword(password: String)
     fun setUserPhoto(userPhoto: Uri?)
 
     fun setUsernameError(value: Boolean)
     fun setPasswordError(value: Boolean)
-    fun setErrorMessage(errorMessage: AuthenticationResult)
+    fun setErrorMessage(errorMessage: AuthenticationResults)
 
     fun setShowPassword(showPassword: Boolean)
 }
@@ -54,7 +54,7 @@ class RegistrationViewModel(
             _state.update { it.copy(username = username) }
         }
 
-        override fun setPassword(password: TextFieldState) {
+        override fun setPassword(password: String) {
             _state.update { it.copy(password = password) }
         }
 
@@ -70,7 +70,7 @@ class RegistrationViewModel(
             _state.update { it.copy(passwordError = value) }
         }
 
-        override fun setErrorMessage(errorMessage: AuthenticationResult) {
+        override fun setErrorMessage(errorMessage: AuthenticationResults) {
             _state.update { it.copy(errorMessage = errorMessage) }
         }
 

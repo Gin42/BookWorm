@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.UserEntity
-import com.example.bookworm.core.data.models.AuthenticationResult
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.repositories.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,8 +25,8 @@ data class LoggedUserState(
 }
 
 interface UserActions {
-    suspend fun registerUser(user: UserEntity): AuthenticationResult
-    suspend fun loginUser(username: String, password: String): AuthenticationResult
+    suspend fun registerUser(user: UserEntity): AuthenticationResults
+    suspend fun loginUser(username: String, password: String): AuthenticationResults
 }
 
 class UserViewModel(
@@ -37,18 +37,18 @@ class UserViewModel(
 
     val actions = object : UserActions {
 
-        override suspend fun registerUser(user: UserEntity): AuthenticationResult {
+        override suspend fun registerUser(user: UserEntity): AuthenticationResults {
             val usernameExist = repository.checkUsernameExists(user.username)
             if (!usernameExist) {
                 repository.upsert(user)
                 loginUser(user.username, user.password)
-                return AuthenticationResult.Success
+                return AuthenticationResults.Success
             } else {
-                return AuthenticationResult.UsernameTaken
+                return AuthenticationResults.UsernameTaken
             }
         }
 
-        override suspend fun loginUser(username: String, password: String): AuthenticationResult {
+        override suspend fun loginUser(username: String, password: String): AuthenticationResults {
             val foundUser = repository.loginUser(username, password)
             return if (foundUser != null) {
                 _state.value = LoggedUserState(foundUser)
@@ -59,9 +59,9 @@ class UserViewModel(
                         }
                         .launchIn(this)
                 }
-                AuthenticationResult.Success
+                AuthenticationResults.Success
             } else {
-                AuthenticationResult.WrongCredentials
+                AuthenticationResults.WrongCredentials
             }
         }
     }

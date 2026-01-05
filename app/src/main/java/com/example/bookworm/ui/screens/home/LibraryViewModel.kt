@@ -3,9 +3,13 @@ package com.example.bookworm.ui.screens.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -24,7 +28,7 @@ data class LibraryState(
 )
 
 interface LibraryActions {
-    fun addBook(book: BookEntity): Job
+    suspend fun addBook(book: BookEntity): AddBookResults
     fun openFilters(value: Boolean)
 
     fun setQuery(query: String)
@@ -87,9 +91,10 @@ class LibraryViewModel(
             _state.update { it.copy(openFilters = value) }
         }
 
-        override fun addBook(book: BookEntity) = viewModelScope.launch {
-            repository.addBook(book)
+        override suspend fun addBook(book: BookEntity): AddBookResults {
+            return repository.addBook(book)
         }
+
     }
 
     private fun List<BookEntity>.filterByQuery(query: String): List<BookEntity> {
