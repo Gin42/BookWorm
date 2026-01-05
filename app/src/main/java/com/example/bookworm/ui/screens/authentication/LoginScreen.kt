@@ -173,8 +173,8 @@ fun LoginScreen(
                     if (state.canSubmit) {
                         val signInResult = runBlocking {
                             onSignIn(
-                                state.username,
-                                state.password.toString()
+                                state.username.trim(),
+                                state.password.trim()
                             )
                         }
                         when (signInResult) {

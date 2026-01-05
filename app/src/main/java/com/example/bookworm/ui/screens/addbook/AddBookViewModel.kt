@@ -39,9 +39,9 @@ data class AddBookState(
     fun toBook() = BookEntity(
         bookId = bookId
             ?: 0L,
-        title = title,
-        author = author,
-        pages = pages.toInt(),
+        title = title.trim(),
+        author = author.trim(),
+        pages = pages.trim().toInt(),
         image = bookCover.toString(),
         userId = userId,
     )

@@ -140,7 +140,7 @@ fun AddBookScreen(
     ) { contentPadding ->
 
         if (state.showAlert) {
-            Alert(actions)
+            BookAlert(actions)
         }
 
         LaunchedEffect(state.alertConfirmed) {
@@ -289,7 +289,7 @@ fun AddBookScreen(
 }
 
 @Composable
-fun Alert(actions: AddBookActions) {
+fun BookAlert(actions: AddBookActions) {
     AlertDialog(
         onDismissRequest = {
             actions.setShowAlert(false)

@@ -7,9 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
+import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.AddEntryResults
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
+import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.utils.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -23,20 +26,31 @@ data class AddDiaryEntryState(
     val pages: String = "",
     val comment: String = "",
 
-
     val bookId: Long = 0,
     val userId: Long = 0,
     val totalPages: Int = 0,
     val journey: ReadingJourneyWithEntries? = null,
 
+    val showAlert: Boolean = false,
+    val alertConfirmed: Boolean = false,
+    val navDestination: BookWormRoute? = null,
+
+    val pagesError: Boolean = false,
+    val dateError: Boolean = false,
+    val errorMessage: AddEntryResults = AddEntryResults.CannotSubmit,
+
     val showDatePicker: Boolean = false,
 ) {
+
+    val canSubmit get() = pages.isNotBlank()
+    val validPages get () = pages.toInt() >= 0
+
     fun toEntry(journeyId: Long): JourneyEntryEntity {
         return JourneyEntryEntity(
             entryId = 0L,
             date = date,
-            pagesRead = pages.toInt(),
-            comment = comment,
+            pagesRead = pages.trim().toInt(),
+            comment = comment.trim(),
             journeyId = journeyId,
             bookId = bookId
         )
@@ -53,6 +67,14 @@ interface AddDiaryEntryActions {
     fun setJourney()
 
     fun addEntry()
+
+    fun setShowAlert(value: Boolean)
+    fun setAlertConfirmed(value: Boolean)
+    fun setNavDestination(route: BookWormRoute?)
+
+    fun setPagesError(value: Boolean)
+    fun setDateError(value: Boolean)
+    fun setErrorMessage(errorMessage: AddEntryResults)
 
 }
 
@@ -104,9 +126,8 @@ class AddDiaryEntryViewModel(
             }
         }
 
-        override fun addEntry() {
+        override fun addEntry(){
             if (!checkFields()) {
-                Log.d(TAG, "CHECK: ${checkFields()}")
                 return
             }
 
@@ -120,7 +141,8 @@ class AddDiaryEntryViewModel(
                     ?.journeyId
                     ?: run {
                         // Create a new Journey and mark book as READING
-                        val newJourneyId = journeyRepository.upsertJourney(bookId, userId, _state.value.date)
+                        val newJourneyId =
+                            journeyRepository.upsertJourney(bookId, userId, _state.value.date)
                         bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
                         newJourneyId
                     }
@@ -143,7 +165,32 @@ class AddDiaryEntryViewModel(
 
 
                 _state.update { it.copy(journey = updatedJourney) }
+                setErrorMessage(AddEntryResults.Success)
             }
+        }
+
+        override fun setShowAlert(value: Boolean) {
+            _state.update { it.copy(showAlert = value) }
+        }
+
+        override fun setAlertConfirmed(value: Boolean) {
+            _state.update { it.copy(alertConfirmed = value) }
+        }
+
+        override fun setNavDestination(route: BookWormRoute?) {
+            _state.update { it.copy(navDestination = route) }
+        }
+
+        override fun setPagesError(value: Boolean) {
+            _state.update { it.copy(pagesError = value) }
+        }
+
+        override fun setDateError(value: Boolean) {
+            _state.update { it.copy(dateError = value) }
+        }
+
+        override fun setErrorMessage(errorMessage: AddEntryResults) {
+            _state.update { it.copy(errorMessage = errorMessage) }
         }
 
     }
@@ -176,8 +223,14 @@ class AddDiaryEntryViewModel(
         val pages = state.pages.toInt()
 
         if (journey == null) {
-            if (pages > totalPages || selectedDate > today) {
-                Log.d(TAG, "CHECK FIELDS")
+            if (pages > totalPages){
+                actions.setPagesError(true)
+                actions.setErrorMessage(AddEntryResults.InvalidPage)
+                return false
+            }
+            if( selectedDate > today) {
+                actions.setDateError(true)
+                actions.setErrorMessage(AddEntryResults.InvalidDate)
                 return false
             } else {
                 return true
@@ -188,8 +241,13 @@ class AddDiaryEntryViewModel(
 
             // If journey has no entries
             if (journey.entries.isEmpty()) {
-                Log.d(TAG, "CHECK DATE")
-                return selectedDate >= startDate
+                if (selectedDate >= startDate) {
+                    return true
+                } else {
+                    actions.setDateError(true)
+                    actions.setErrorMessage(AddEntryResults.InvalidDate)
+                    return false
+                }
             } else {
                 // If journey has entries
 
@@ -199,10 +257,16 @@ class AddDiaryEntryViewModel(
                     null
                 }
 
-                if(lastPage!=null) {
+                if (lastPage != null) {
                     val result = pages > lastPage
-                    return result
-                } else{
+                    if (result) {
+                        return true
+                    } else {
+                        actions.setPagesError(true)
+                        actions.setErrorMessage(AddEntryResults.InvalidPage)
+                        return false
+                    }
+                } else {
                     return true
                 }
             }

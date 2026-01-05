@@ -26,8 +26,8 @@ data class RegistrationState(
 
     fun toUser() = UserEntity(
         userId = 0L,
-        username = username,
-        password = password,
+        username = username.trim(),
+        password = password.trim(),
         image = userPhoto.toString(),
     )
 }
