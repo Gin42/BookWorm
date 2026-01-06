@@ -38,4 +38,23 @@
     <string name="password_label">Password</string>
     <string name="password_placeholder">Password</string>
 
+    <!-- Achievements -->
+    <string name="Read1_ach_name">Read 1</string>
+    <string name="Read1_ach_desc">Read 1 book</string>
+    <string name="Read5_ach_name">Read 5</string>
+    <string name="Read5_ach_desc">Read 5 book</string>
+    <string name="Read10_ach_name">Read 10</string>
+    <string name="Read10_ach_desc">Read 10 book</string>
+    <string name="Read20_ach_name">Read 20</string>
+    <string name="Read20_ach_desc">Read 20 book</string>
+
+    <string name="Add1_ach_name">Add 1</string>
+    <string name="Add1_ach_desc">Add 1 book</string>
+    <string name="Add5_ach_name">Add 5</string>
+    <string name="Add5_ach_desc">Add 5 book</string>
+    <string name="Add10_ach_name">Add 10</string>
+    <string name="Add10_ach_desc">Add 10 book</string>
+    <string name="Add20_ach_name">Add 20</string>
+    <string name="Add20_ach_desc">Add 20 book</string>
+
 </resources>

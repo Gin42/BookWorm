@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navOptions
 import androidx.navigation.toRoute
+import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
@@ -33,6 +34,7 @@ import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
 import com.example.bookworm.ui.screens.stats.StatsViewModel
 import com.example.bookworm.ui.screens.userpage.UserPageScreen
+import com.example.bookworm.ui.screens.userpage.UserPageViewModel
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
@@ -87,7 +89,6 @@ fun BookWormNavGraph(navController: NavHostController) {
         key = "book_vm_user_${userState.id}"
     )
     val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
-
 
     NavHost(
         navController = navController,
@@ -196,16 +197,34 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.UserPage> {
+
+            val achievementViewModel: AchievementViewModel = koinViewModel<AchievementViewModel>(parameters = {
+                parametersOf(userState.user.userId)
+            })
+            val userPageViewModel: UserPageViewModel = koinViewModel<UserPageViewModel>()
+
+            val unlockedAchievementState by achievementViewModel.unlockedAchievementsState.collectAsStateWithLifecycle()
+            val lockedAchievementsState by achievementViewModel.lockedAchievementsState.collectAsStateWithLifecycle()
+
+            val state by userPageViewModel.state.collectAsStateWithLifecycle()
+
             UserPageScreen(
                 navController,
                 userState = userState,
                 favourites = libraryViewModel.filteredBooks.collectAsState().value.filter { it.favourite },
+                state = state,
+                actions = userPageViewModel.actions,
+                unlockedAchievementState = unlockedAchievementState,
+                lockedAchievementsState = lockedAchievementsState,
                 onSeeFavourites = {
                     libraryViewModel.actions.filterByFavourites(true)
                     navController.navigate(BookWormRoute.Home)
                 },
                 onBookClick = { bookId ->
                     navController.navigate(BookWormRoute.BookDetails(bookId))
+                },
+                onGetAchievementImage = { achievementId ->
+                    achievementViewModel.actions.getAchievementImage(achievementId)
                 }
             )
         }

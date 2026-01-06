@@ -1,14 +1,11 @@
 package com.example.bookworm.ui.screens.userpage
 
-import android.content.ContentValues.TAG
 import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -29,24 +26,29 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.carousel.HorizontalUncontainedCarousel
 import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.R
+import com.example.bookworm.core.data.database.entities.AchievementEntity
 import com.example.bookworm.core.data.database.entities.BookEntity
-import com.example.bookworm.ui.BookWormRoute
-import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.NavBottom
 import com.example.bookworm.ui.composables.Size
-import org.koin.core.parameter.parametersOf
+import com.example.bookworm.ui.entitiesViewModel.LockedAchievementsState
+import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
+import com.example.bookworm.ui.entitiesViewModel.UnlockedAchievementState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,7 +56,12 @@ import org.koin.core.parameter.parametersOf
 fun UserPageScreen(
     navController: NavController,
     userState: LoggedUserState,
+    state: UserPageState,
+    actions: UserPageActions,
     favourites: List<BookEntity>,
+    unlockedAchievementState: UnlockedAchievementState,
+    lockedAchievementsState: LockedAchievementsState,
+    onGetAchievementImage: (Long) -> Int?,
     onSeeFavourites: () -> Unit,
     onBookClick: (Long) -> Unit,
 ) {
@@ -137,7 +144,7 @@ fun UserPageScreen(
                                 .padding(top = 16.dp, bottom = 16.dp),
                             itemWidth = 150.dp,
                             itemSpacing = 8.dp,
-                        ) {index ->
+                        ) { index ->
                             val item = favourites[index]
                             BookItem(item, onBookClick)
                         }
@@ -164,16 +171,9 @@ fun UserPageScreen(
                     }
                 }
             }
+
             //user badges
             item {
-
-                val badges = listOf(
-                    BadgeItem(0, Icons.Outlined.Diamond),
-                    BadgeItem(1, Icons.Outlined.Diamond),
-                    BadgeItem(2, Icons.Outlined.Diamond),
-                    BadgeItem(3, Icons.Outlined.Diamond),
-                    BadgeItem(4, Icons.Outlined.Diamond),
-                )
 
                 Column(
                     horizontalAlignment = Alignment.Start,
@@ -181,34 +181,50 @@ fun UserPageScreen(
                         .padding(top = 16.dp)
                         .fillMaxWidth()
                 ) {
-                    Text(
-                        "Badges",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
+                    ListItem(
                         modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
-                    )
-
-
-                    val columns = 2
-                    for (i in badges.indices step columns) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp, bottom = 16.dp),
-                            horizontalArrangement = Arrangement.SpaceEvenly
-                        ) {
-                            for (j in 0 until columns) {
-                                if (i + j < badges.size) {
-                                    Badge(badges[i + j])
+                        headlineContent = {
+                            Text(
+                                "Achievements",
+                                style = MaterialTheme.typography.headlineMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        },
+                        trailingContent = {
+                            if (lockedAchievementsState.achievements.isNotEmpty()) {
+                                TextButton(
+                                    onClick = {
+                                        actions.setSeeAllAchievements(!state.seeAllAchievements)
+                                    }
+                                ) {
+                                    Text(
+                                        text = if (state.seeAllAchievements) {
+                                            "Hide locked ones"
+                                        } else {
+                                            "Show locked ones"
+                                        }
+                                    )
                                 }
                             }
-                        }
+                        },
+                    )
+
+                    /** If not see all, then see only the unlocked ones,
+                     * else show all achievements.*/
+
+                    unlockedAchievementState.achievements.forEach { it ->
+                        Achievement(it, onGetAchievementImage)
                     }
 
+                    if (state.seeAllAchievements) {
+                        val filteredAchievements =
+                            lockedAchievementsState.achievements.filterNot { it in unlockedAchievementState.achievements }
+                        filteredAchievements.forEach {
+                            Achievement(it, onGetAchievementImage, locked = true)
+                        }
+                    }
                 }
-
             }
-
         }
     }
 }
@@ -219,27 +235,56 @@ data class BadgeItem(
 )
 
 @Composable
-fun Badge(item: BadgeItem) {
-    Column(
+fun Achievement(
+    item: AchievementEntity,
+    onGetAchievementImage: (Long) -> Int?,
+    locked: Boolean = false
+) {
+
+    val strings = achievementStringFinder(item.name)
+
+    ListItem(
         modifier = Modifier
             .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Image(
-            modifier = Modifier
-                .height(100.dp),
-            imageVector = item.icon,
-            contentDescription = "Badge description",
-            contentScale = ContentScale.Crop
-        )
-        Text(
-            "Badge title",
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Bold,
-        )
-        Text(
-            "Badge description",
-            style = MaterialTheme.typography.bodySmall,
-        )
-    }
+        headlineContent = {
+            Text(
+                strings[AchievementPositions.ACHIEVEMENT_NAME],
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+            )
+        },
+        supportingContent = {
+            Text(
+                strings[AchievementPositions.ACHIEVEMENT_CONDITION],
+                style = MaterialTheme.typography.bodySmall,
+            )
+        },
+        leadingContent = {
+            val achievementImageResId = onGetAchievementImage(item.achievementId)
+            if (achievementImageResId != null) {
+                Image(
+                    modifier = Modifier
+                        .height(100.dp),
+                    painter = painterResource(id = achievementImageResId),
+                    contentDescription = "Achievement image",
+                    contentScale = ContentScale.FillHeight
+                )
+            }
+        },
+        trailingContent = {
+            Text(
+                text = if (locked) {
+                    "LOCKED!"
+                } else {
+                    "UNLOCKED!"
+                },
+                color = if (locked) {
+                    Color.Red
+                } else {
+                    Color.Green
+                },
+            )
+        },
+    )
 }
+

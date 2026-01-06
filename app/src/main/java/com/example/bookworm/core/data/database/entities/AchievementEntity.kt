@@ -21,9 +21,6 @@ data class AchievementEntity(
     @ColumnInfo(name = "description")
     val description: String,
 
-    @ColumnInfo(name = "type")
-    val type: AchievementType,
-
-    @ColumnInfo(name = "number")
-    val targetNumber: Int,
+    @ColumnInfo(name = "image")
+    val image: Int,
 )

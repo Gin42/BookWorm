@@ -16,20 +16,18 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface AchievementDAOs {
 
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertAchievements(achievements: List<AchievementEntity>)
-
     @Upsert
     suspend fun upsert(userAchievement: UnlockedAchievementEntity)
 
-    @Query("SELECT * FROM achievements WHERE type = :type")
-    suspend fun getAllAchievementsByType(type: AchievementType): List<AchievementEntity>
 
-    @Query("SELECT * FROM unlocked_achievements WHERE user_id = :userId")
-    suspend fun getUserAchievementsOnce(userId: Long): List<UnlockedAchievementEntity>
+    @Query("SELECT * FROM achievements WHERE achievement_id IN " +
+            "(SELECT achievement_id FROM unlocked_achievements " +
+            "WHERE user_id=:userId)")
+    fun getAllUserAchievements(userId: Long) : Flow<List<AchievementEntity>>
 
-    // Return achievement + user progress in a single object
-    @Transaction
-    @Query("SELECT * FROM achievements")
-    fun getUserAchievementsWithProgress(): Flow<List<AchievementWithProgress>>
+    @Query("SELECT * FROM achievements WHERE achievement_id NOT IN " +
+            "(SELECT achievement_id FROM unlocked_achievements " +
+            "WHERE user_id=:userId)")
+    fun getNotUnlockedAchievements(userId: Long) : Flow<List<AchievementEntity>>
+
 }
