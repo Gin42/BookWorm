@@ -43,7 +43,7 @@ data class AddDiaryEntryState(
 ) {
 
     val canSubmit get() = pages.isNotBlank()
-    val validPages get () = pages.toInt() >= 0
+    val validPages get() = pages.toInt() >= 0
 
     fun toEntry(journeyId: Long): JourneyEntryEntity {
         return JourneyEntryEntity(
@@ -66,7 +66,7 @@ interface AddDiaryEntryActions {
     fun setUserId(userId: Long)
     fun setJourney()
 
-    suspend fun addEntry()
+    suspend fun addEntry(): AddEntryResults
 
     fun setShowAlert(value: Boolean)
     fun setAlertConfirmed(value: Boolean)
@@ -126,50 +126,42 @@ class AddDiaryEntryViewModel(
             }
         }
 
-        override suspend fun addEntry(){
-            if (!checkFields()) {
-                return
-            }
+        override suspend fun addEntry(): AddEntryResults {
+            if (!checkFields()) return _state.value.errorMessage
 
-            viewModelScope.launch {
-                val currentJourney = _state.value.journey
+            val currentJourney = _state.value.journey
 
-                // No journey or journey already ended → create new
-                val journeyId = currentJourney
-                    ?.takeIf { it.journey.endDate == null }
-                    ?.journey
-                    ?.journeyId
-                    ?: run {
-                        // Create a new Journey and mark book as READING
-                        val newJourneyId =
-                            journeyRepository.upsertJourney(bookId, userId, _state.value.date)
-                        bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
-                        newJourneyId
-                    }
-
-                journeyRepository.addEntry(
-                    _state.value.toEntry(journeyId)
-                )
-
-                /* If the user finished the book it is marked in the status ad FINISHED*/
-                if (_state.value.pages.toInt() == _state.value.totalPages) {
-                    bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
-                    journeyRepository.endJourney(
-                        journeyId = journeyId,
-                        endDate = _state.value.date,
-                        userId
-                    )
+            val journeyId = currentJourney
+                ?.takeIf { it.journey.endDate == null }
+                ?.journey
+                ?.journeyId
+                ?: run {
+                    val newJourneyId =
+                        journeyRepository.upsertJourney(bookId, userId, _state.value.date)
+                    bookRepository.updateBookStatus(bookId, ReadingStatus.READING)
+                    newJourneyId
                 }
 
-                val updatedJourney =
-                    journeyRepository.observeJourney(journeyId).first()
+            journeyRepository.addEntry(
+                _state.value.toEntry(journeyId)
+            )
 
-
-                _state.update { it.copy(journey = updatedJourney) }
-                Log.d("DEBUG LOG", "Fino qui arrivo")
-                setErrorMessage(AddEntryResults.Success)
-                Log.d("DEBUG LOG", "E anche fino a qui + ${_state.value.errorMessage}")
+            if (_state.value.pages.toInt() == _state.value.totalPages) {
+                bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
+                journeyRepository.endJourney(
+                    journeyId = journeyId,
+                    endDate = _state.value.date,
+                    userId
+                )
             }
+
+            val updatedJourney =
+                journeyRepository.observeJourney(journeyId).first()
+
+            _state.update { it.copy(journey = updatedJourney) }
+            setErrorMessage(AddEntryResults.Success)
+            return AddEntryResults.Success
+
         }
 
         override fun setShowAlert(value: Boolean) {
@@ -226,12 +218,12 @@ class AddDiaryEntryViewModel(
         val pages = state.pages.toInt()
 
         if (journey == null) {
-            if (pages > totalPages){
+            if (pages > totalPages) {
                 actions.setPagesError(true)
                 actions.setErrorMessage(AddEntryResults.InvalidPage)
                 return false
             }
-            if( selectedDate > today) {
+            if (selectedDate > today) {
                 actions.setDateError(true)
                 actions.setErrorMessage(AddEntryResults.InvalidDate)
                 return false

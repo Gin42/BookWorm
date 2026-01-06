@@ -49,6 +49,7 @@ import com.example.bookworm.utils.TimeUtils.convertMillisToDate
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import okhttp3.internal.wait
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,6 +61,7 @@ fun AddDiaryEntryScreen(
     onNavigateUp: () -> Unit
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -95,10 +97,10 @@ fun AddDiaryEntryScreen(
                 onClick = {
                     if (state.canSubmit) {
                         if (state.validPages) {
-                            runBlocking {
-                                actions.addEntry()
+                            coroutineScope.launch {
+                                val result = actions.addEntry()
                                 Log.d("DEBUG LOG", "This is errorMessage -> ${state.errorMessage}")
-                                if (state.errorMessage == AddEntryResults.Success) {
+                                if (result == AddEntryResults.Success) {
                                     onNavigateUp()
                                 }
                             }
