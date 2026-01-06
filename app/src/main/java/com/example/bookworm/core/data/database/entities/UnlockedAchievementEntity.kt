@@ -34,12 +34,6 @@ data class UnlockedAchievementEntity(
     @ColumnInfo(name = "user_id")
     val userId: Long,
 
-    @ColumnInfo(name = "progress")
-    val progress: Int = 0,
-
-    @ColumnInfo(name = "is_completed")
-    val isCompleted: Boolean = false,
-
     @ColumnInfo(name = "is_notified")
     val isNotified: Boolean = false,
 

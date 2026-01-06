@@ -11,9 +11,9 @@ import kotlinx.coroutines.flow.Flow
 interface NotificationDAOs {
 
     @Query("SELECT * FROM notifications WHERE notification_id = :notificationId")
-    fun getNotificationById(notificationId: String): NotificationEntity
+    fun getNotificationById(notificationId: Long): NotificationEntity
 
-    @Query("SELECT * FROM notifications WHERE user_id = :userId")
+    @Query("SELECT * FROM notifications WHERE user_id = :userId ORDER BY send_time DESC")
     fun getAllNotifications(userId: Long): Flow<List<NotificationEntity>>
 
     @Upsert
@@ -21,4 +21,7 @@ interface NotificationDAOs {
 
     @Delete
     suspend fun deleteNotification(notification: NotificationEntity)
+
+    @Query("UPDATE notifications SET is_read = 1 WHERE notification_id = :notificationId")
+    suspend fun readNotification(notificationId: Long)
 }

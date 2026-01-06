@@ -16,5 +16,7 @@ class AchievementRepository(private val achievementDAO: AchievementDAOs) {
     fun getNotUnlockedAchievements(userId: Long): Flow<List<AchievementEntity>> =
         achievementDAO.getNotUnlockedAchievements(userId)
 
+    fun getAchievementById(achievementId: Long) : AchievementEntity = achievementDAO.getAchievementById(achievementId)
+
     suspend fun getAchievementIdByName(name: String): Long? = achievementDAO.getAchievementIdByName(name)
 }

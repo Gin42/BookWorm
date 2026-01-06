@@ -1,24 +1,31 @@
 package com.example.bookworm.core.data.repositories
 
-import com.example.bookworm.core.data.database.daos.AchievementDAOs
 import com.example.bookworm.core.data.database.daos.NotificationDAOs
 import com.example.bookworm.core.data.database.entities.NotificationEntity
 import kotlinx.coroutines.flow.Flow
 
-class NotificationRepository ( private val notificationDAOs: NotificationDAOs) {
+class NotificationRepository(private val notificationDAO: NotificationDAOs) {
 
-    suspend fun upsertNotification(notification: NotificationEntity): Long = notificationDAOs.upsertNotification(notification)
+    suspend fun upsertNotification(notification: NotificationEntity): Long =
+        notificationDAO.upsertNotification(notification)
 
-    suspend fun deleteNotification(notification: NotificationEntity): Boolean {
+    suspend fun deleteNotification(notificationId: Long): Boolean {
         return try {
-            notificationDAOs.deleteNotification(notification)
+            val notification = getNotificationById(notificationId)
+            notificationDAO.deleteNotification(notification)
             true
         } catch (e: Exception) {
             false
         }
     }
 
-    fun getNotificationById(notificationId: String): NotificationEntity = notificationDAOs.getNotificationById(notificationId)
+    fun getNotificationById(notificationId: Long): NotificationEntity =
+        notificationDAO.getNotificationById(notificationId)
 
-    fun getAllNotifications(userId: Long): Flow<List<NotificationEntity>> = notificationDAOs.getAllNotifications(userId)
+    fun getAllNotifications(userId: Long): Flow<List<NotificationEntity>> =
+        notificationDAO.getAllNotifications(userId)
+
+    suspend fun readNotification(notificationId: Long) {
+        notificationDAO.readNotification(notificationId)
+    }
 }

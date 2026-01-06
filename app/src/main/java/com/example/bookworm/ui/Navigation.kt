@@ -4,6 +4,7 @@ package com.example.bookworm.ui
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
+import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -16,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navOptions
 import androidx.navigation.toRoute
 import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
+import com.example.bookworm.ui.entitiesViewModel.NotificationViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
@@ -29,6 +31,7 @@ import com.example.bookworm.ui.screens.bookdetails.BookDetailsScreen
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.home.LibraryScreen
 import com.example.bookworm.ui.screens.home.LibraryViewModel
+import com.example.bookworm.ui.screens.notifications.NotificationsScreen
 import com.example.bookworm.ui.screens.settings.SettingsScreen
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsScreen
@@ -67,6 +70,9 @@ sealed interface BookWormRoute {
 
     @Serializable
     data object Login : BookWormRoute
+
+    @Serializable
+    data object Notifications : BookWormRoute
 }
 
 sealed class BottomNavigation(val label: String, val icon: ImageVector, val route: BookWormRoute) {
@@ -75,6 +81,11 @@ sealed class BottomNavigation(val label: String, val icon: ImageVector, val rout
     data object UserPage : BottomNavigation(
         "User Page", Icons.Outlined.Person,
         BookWormRoute.UserPage
+    )
+
+    data object Notifications : BottomNavigation(
+        "Inbox", Icons.Outlined.Inbox,
+        BookWormRoute.Notifications
     )
 }
 
@@ -89,6 +100,13 @@ fun BookWormNavGraph(navController: NavHostController) {
         key = "book_vm_user_${userState.id}"
     )
     val libraryState by libraryViewModel.state.collectAsStateWithLifecycle()
+
+    val notificationVM = koinViewModel<NotificationViewModel>(
+        parameters = { parametersOf(userState.id) },
+        key = "notification_vm_user_${userState.id}"
+    )
+
+    val notificationState by notificationVM.state.collectAsStateWithLifecycle()
 
     NavHost(
         navController = navController,
@@ -153,6 +171,7 @@ fun BookWormNavGraph(navController: NavHostController) {
                 onBookClick = { bookId ->
                     navController.navigate(BookWormRoute.BookDetails(bookId))
                 },
+                notificationsState = notificationState
             )
         }
 
@@ -198,9 +217,10 @@ fun BookWormNavGraph(navController: NavHostController) {
 
         composable<BookWormRoute.UserPage> {
 
-            val achievementViewModel: AchievementViewModel = koinViewModel<AchievementViewModel>(parameters = {
-                parametersOf(userState.user.userId)
-            })
+            val achievementViewModel: AchievementViewModel =
+                koinViewModel<AchievementViewModel>(parameters = {
+                    parametersOf(userState.user.userId)
+                })
             val userPageViewModel: UserPageViewModel = koinViewModel<UserPageViewModel>()
 
             val unlockedAchievementState by achievementViewModel.unlockedAchievementsState.collectAsStateWithLifecycle()
@@ -225,7 +245,8 @@ fun BookWormNavGraph(navController: NavHostController) {
                 },
                 onGetAchievementImage = { achievementId ->
                     achievementViewModel.actions.getAchievementImage(achievementId)
-                }
+                },
+                notificationsState = notificationState
             )
         }
 
@@ -253,7 +274,12 @@ fun BookWormNavGraph(navController: NavHostController) {
             )
             val state by statsVm.state.collectAsStateWithLifecycle()
 
-            StatsScreen(navController, state, statsVm.actions)
+            StatsScreen(
+                navController,
+                state,
+                statsVm.actions,
+                notificationsState = notificationState
+            )
         }
 
         composable<BookWormRoute.AddDiaryEntry> { backStackEntry ->
@@ -277,6 +303,17 @@ fun BookWormNavGraph(navController: NavHostController) {
                 actions = addDiaryEntryVm.actions,
                 onNavigateUp = {
                     navController.navigateUp()
+                }
+            )
+        }
+
+        composable<BookWormRoute.Notifications> {
+            NotificationsScreen(
+                navController = navController,
+                state = notificationState,
+                actions = notificationVM.actions,
+                onNavigateToUserPage = {
+                    navController.navigate(BookWormRoute.UserPage)
                 }
             )
         }

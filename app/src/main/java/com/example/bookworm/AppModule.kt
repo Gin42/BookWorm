@@ -15,10 +15,12 @@ import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
 import com.example.bookworm.core.data.repositories.AchievementRepository
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.core.data.repositories.JourneyEntryRepository
+import com.example.bookworm.core.data.repositories.NotificationRepository
 import com.example.bookworm.core.data.repositories.ReadingJourneyRepository
 import com.example.bookworm.core.data.repositories.ThemeRepository
 import com.example.bookworm.core.data.repositories.UserRepository
 import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
+import com.example.bookworm.ui.entitiesViewModel.NotificationViewModel
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
 import com.example.bookworm.ui.screens.adddiaryentry.AddDiaryEntryViewModel
@@ -58,7 +60,8 @@ val appModule = module {
         AchievementEvaluator(
             bookDao = get<BookWormDatabase>().bookDao(),
             journeyDao = get<BookWormDatabase>().readingJourneyDao(),
-            achievementDao = get<BookWormDatabase>().achievementDao()
+            achievementDao = get<BookWormDatabase>().achievementDao(),
+            notificationDAO = get<BookWormDatabase>().notificationDao(),
         )
     }
 
@@ -88,6 +91,10 @@ val appModule = module {
 
     single {
         AchievementRepository(get<BookWormDatabase>().achievementDao())
+    }
+
+    single {
+        NotificationRepository(get<BookWormDatabase>().notificationDao())
     }
 
     single { ReadingStatusStateMachine() }
@@ -152,6 +159,13 @@ val appModule = module {
         AchievementViewModel(
             userId = userId,
             repository = get()
+        )
+    }
+
+    viewModel { (userId: Long) ->
+        NotificationViewModel(
+            userId = userId,
+            repository = get(),
         )
     }
 }

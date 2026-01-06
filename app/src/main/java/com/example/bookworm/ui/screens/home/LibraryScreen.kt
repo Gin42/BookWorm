@@ -44,6 +44,7 @@ import com.example.bookworm.ui.composables.AddBookFloatingButton
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
 import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,12 +55,13 @@ fun LibraryScreen(
     state: LibraryState,
     books: State<List<BookEntity>>,
     actions: LibraryActions,
+    notificationsState: NotificationsState
 ) {
 
     Scaffold(
         floatingActionButton = { AddBookFloatingButton(navController) },
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController) },
+        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         if (state.openFilters) {

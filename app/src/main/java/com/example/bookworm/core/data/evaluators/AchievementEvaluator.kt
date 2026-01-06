@@ -2,15 +2,19 @@ package com.example.bookworm.core.data.evaluators
 
 import com.example.bookworm.core.data.database.daos.AchievementDAOs
 import com.example.bookworm.core.data.database.daos.BookDAOs
+import com.example.bookworm.core.data.database.daos.NotificationDAOs
 import com.example.bookworm.core.data.database.daos.ReadingJourneyDAOs
+import com.example.bookworm.core.data.database.entities.NotificationEntity
 import com.example.bookworm.core.data.database.entities.UnlockedAchievementEntity
 import com.example.bookworm.core.data.models.AchievementName
 import com.example.bookworm.core.data.models.AchievementType
+import com.example.bookworm.utils.TimeUtils
 
 class AchievementEvaluator(
     private val bookDao: BookDAOs,
     private val journeyDao: ReadingJourneyDAOs,
-    private val achievementDao: AchievementDAOs
+    private val achievementDao: AchievementDAOs,
+    private val notificationDAO: NotificationDAOs
 ) {
 
     suspend fun evaluateBookAdded(userId: Long) {
@@ -31,17 +35,36 @@ class AchievementEvaluator(
             .forEach { unlock(userId, it) }
     }
 
+
     private suspend fun unlock(userId: Long, achievement: AchievementName) {
         val achievementId = achievementDao
             .getAchievementIdByName(achievement.name)
             ?: return
 
+        val alreadyUnlocked = achievementDao.isAchievementUnlocked(
+            userId = userId,
+            achievementId = achievementId
+        )
+
+        if (alreadyUnlocked) return
+
         achievementDao.upsert(
             UnlockedAchievementEntity(
                 achievementId = achievementId,
                 userId = userId,
-                isCompleted = true
+            )
+        )
+        notificationDAO.upsertNotification(
+            NotificationEntity(
+                notificationId = 0L,
+                userId = userId,
+                achievementId = achievementId,
+                title = "You unlocked a NEW achievement:",
+                body = achievement.name,
+                sendTime = TimeUtils.now(),
+                isRead = false
             )
         )
     }
+
 }

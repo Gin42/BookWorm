@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
+import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 import com.example.bookworm.ui.screens.bookdetails.toFormattedDate
 import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.LineChart
@@ -54,11 +55,12 @@ import java.time.format.DateTimeFormatter
 fun StatsScreen(
     navController: NavController,
     state: StatsState,
-    actions: StatsActions
+    actions: StatsActions,
+    notificationsState: NotificationsState
 ) {
     Scaffold(
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController) },
+        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         LazyColumn(

@@ -1,5 +1,6 @@
 package com.example.bookworm.ui.screens.adddiaryentry
 
+import android.util.Log
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -31,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -44,6 +46,9 @@ import com.example.bookworm.core.data.models.AddEntryResults
 import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.utils.TimeUtils.convertMillisToDate
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -54,6 +59,7 @@ fun AddDiaryEntryScreen(
     actions: AddDiaryEntryActions,
     onNavigateUp: () -> Unit
 ) {
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -89,9 +95,12 @@ fun AddDiaryEntryScreen(
                 onClick = {
                     if (state.canSubmit) {
                         if (state.validPages) {
-                            actions.addEntry()
-                            if (state.errorMessage == AddEntryResults.Success) {
-                                onNavigateUp()
+                            runBlocking {
+                                actions.addEntry()
+                                Log.d("DEBUG LOG", "This is errorMessage -> ${state.errorMessage}")
+                                if (state.errorMessage == AddEntryResults.Success) {
+                                    onNavigateUp()
+                                }
                             }
                         } else {
                             actions.setPagesError(true)

@@ -48,6 +48,7 @@ import com.example.bookworm.ui.composables.NavBottom
 import com.example.bookworm.ui.composables.Size
 import com.example.bookworm.ui.entitiesViewModel.LockedAchievementsState
 import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
+import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 import com.example.bookworm.ui.entitiesViewModel.UnlockedAchievementState
 
 
@@ -64,11 +65,12 @@ fun UserPageScreen(
     onGetAchievementImage: (Long) -> Int?,
     onSeeFavourites: () -> Unit,
     onBookClick: (Long) -> Unit,
+    notificationsState: NotificationsState
 ) {
 
     Scaffold(
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController) },
+        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         LazyColumn(
@@ -149,25 +151,7 @@ fun UserPageScreen(
                             BookItem(item, onBookClick)
                         }
                     } else {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
 
-                            ) {
-                            Icon(
-                                imageVector = Icons.Outlined.Book,
-                                contentDescription = "Book icon",
-                                modifier = Modifier.size(64.dp)
-                            )
-                            Text(
-                                text = "It seems like you haven't found your favourites.\n Go read some.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center,
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
                     }
                 }
             }
@@ -228,11 +212,6 @@ fun UserPageScreen(
         }
     }
 }
-
-data class BadgeItem(
-    val id: Int,
-    val icon: ImageVector
-)
 
 @Composable
 fun Achievement(

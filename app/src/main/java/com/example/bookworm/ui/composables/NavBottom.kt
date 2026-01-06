@@ -1,5 +1,7 @@
 package com.example.bookworm.ui.composables
 
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -9,18 +11,24 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavController
 import androidx.navigation.navOptions
 import com.example.bookworm.ui.BottomNavigation
+import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 
 
 @Composable
-fun NavBottom(navController: NavController) {
+fun NavBottom(
+    navController: NavController,
+    notificationsState: NotificationsState
+) {
 
     val destinations = listOf(
         BottomNavigation.Library,
         BottomNavigation.Stats,
-        BottomNavigation.UserPage
+        BottomNavigation.Notifications,
+        BottomNavigation.UserPage,
     )
 
     val selectedNavigationIndex = rememberSaveable {
@@ -29,6 +37,7 @@ fun NavBottom(navController: NavController) {
 
     NavigationBar {
         destinations.forEachIndexed { index, destination ->
+
             NavigationBarItem(
                 selected = selectedNavigationIndex.value == index,
                 onClick = {
@@ -43,10 +52,32 @@ fun NavBottom(navController: NavController) {
                         })
                 },
                 icon = {
-                    Icon(
-                        destination.icon,
-                        contentDescription = "${destination.label} icon"
-                    )
+                    if (destination == BottomNavigation.Notifications) {
+                        BadgedBox(
+                            badge = {
+                                if (notificationsState.unreadNotifications.isNotEmpty()) {
+                                    Badge(
+                                        containerColor = Color.Red,
+                                        contentColor = Color.White,
+                                        content = {
+                                            Text(notificationsState.unreadNotifications.size.toString())
+                                        }
+                                    )
+                                }
+                            }
+                        ) {
+                            Icon(
+                                destination.icon,
+                                contentDescription = "${destination.label} icon"
+                            )
+                        }
+                    } else {
+                        Icon(
+                            destination.icon,
+                            contentDescription = "${destination.label} icon"
+                        )
+
+                    }
                 },
                 label = {
                     Text(
@@ -54,7 +85,7 @@ fun NavBottom(navController: NavController) {
                     )
                 },
 
-            )
+                )
         }
     }
 }

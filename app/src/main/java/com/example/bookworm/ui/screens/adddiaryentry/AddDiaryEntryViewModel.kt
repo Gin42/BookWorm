@@ -66,7 +66,7 @@ interface AddDiaryEntryActions {
     fun setUserId(userId: Long)
     fun setJourney()
 
-    fun addEntry()
+    suspend fun addEntry()
 
     fun setShowAlert(value: Boolean)
     fun setAlertConfirmed(value: Boolean)
@@ -126,7 +126,7 @@ class AddDiaryEntryViewModel(
             }
         }
 
-        override fun addEntry(){
+        override suspend fun addEntry(){
             if (!checkFields()) {
                 return
             }
@@ -156,7 +156,7 @@ class AddDiaryEntryViewModel(
                     bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
                     journeyRepository.endJourney(
                         journeyId = journeyId,
-                        endDate = _state.value.date /*TODO check*/,
+                        endDate = _state.value.date,
                         userId
                     )
                 }
@@ -166,7 +166,9 @@ class AddDiaryEntryViewModel(
 
 
                 _state.update { it.copy(journey = updatedJourney) }
+                Log.d("DEBUG LOG", "Fino qui arrivo")
                 setErrorMessage(AddEntryResults.Success)
+                Log.d("DEBUG LOG", "E anche fino a qui + ${_state.value.errorMessage}")
             }
         }
 
