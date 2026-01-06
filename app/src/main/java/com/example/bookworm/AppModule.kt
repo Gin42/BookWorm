@@ -8,6 +8,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.bookworm.core.data.BookWormDatabase
+import com.example.bookworm.core.data.evaluators.AchievementEvaluator
 import com.example.bookworm.core.data.models.AchievementName
 import com.example.bookworm.core.data.models.AchievementType
 import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
@@ -45,81 +46,20 @@ val appModule = module {
         )
             .fallbackToDestructiveMigration()
             .addCallback(object : RoomDatabase.Callback() {
-                override fun onCreate(db: SupportSQLiteDatabase) {
-                    super.onCreate(db)
-                    AchievementName.entries.forEach {
-                        val values = ContentValues().apply {
-                            put("name", it.name)
-                            put("description", "")
-                            put("image", it.imageResId)
-                        }
-                        db.insert(
-                            "achievements",
-                            SQLiteDatabase.CONFLICT_IGNORE,
-                            values
-                        )
-                    }
-                    AchievementName.entries.forEach {
-                        val table = when (it.type) {
-                            AchievementType.BookRead -> "reading_journey"
-                            AchievementType.BookAdded -> "books"
-                        }
-                        when (it.type) {
-                            AchievementType.BookRead -> {
-                                db.execSQL(
-                                    """
-                                    CREATE TRIGGER IF NOT EXISTS ${it.name}_trigger
-                                    AFTER UPDATE ON $table
-                                    FOR EACH ROW
-                                    WHEN
-                                        NEW.end_date IS NOT NULL
-                                        AND OLD.end_date IS NULL
-                                        AND NEW.is_dropped = 0
-                                        AND (
-                                            SELECT COUNT(*)
-                                            FROM $table
-                                            WHERE userId = NEW.userId
-                                              AND end_date IS NOT NULL
-                                              AND is_dropped = 0
-                                        ) = ${it.number}
-                                    BEGIN
-                                        INSERT OR IGNORE INTO unlocked_achievements (userId, achievementId)
-                                        VALUES (
-                                            NEW.userId,
-                                            (SELECT achievement_id FROM achievements WHERE name = '${it.name}')
-                                        );
-                                    END;
-                                    """.trimIndent()
-                                )
-                            }
-
-                            AchievementType.BookAdded -> {
-                                db.execSQL(
-                                    """
-                                    CREATE TRIGGER IF NOT EXISTS ${it.name}_trigger
-                                    AFTER INSERT ON $table
-                                    FOR EACH ROW
-                                    WHEN (
-                                        SELECT COUNT(*)
-                                        FROM $table
-                                        WHERE userId = NEW.userId
-                                    ) = ${it.number}
-                                    BEGIN
-                                        INSERT OR IGNORE INTO unlocked_achievements (userId, achievementId)
-                                        VALUES (
-                                            NEW.userId,
-                                            (SELECT achievement_id FROM achievements WHERE name = '${it.name}')
-                                        );
-                                    END;
-                                    """.trimIndent()
-                                )
-                            }
-                        }
-
-                    }
+                override fun onOpen(db: SupportSQLiteDatabase) {
+                    super.onOpen(db)
+                    createAchievements(db)
                 }
             })
             .build()
+    }
+
+    single {
+        AchievementEvaluator(
+            bookDao = get<BookWormDatabase>().bookDao(),
+            journeyDao = get<BookWormDatabase>().readingJourneyDao(),
+            achievementDao = get<BookWormDatabase>().achievementDao()
+        )
     }
 
     single { ThemeRepository(get()) }
@@ -129,13 +69,16 @@ val appModule = module {
     }
 
     single {
-        BookRepository(get<BookWormDatabase>().bookDao())
+        BookRepository(
+            get<BookWormDatabase>().bookDao(),
+            get())
     }
 
     single {
         ReadingJourneyRepository(
             journeyDAO = get<BookWormDatabase>().readingJourneyDao(),
-            entryDAO = get<BookWormDatabase>().journeyEntryDao()
+            entryDAO = get<BookWormDatabase>().journeyEntryDao(),
+            achievementEvaluator = get()
         )
     }
 
@@ -209,6 +152,20 @@ val appModule = module {
         AchievementViewModel(
             userId = userId,
             repository = get()
+        )
+    }
+}
+
+private fun createAchievements(db: SupportSQLiteDatabase) {
+    AchievementName.entries.forEach {
+        db.insert(
+            "achievements",
+            SQLiteDatabase.CONFLICT_IGNORE,
+            ContentValues().apply {
+                put("name", it.name)
+                put("description", "")
+                put("image", it.imageResId)
+            }
         )
     }
 }

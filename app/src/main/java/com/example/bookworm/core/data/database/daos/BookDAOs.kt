@@ -18,18 +18,6 @@ interface BookDAOs {
     @Query("SELECT * FROM books WHERE user_id = :userId ")
     fun getAllBooks(userId: Long): Flow<List<BookEntity>>
 
-    //select books where author or title are similar to the search query
-    @Query("SELECT * FROM books WHERE title LIKE '%' || :searchString || '%' OR author LIKE '%' || :searchString || '%' AND user_id = :userId")
-    fun searchBook(searchString: String, userId: Long): Flow<List<BookEntity>>
-
-    //select all book where favourite = TRUE
-    @Query("SELECT * FROM books WHERE favourite = 1 AND user_id = :userId")
-    fun getAllFavouriteBooks(userId: Long): Flow<List<BookEntity>>
-
-    //select all book where status = status
-    @Query("SELECT * FROM books WHERE status = :status AND user_id = :userId")
-    fun getBooksByStatus(status: ReadingStatus, userId: Long): Flow<List<BookEntity>>
-
     @Query ("UPDATE books SET favourite = NOT favourite WHERE book_id = :bookId ")
     suspend fun toggleFavouriteBook(bookId: Long)
 
@@ -38,6 +26,9 @@ interface BookDAOs {
 
     @Query("SELECT * FROM books WHERE title = :title AND author = :author AND user_id = :userId")
     suspend fun checkValidBook(title: String, author: String, userId: Long): List<BookEntity?>
+
+    @Query("SELECT COUNT(*) FROM books WHERE user_id = :userId")
+    suspend fun countBooks(userId: Long): Int
 
     @Upsert
     suspend fun upsertBook(book: BookEntity): Long

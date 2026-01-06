@@ -43,6 +43,16 @@ interface ReadingJourneyDAOs {
         endDate: Long
     )
 
+    @Query("""
+        SELECT COUNT(*)
+        FROM reading_journey
+        WHERE user_id = :userId
+          AND end_date IS NOT NULL
+          AND is_dropped = 0
+    """)
+    suspend fun countFinishedBooks(userId: Long): Int
+
+
     @Upsert
     suspend fun upsertJourney(journey: ReadingJourneyEntity): Long
 

@@ -5,12 +5,14 @@ import com.example.bookworm.core.data.database.daos.ReadingJourneyDAOs
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
 import com.example.bookworm.core.data.database.entities.ReadingJourneyEntity
 import com.example.bookworm.core.data.database.relationships.ReadingJourneyWithEntries
+import com.example.bookworm.core.data.evaluators.AchievementEvaluator
 import com.example.bookworm.utils.TimeUtils
 import kotlinx.coroutines.flow.Flow
 
 class ReadingJourneyRepository (
     private val journeyDAO: ReadingJourneyDAOs,
-    private val entryDAO: JourneyEntryDAOs
+    private val entryDAO: JourneyEntryDAOs,
+    private val achievementEvaluator: AchievementEvaluator
 ) {
 
     suspend fun upsertJourney(bookId: Long, userId: Long, startDate: Long): Long {
@@ -26,8 +28,12 @@ class ReadingJourneyRepository (
 
     suspend fun endJourney(
         journeyId: Long,
-        endDate: Long
-    ) = journeyDAO.endJourney(journeyId, endDate)
+        endDate: Long,
+        userId: Long
+    )  {
+        journeyDAO.endJourney(journeyId, endDate)
+        achievementEvaluator.evaluateBookRead(userId)
+    }
 
     fun observeJourneys (bookId: Long): Flow<List<ReadingJourneyWithEntries>> = journeyDAO.getJourneysWithEntries(bookId)
 
@@ -47,6 +53,8 @@ class ReadingJourneyRepository (
             false
         }
     }
+
+    suspend fun countFinishedBooks(userId: Long): Int = journeyDAO.countFinishedBooks(userId)
 
     private fun toJourney(bookId: Long, userId: Long, startDate: Long): ReadingJourneyEntity {
         return ReadingJourneyEntity(

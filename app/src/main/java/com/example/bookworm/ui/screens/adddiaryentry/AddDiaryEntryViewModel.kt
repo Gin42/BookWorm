@@ -156,7 +156,8 @@ class AddDiaryEntryViewModel(
                     bookRepository.updateBookStatus(bookId, ReadingStatus.FINISHED)
                     journeyRepository.endJourney(
                         journeyId = journeyId,
-                        endDate = _state.value.date /*TODO check*/
+                        endDate = _state.value.date /*TODO check*/,
+                        userId
                     )
                 }
 

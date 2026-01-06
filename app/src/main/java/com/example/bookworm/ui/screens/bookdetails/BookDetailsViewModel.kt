@@ -93,7 +93,8 @@ class BookDetailsViewModel(
                             currentJourney()?.let {
                                 journeyRepository.endJourney(
                                     journeyId = it.journeyId,
-                                    endDate = TimeUtils.now()
+                                    endDate = TimeUtils.now(),
+                                    userId
                                 )
                             }
 

@@ -19,7 +19,6 @@ interface AchievementDAOs {
     @Upsert
     suspend fun upsert(userAchievement: UnlockedAchievementEntity)
 
-
     @Query("SELECT * FROM achievements WHERE achievement_id IN " +
             "(SELECT achievement_id FROM unlocked_achievements " +
             "WHERE user_id=:userId)")
@@ -29,5 +28,12 @@ interface AchievementDAOs {
             "(SELECT achievement_id FROM unlocked_achievements " +
             "WHERE user_id=:userId)")
     fun getNotUnlockedAchievements(userId: Long) : Flow<List<AchievementEntity>>
+
+    @Query("""
+        SELECT achievement_id
+        FROM achievements
+        WHERE name = :name
+    """)
+    suspend fun getAchievementIdByName(name: String): Long?
 
 }
