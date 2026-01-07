@@ -196,7 +196,7 @@ fun LoginScreen(
                 modifier = Modifier
             ) {
                 Text(
-                    stringResource(R.string.sign_in_button_desc),
+                    stringResource(R.string.sign_in_button),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

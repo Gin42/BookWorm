@@ -1,8 +1,6 @@
 package com.example.bookworm.ui.screens.addbook
 
-import android.content.ContentValues.TAG
 import android.net.Uri
-import android.util.Log
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -30,7 +28,9 @@ data class AddBookState(
 
     val error: Boolean = false,
     val pagesError: Boolean = false,
-    val errorMessage: AddBookResults = AddBookResults.CannotSubmit
+    val errorMessage: AddBookResults = AddBookResults.CannotSubmit,
+
+    val isImagePickerVisible: Boolean = false,
 ) {
     val canSubmit get() = title.isNotBlank() && author.isNotBlank() && pages.isNotBlank()
     val validPages get () = pages.toInt() >= 0
@@ -63,6 +63,7 @@ interface AddBookActions {
     fun setShowAlert(value: Boolean)
     fun setAlertConfirmed(value: Boolean)
     fun setNavDestination(route: BookWormRoute?)
+    fun setPickerVisible(value: Boolean)
 }
 
 class AddBookViewModel(
@@ -135,6 +136,10 @@ class AddBookViewModel(
 
         override fun setErrorMessage(errorMessage: AddBookResults) {
             _state.update { it.copy(errorMessage = errorMessage) }
+        }
+
+        override fun setPickerVisible(value: Boolean) {
+            _state.update { it.copy(isImagePickerVisible = value) }
         }
     }
 

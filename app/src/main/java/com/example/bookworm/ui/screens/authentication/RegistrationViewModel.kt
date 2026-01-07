@@ -16,7 +16,9 @@ data class RegistrationState(
 
     val usernameError: Boolean = false,
     val passwordError: Boolean = false,
-    val errorMessage: AuthenticationResults = AuthenticationResults.CannotSubmit
+    val errorMessage: AuthenticationResults = AuthenticationResults.CannotSubmit,
+
+    val isImagePickerVisible: Boolean = false,
 ) {
     val canSubmit get() = username.isNotBlank() && password.isNotBlank()
 
@@ -38,6 +40,7 @@ interface RegistrationActions {
     fun setErrorMessage(errorMessage: AuthenticationResults)
 
     fun setShowPassword(showPassword: Boolean)
+    fun setPickerVisible(value: Boolean)
 }
 
 class RegistrationViewModel(
@@ -72,6 +75,10 @@ class RegistrationViewModel(
 
         override fun setShowPassword(showPassword: Boolean) {
             _state.update { it.copy(showPassword = showPassword) }
+        }
+
+        override fun setPickerVisible(value: Boolean) {
+            _state.update { it.copy(isImagePickerVisible = value) }
         }
     }
 

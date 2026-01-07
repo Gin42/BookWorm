@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -39,11 +38,10 @@ import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.AddBookResults
-import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.ui.BookWormRoute
+import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
-import com.example.bookworm.utils.rememberCameraLauncher
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -268,11 +266,16 @@ fun AddBookScreen(
                 isError = state.pagesError
             )
 
-            val ctx = LocalContext.current
-
-            val cameraLauncher = rememberCameraLauncher(
-                onPictureTaken = { imageUri -> actions.setCover(imageUri) }
-            )
+            if (state.isImagePickerVisible) {
+                ImagePickerBottomSheet(
+                    onSelected = { image ->
+                        actions.setCover(image)
+                    },
+                    onDismissRequest = {
+                        actions.setPickerVisible(false)
+                    }
+                )
+            }
 
             Box(
                 contentAlignment = Alignment.BottomEnd
@@ -283,9 +286,9 @@ fun AddBookScreen(
                     CircleShape
                 )
                 Button(
-                    onClick = cameraLauncher::captureImage,
+                    onClick = { actions.setPickerVisible(true) },
                     shape = CircleShape,
-                ) {
+                )  {
                     Icon(
                         Icons.Outlined.Add,
                         contentDescription = stringResource(R.string.add_image_icon_desc),
@@ -313,7 +316,7 @@ fun BookAlert(actions: AddBookActions) {
                 }
             ) {
                 Text(
-                    text = stringResource(R.string.exit_warning_alert_cancel),
+                    text = stringResource(R.string.exit_warning_alert_cancel_button),
                 )
             }
         },
@@ -326,7 +329,7 @@ fun BookAlert(actions: AddBookActions) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text(
-                    text = stringResource(R.string.exit_warning_alert_confirm),
+                    text = stringResource(R.string.exit_warning_alert_confirm_button),
                     color = MaterialTheme.colorScheme.onError
                 )
             }

@@ -279,7 +279,7 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
                 }
             ) {
                 Text(
-                    text = stringResource(R.string.exit_warning_alert_cancel),
+                    text = stringResource(R.string.exit_warning_alert_cancel_button),
                 )
             }
         },
@@ -292,7 +292,7 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text(
-                    text = stringResource(R.string.exit_warning_alert_confirm),
+                    text = stringResource(R.string.exit_warning_alert_confirm_button),
                     color = MaterialTheme.colorScheme.onError
                 )
             }

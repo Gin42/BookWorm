@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -44,9 +43,9 @@ import androidx.compose.ui.unit.dp
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.UserEntity
 import com.example.bookworm.core.data.models.AuthenticationResults
+import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
-import com.example.bookworm.utils.rememberCameraLauncher
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -93,11 +92,16 @@ fun RegistrationScreen(
 
             // Image selection
 
-            val ctx = LocalContext.current
-
-            val cameraLauncher = rememberCameraLauncher(
-                onPictureTaken = { imageUri -> actions.setUserPhoto(imageUri) }
-            )
+            if (state.isImagePickerVisible) {
+                ImagePickerBottomSheet(
+                    onSelected = { image ->
+                        actions.setUserPhoto(image)
+                    },
+                    onDismissRequest = {
+                        actions.setPickerVisible(false)
+                    }
+                )
+            }
 
             Box(
                 contentAlignment = Alignment.BottomEnd
@@ -107,8 +111,8 @@ fun RegistrationScreen(
                     desc = stringResource(R.string.user_profile_picture_desc),
                     CircleShape
                 )
-                Button(
-                    onClick = cameraLauncher::captureImage,
+               Button(
+                    onClick = { actions.setPickerVisible(true) },
                     shape = CircleShape,
                 ) {
                     Icon(
@@ -215,7 +219,7 @@ fun RegistrationScreen(
                 modifier = Modifier
             ) {
                 Text(
-                    stringResource(R.string.sign_up_button_desc),
+                    stringResource(R.string.sign_up_button),
                     style = MaterialTheme.typography.titleMedium
                 )
             }

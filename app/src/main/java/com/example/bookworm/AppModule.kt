@@ -44,7 +44,6 @@ val appModule = module {
             BookWormDatabase::class.java,
             "bookworm"
         )
-            .fallbackToDestructiveMigration()
             .addCallback(object : RoomDatabase.Callback() {
                 override fun onOpen(db: SupportSQLiteDatabase) {
                     super.onOpen(db)
