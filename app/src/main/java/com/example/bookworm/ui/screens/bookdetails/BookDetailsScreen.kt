@@ -1,8 +1,6 @@
 package com.example.bookworm.ui.screens.bookdetails
 
-import android.content.ContentValues.TAG
 import android.net.Uri
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,13 +41,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.R
 import com.example.bookworm.core.data.models.ReadingStatus
-import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.AddDiaryFloatingButton
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
@@ -87,7 +86,7 @@ fun BookDetailsScreen(
                     ImageWithPlaceholder(
                         uri = Uri.parse(it),
                         size = Size.BookDetail,
-                        desc = "Book cover",
+                        desc = stringResource(R.string.book_cover_desc),
                         shape = RoundedCornerShape(16.dp)
                     )
                 }
@@ -123,7 +122,7 @@ fun BookDetailsScreen(
                                     if (state.selectedBook.favourite)
                                         Icons.Filled.Favorite
                                     else Icons.Outlined.FavoriteBorder,
-                                    contentDescription = "Favorite"
+                                    contentDescription = stringResource(R.string.favourite_icon_desc)
                                 )
                             }
                             IconButton(
@@ -131,7 +130,10 @@ fun BookDetailsScreen(
                                     onNavigateToAddBook()
                                 }
                             ) {
-                                Icon(Icons.Outlined.Edit, contentDescription = "Edit")
+                                Icon(
+                                    Icons.Outlined.Edit,
+                                    contentDescription = stringResource(R.string.modify_icon_desc)
+                                )
                             }
                         }
                     }
@@ -152,13 +154,17 @@ fun BookDetailsScreen(
                     ?.lastOrNull()
                     ?.pagesRead ?: 0
 
-                if (bookStatus == ReadingStatus.DROPPED || bookStatus == ReadingStatus.PLAN_TO_READ) {
-                    actions.showProgress(false)
-                } else if (bookStatus == ReadingStatus.FINISHED) {
-                    actions.showProgress(true)
-                    lastPagesRead = state.selectedBook.pages
-                } else if (bookStatus == ReadingStatus.READING) {
-                    actions.showProgress(true)
+                when (bookStatus) {
+                    ReadingStatus.DROPPED, ReadingStatus.PLAN_TO_READ -> {
+                        actions.showProgress(false)
+                    }
+                    ReadingStatus.FINISHED -> {
+                        actions.showProgress(true)
+                        lastPagesRead = state.selectedBook.pages
+                    }
+                    ReadingStatus.READING -> {
+                        actions.showProgress(true)
+                    }
                 }
 
                 val progressFraction =
@@ -175,8 +181,12 @@ fun BookDetailsScreen(
                             )
                         },
                         leadingContent = {
-                            Text("Progress:", style = MaterialTheme.typography.labelLarge)
+                            Text(
+                                stringResource(R.string.progress_message),
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         },
+                        /*TODO*/
                         trailingContent = {
                             Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
                         }
@@ -191,13 +201,21 @@ fun BookDetailsScreen(
             } else {
                 item {
                     Column(
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Outlined.Book, null, modifier = Modifier.size(64.dp))
+                        Icon(
+                            Icons.Outlined.Book,
+                            null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onBackground
+                        )
                         Text(
-                            "It seems like you haven't started this journey yet.\nStart reading.",
-                            textAlign = TextAlign.Center
+                            stringResource(R.string.journey_empty_message),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -211,11 +229,19 @@ fun StatusSelection(
     state: BookDetailsState,
     actions: BookDetailsAction
 ) {
+
+    val verticalPadding = if (!state.showProgress) {
+        32.dp
+    } else {
+        0.dp
+    }
+
     ListItem(
         modifier = Modifier
             .border(1.dp, Color.Transparent)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { actions.toggleStatusExpanded(!state.statusExpanded) },
+            .clickable { actions.toggleStatusExpanded(!state.statusExpanded) }
+            .padding(vertical = verticalPadding),
         headlineContent = {
             Text(
                 state.selectedBook.status.name.replace('_', ' ').lowercase()
@@ -235,7 +261,11 @@ fun StatusSelection(
                     } else {
                         Icons.Filled.ArrowDropDown
                     },
-                    contentDescription = "Status options"
+                    contentDescription = if (state.statusExpanded) {
+                        stringResource(R.string.minimize_options_icon_desc)
+                    } else {
+                        stringResource(R.string.expand_options_icon_desc)
+                    }
                 )
             }
             DropdownMenu(
@@ -285,11 +315,12 @@ fun BookJourney(
                 headlineContent = {
                     Text(
                         "${journey.startDate.toFormattedDate()} - " +
-                                (journey.endDate?.toFormattedDate() ?: "Current")
+                                (journey.endDate?.toFormattedDate()
+                                    ?: stringResource(R.string.current_message))
                     )
                 },
                 supportingContent = {
-                    Text("Number of entries: ${journey.entries.size}")
+                    Text(stringResource(R.string.number_entries_message) + journey.entries.size)
                 },
                 trailingContent = {
                     Icon(
@@ -361,7 +392,9 @@ fun DiaryEntry(
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
-                    Text("Pages read: ${entry.pagesRead}")
+                    Text(
+                        stringResource(R.string.pages_read__message) + entry.pagesRead
+                    )
                     Text(entry.comment.orEmpty())
                 }
             }

@@ -28,8 +28,7 @@ interface LoginAction {
     fun setShowPassword(showPassword: Boolean)
 }
 
-class LoginViewModel(
-) : ViewModel() {
+class LoginViewModel : ViewModel() {
     private val _state = MutableStateFlow(LoginState())
     val state = _state.asStateFlow()
 

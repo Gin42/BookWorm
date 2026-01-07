@@ -1,17 +1,8 @@
 package com.example.bookworm.ui.screens.stats
 
-import android.content.ContentValues.TAG
-import android.util.Log
 import androidx.compose.animation.core.EaseInOutCubic
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -21,35 +12,23 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.LinearGradientShader
-import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.R
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
 import com.example.bookworm.ui.entitiesViewModel.NotificationsState
-import com.example.bookworm.ui.screens.bookdetails.toFormattedDate
-import ir.ehsannarmani.compose_charts.ColumnChart
 import ir.ehsannarmani.compose_charts.LineChart
 import ir.ehsannarmani.compose_charts.models.AnimationMode
-import ir.ehsannarmani.compose_charts.models.BarProperties
-import ir.ehsannarmani.compose_charts.models.Bars
 import ir.ehsannarmani.compose_charts.models.DotProperties
-import ir.ehsannarmani.compose_charts.models.HorizontalIndicatorProperties
-import ir.ehsannarmani.compose_charts.models.IndicatorCount
-import ir.ehsannarmani.compose_charts.models.IndicatorPosition
-import ir.ehsannarmani.compose_charts.models.IndicatorProperties
 import ir.ehsannarmani.compose_charts.models.LabelProperties
 import ir.ehsannarmani.compose_charts.models.Line
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @Composable
 fun StatsScreen(
@@ -75,7 +54,7 @@ fun StatsScreen(
                 ) {
                     // Title
                     Text(
-                        "Pages per month",
+                        stringResource(R.string.pages_per_month_heading),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(vertical = 8.dp)
@@ -105,7 +84,7 @@ fun PagesPerMonthChart(
     val hasData = pagesPerMonth.values.any { it > 0.0 }
     if (!hasData) {
         Text(
-            text = "No reading data for this year yet",
+            text = stringResource(R.string.stats_empty_message),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center
         )
@@ -116,16 +95,20 @@ fun PagesPerMonthChart(
     val secondary = MaterialTheme.colorScheme.secondary
 
     Text(
-        "You have an average of ${monthAverage.toInt()} pages read in a month",
+        stringResource(R.string.pages_per_month_body_part_1) + monthAverage.toInt() + stringResource(
+            R.string.pages_per_month_body_part_2
+        ),
         style = MaterialTheme.typography.bodyMedium,
         modifier = Modifier.padding(bottom = 16.dp)
     )
+
+    val label = stringResource(R.string.pages_per_month_heading)
 
     LineChart(
         data = remember {
             listOf(
                 Line(
-                    label = "Pages per month",
+                    label = label,
                     values = pagesPerMonth.values.toList(),
                     color = Brush.verticalGradient(
                         colors = listOf(secondary, primary)

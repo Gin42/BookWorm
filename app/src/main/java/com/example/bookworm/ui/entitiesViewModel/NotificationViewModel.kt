@@ -1,15 +1,9 @@
 package com.example.bookworm.ui.entitiesViewModel
 
-import android.adservices.adid.AdId
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.bookworm.core.data.database.entities.AchievementEntity
 import com.example.bookworm.core.data.database.entities.NotificationEntity
-import com.example.bookworm.core.data.repositories.AchievementRepository
 import com.example.bookworm.core.data.repositories.NotificationRepository
-import com.example.bookworm.utils.TimeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -47,7 +41,6 @@ class NotificationViewModel(
     }
 
     private fun refreshNotifications() {
-        Log.d("LOG DEBUG", "This is user id -> ${userId}")
         viewModelScope.launch {
             repository.getAllNotifications(userId)
                 .map { notifications ->
@@ -58,8 +51,6 @@ class NotificationViewModel(
                     )
                 }
                 .collect { _state.value = it }
-            Log.d("LOG DEBUG", "This is notification -> ${_state.value.notifications}\n" +
-                    "${_state.value.unreadNotifications}")
         }
     }
 }

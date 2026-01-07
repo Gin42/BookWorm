@@ -2,10 +2,9 @@ package com.example.bookworm.ui.screens.userpage
 
 import android.net.Uri
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,7 +14,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Book
-import androidx.compose.material.icons.outlined.Diamond
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -28,14 +27,12 @@ import androidx.compose.material3.carousel.rememberCarouselState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.bookworm.R
@@ -57,12 +54,9 @@ import com.example.bookworm.ui.entitiesViewModel.UnlockedAchievementState
 fun UserPageScreen(
     navController: NavController,
     userState: LoggedUserState,
-    state: UserPageState,
-    actions: UserPageActions,
     favourites: List<BookEntity>,
     unlockedAchievementState: UnlockedAchievementState,
     lockedAchievementsState: LockedAchievementsState,
-    onGetAchievementImage: (Long) -> Int?,
     onSeeFavourites: () -> Unit,
     onBookClick: (Long) -> Unit,
     notificationsState: NotificationsState
@@ -93,7 +87,7 @@ fun UserPageScreen(
                     ImageWithPlaceholder(
                         imageUri,
                         Size.Lg,
-                        desc = "User photo",
+                        desc = stringResource(R.string.user_profile_picture_desc),
                         CircleShape
                     )
 
@@ -118,7 +112,7 @@ fun UserPageScreen(
                         modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
                         headlineContent = {
                             Text(
-                                "Favourites",
+                                stringResource(R.string.favourites_message),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                             )
@@ -131,7 +125,7 @@ fun UserPageScreen(
 
                                     }
                                 ) {
-                                    Text("Show all")
+                                    Text(stringResource(R.string.show_all_button))
                                 }
                             }
                         },
@@ -151,7 +145,24 @@ fun UserPageScreen(
                             BookItem(item, onBookClick)
                         }
                     } else {
-
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Icon(
+                                Icons.Outlined.Book,
+                                null,
+                                modifier = Modifier.size(64.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                            Text(
+                                stringResource(R.string.favourites_empty_message),
+                                textAlign = TextAlign.Center,
+                                color = MaterialTheme.colorScheme.onBackground
+                            )
+                        }
                     }
                 }
             }
@@ -169,43 +180,18 @@ fun UserPageScreen(
                         modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
                         headlineContent = {
                             Text(
-                                "Achievements",
+                                stringResource(R.string.achievements_message),
                                 style = MaterialTheme.typography.headlineMedium,
                                 fontWeight = FontWeight.Bold,
                             )
                         },
-                        trailingContent = {
-                            if (lockedAchievementsState.achievements.isNotEmpty()) {
-                                TextButton(
-                                    onClick = {
-                                        actions.setSeeAllAchievements(!state.seeAllAchievements)
-                                    }
-                                ) {
-                                    Text(
-                                        text = if (state.seeAllAchievements) {
-                                            "Hide locked ones"
-                                        } else {
-                                            "Show locked ones"
-                                        }
-                                    )
-                                }
-                            }
-                        },
                     )
 
-                    /** If not see all, then see only the unlocked ones,
-                     * else show all achievements.*/
-
-                    unlockedAchievementState.achievements.forEach { it ->
-                        Achievement(it, onGetAchievementImage)
+                    unlockedAchievementState.achievements.forEach {
+                        Achievement(it)
                     }
-
-                    if (state.seeAllAchievements) {
-                        val filteredAchievements =
-                            lockedAchievementsState.achievements.filterNot { it in unlockedAchievementState.achievements }
-                        filteredAchievements.forEach {
-                            Achievement(it, onGetAchievementImage, locked = true)
-                        }
+                    lockedAchievementsState.achievements.forEach {
+                        Achievement(it, locked = true)
                     }
                 }
             }
@@ -213,14 +199,15 @@ fun UserPageScreen(
     }
 }
 
+
 @Composable
 fun Achievement(
     item: AchievementEntity,
-    onGetAchievementImage: (Long) -> Int?,
     locked: Boolean = false
 ) {
 
     val strings = achievementStringFinder(item.name)
+
 
     ListItem(
         modifier = Modifier
@@ -239,31 +226,34 @@ fun Achievement(
             )
         },
         leadingContent = {
-            val achievementImageResId = onGetAchievementImage(item.achievementId)
-            if (achievementImageResId != null) {
+            if (locked) {
+                Box(
+                    contentAlignment = Alignment.BottomEnd
+                ) {
+                    Image(
+                        modifier = Modifier
+                            .height(80.dp)
+                            .alpha(0.2F),
+                        painter = painterResource(id = item.image),
+                        contentDescription = stringResource(R.string.achievement_image_desc),
+                        contentScale = ContentScale.FillHeight
+                    )
+                    Icon(
+                        Icons.Outlined.Lock,
+                        null,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            } else {
                 Image(
                     modifier = Modifier
-                        .height(100.dp),
-                    painter = painterResource(id = achievementImageResId),
-                    contentDescription = "Achievement image",
+                        .height(80.dp),
+                    painter = painterResource(id = item.image),
+                    contentDescription = stringResource(R.string.achievement_image_desc),
                     contentScale = ContentScale.FillHeight
                 )
             }
-        },
-        trailingContent = {
-            Text(
-                text = if (locked) {
-                    "LOCKED!"
-                } else {
-                    "UNLOCKED!"
-                },
-                color = if (locked) {
-                    Color.Red
-                } else {
-                    Color.Green
-                },
-            )
-        },
+        }
     )
 }
 

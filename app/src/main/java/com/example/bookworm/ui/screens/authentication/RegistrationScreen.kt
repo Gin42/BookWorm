@@ -1,23 +1,17 @@
 package com.example.bookworm.ui.screens.authentication
 
-import android.content.ContentValues.TAG
-import android.icu.number.NumberFormatter.UnitWidth
-import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextObfuscationMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -27,7 +21,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,15 +41,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.UserEntity
 import com.example.bookworm.core.data.models.AuthenticationResults
-import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
 import com.example.bookworm.utils.rememberCameraLauncher
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -149,11 +139,11 @@ fun RegistrationScreen(
                     if (state.usernameError) {
                         when (state.errorMessage) {
                             AuthenticationResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AuthenticationResults.UsernameTaken -> {
-                                Text("Username already taken!")
+                                Text(stringResource(R.string.username_taken_error))
                             }
 
                             else -> {
@@ -197,7 +187,7 @@ fun RegistrationScreen(
                 },
                 supportingText = {
                     if (state.passwordError && state.errorMessage == AuthenticationResults.CannotSubmit) {
-                        Text("Fill all fields please")
+                        Text(stringResource(R.string.fill_all_fields_error))
                     }
                 },
                 isError = state.passwordError
@@ -232,25 +222,30 @@ fun RegistrationScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Go to login
-            Text(
-                buildAnnotatedString {
-                    append(stringResource(R.string.sign_in_text))
-                    withAnnotation(
-                        tag = "sign_in",
-                        annotation = "sign_in"
-                    ) {
 
-                        pushStyle(
-                            SpanStyle(
-                                color = Color.Blue,
-                                textDecoration = TextDecoration.Underline
-                            )
+            val signUpText = stringResource(R.string.sign_in_text)
+            val signUpLinkText = stringResource(R.string.sign_in_link_text)
+
+            val annotatedString = buildAnnotatedString {
+                append(signUpText)
+
+                withAnnotation(
+                    tag = "sign-up",
+                    annotation = "sign-up"
+                ) {
+                    pushStyle(
+                        SpanStyle(
+                            color = Color.Blue,
+                            textDecoration = TextDecoration.Underline
                         )
-                        append("Sign-in")
-                        pop()
-                    }
-                },
+                    )
+                    append(signUpLinkText)
+                    pop()
+                }
+            }
+
+            Text(
+                text = annotatedString,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable(onClick = {

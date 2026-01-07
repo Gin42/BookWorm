@@ -4,12 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.AddBookResults
-import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +13,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 data class LibraryState(
     val query: String = "",
@@ -38,7 +33,7 @@ interface LibraryActions {
 
 class LibraryViewModel(
     private val repository: BookRepository,
-    private val userId: Long
+    userId: Long
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<LibraryState> = MutableStateFlow(

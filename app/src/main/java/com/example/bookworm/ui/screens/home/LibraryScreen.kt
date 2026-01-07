@@ -32,12 +32,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.ui.composables.AddBookFloatingButton
@@ -92,7 +94,7 @@ fun LibraryScreen(
                         SearchBarDefaults.InputField(
                             query = state.query,
                             onQueryChange = { actions.setQuery(it) },
-                            placeholder = { Text("Search") },
+                            placeholder = { Text(stringResource(R.string.favourites_option)) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Outlined.Search,
@@ -104,7 +106,7 @@ fun LibraryScreen(
                                     IconButton(onClick = { actions.setQuery("") }) {
                                         Icon(
                                             Icons.Outlined.Close,
-                                            contentDescription = "Clear input"
+                                            contentDescription = stringResource(R.string.clear_input_icon_desc)
                                         )
                                     }
                                 }
@@ -123,7 +125,10 @@ fun LibraryScreen(
                         .size(40.dp)
                         .align(Alignment.CenterVertically)
                 ) {
-                    Icon(Icons.Filled.FilterList, contentDescription = "Filters")
+                    Icon(
+                        Icons.Filled.FilterList,
+                        contentDescription = stringResource(R.string.filters_icon_desc)
+                    )
                 }
             }
 
@@ -141,23 +146,27 @@ fun LibraryScreen(
                     }
                 }
             } else {
-                Column (
+                Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(8.dp).fillMaxSize()
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .fillMaxSize()
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.Book,
-                        contentDescription = "Book icon",
+                        contentDescription = stringResource(R.string.book_icon_desc),
+                        tint = MaterialTheme.colorScheme.onBackground,
                         modifier = Modifier
                             .size(64.dp)
                     )
                     Text(
-                        text = "There seems to be a shortage of books.\nAdd some.",
+                        text = stringResource(R.string.library_empty_message),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
-                            .fillMaxWidth()
+                            .fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onBackground
                     )
                 }
             }
@@ -186,7 +195,7 @@ fun FiltersSelection(actions: LibraryActions, state: LibraryState) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Filter selection",
+                    text = stringResource(R.string.filters_selection_message),
                     style = MaterialTheme.typography.titleMedium,
                     textAlign = TextAlign.Start
                 )
@@ -195,7 +204,7 @@ fun FiltersSelection(actions: LibraryActions, state: LibraryState) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
-                        "Favourites"
+                        stringResource(R.string.favourites_option)
                     )
                     Checkbox(
                         checked = state.favouritesOnly,

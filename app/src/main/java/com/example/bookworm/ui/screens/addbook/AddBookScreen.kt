@@ -68,7 +68,7 @@ fun AddBookScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "BookWorm",
+                        text = stringResource(R.string.app_name),
                         fontFamily = FontFamily(Font(R.font.alegreya_sans_sc_medium)),
                         style = MaterialTheme.typography.headlineMedium,
                     )
@@ -78,7 +78,10 @@ fun AddBookScreen(
                         actions.setShowAlert(true)
                         actions.setNavDestination(BookWormRoute.Home)
                     }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go Back")
+                        Icon(
+                            Icons.AutoMirrored.Outlined.ArrowBack,
+                            contentDescription = stringResource(R.string.go_back_icon_desc)
+                        )
                     }
                 },
                 actions = {
@@ -88,7 +91,10 @@ fun AddBookScreen(
                             actions.setNavDestination(BookWormRoute.Settings)
                         }
                     ) {
-                        Icon(Icons.Filled.Settings, contentDescription = "App Settings")
+                        Icon(
+                            Icons.Filled.Settings,
+                            contentDescription = stringResource(R.string.settings_icon_desc)
+                        )
                     }
                 }
             )
@@ -134,7 +140,7 @@ fun AddBookScreen(
                     }
                 }
             ) {
-                Icon(Icons.Outlined.Check, "Add Book")
+                Icon(Icons.Outlined.Check, stringResource(R.string.confirm_icon_desc))
             }
         }
     ) { contentPadding ->
@@ -161,7 +167,11 @@ fun AddBookScreen(
         ) {
 
             Text(
-                "Add new book",
+                if (bookId != null) {
+                    stringResource(R.string.add_book_message)
+                } else {
+                    stringResource(R.string.modify_book_message)
+                },
                 style = MaterialTheme.typography.titleLarge
             )
 
@@ -171,8 +181,8 @@ fun AddBookScreen(
                     actions.setTitle(it)
                     actions.setError(false)
                 },
-                label = { Text("Title") },
-                placeholder = { Text("Title") },
+                label = { Text(stringResource(R.string.title_label)) },
+                placeholder = { Text(stringResource(R.string.title_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
@@ -181,13 +191,12 @@ fun AddBookScreen(
                     if (state.error) {
                         when (state.errorMessage) {
                             AddBookResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AddBookResults.BookPresent -> {
-                                Text("Book already added")
+                                Text(stringResource(R.string.existent_book_error))
                             }
-
                             else -> {
                             }
                         }
@@ -202,8 +211,8 @@ fun AddBookScreen(
                     actions.setAuthor(it)
                     actions.setError(false)
                 },
-                label = { Text("Author") },
-                placeholder = { Text("Author") },
+                label = { Text(stringResource(R.string.author_label)) },
+                placeholder = { Text(stringResource(R.string.author_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 20,
@@ -212,11 +221,11 @@ fun AddBookScreen(
                     if (state.error) {
                         when (state.errorMessage) {
                             AddBookResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AddBookResults.BookPresent -> {
-                                Text("Book already added")
+                                Text(stringResource(R.string.existent_book_error))
                             }
 
                             else -> {
@@ -234,8 +243,8 @@ fun AddBookScreen(
                     actions.setError(false)
                     actions.setPagesError(false)
                 },
-                label = { Text("Pages") },
-                placeholder = { Text("Pages") },
+                label = { Text(stringResource(R.string.tot_pages_label)) },
+                placeholder = { Text(stringResource(R.string.tot_pages_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 20,
@@ -244,11 +253,11 @@ fun AddBookScreen(
                     if (state.pagesError) {
                         when (state.errorMessage) {
                             AddBookResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AddBookResults.InvalidPages -> {
-                                Text("Enter a valid number of pages")
+                                Text(stringResource(R.string.invalid_pages_error))
                             }
 
                             else -> {
@@ -270,7 +279,7 @@ fun AddBookScreen(
             ) {
                 ImageWithPlaceholder(
                     state.bookCover, Size.Lg,
-                    desc = "Book cover",
+                    desc = stringResource(R.string.book_cover_desc),
                     CircleShape
                 )
                 Button(
@@ -294,8 +303,8 @@ fun BookAlert(actions: AddBookActions) {
         onDismissRequest = {
             actions.setShowAlert(false)
         },
-        title = { Text(text = "Warning!") },
-        text = { Text(text = "You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.") },
+        title = { Text(text = stringResource(R.string.exit_warning_alert_title)) },
+        text = { Text(text = stringResource(R.string.exit_warning_alert_body)) },
         dismissButton = {
             TextButton(
                 onClick = {
@@ -304,7 +313,7 @@ fun BookAlert(actions: AddBookActions) {
                 }
             ) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(R.string.exit_warning_alert_cancel),
                 )
             }
         },
@@ -317,7 +326,7 @@ fun BookAlert(actions: AddBookActions) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text(
-                    text = "Leave Page",
+                    text = stringResource(R.string.exit_warning_alert_confirm),
                     color = MaterialTheme.colorScheme.onError
                 )
             }

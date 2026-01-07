@@ -8,7 +8,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.AddBookResults
-import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.ui.BookWormRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -85,7 +84,6 @@ class AddBookViewModel(
                         setPages(bookEntity.pages.toString())
                         setCover(bookEntity.image?.toUri())
                     } else {
-                        Log.e(TAG, "FOO: Book not found with id: $bookId")
                     }
                 }
             }

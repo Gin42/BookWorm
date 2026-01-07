@@ -35,7 +35,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AuthenticationResults
 import kotlinx.coroutines.runBlocking
@@ -44,7 +43,6 @@ import kotlin.reflect.KSuspendFunction2
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
     state: LoginState,
     actions: LoginAction,
     onSignIn: KSuspendFunction2<String, String, AuthenticationResults>,
@@ -101,11 +99,11 @@ fun LoginScreen(
                     if (state.error) {
                         when (state.errorMessage) {
                             AuthenticationResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AuthenticationResults.WrongCredentials -> {
-                                Text("Wrong credentials, try again")
+                                Text(stringResource(R.string.wrong_credential_error))
                             }
 
                             else -> {
@@ -151,11 +149,11 @@ fun LoginScreen(
                     if (state.error) {
                         when (state.errorMessage) {
                             AuthenticationResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AuthenticationResults.WrongCredentials -> {
-                                Text("Wrong credentials, try again")
+                                Text(stringResource(R.string.wrong_credential_error))
                             }
 
                             else -> {
@@ -205,24 +203,29 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(
-                buildAnnotatedString {
-                    append(stringResource(R.string.sign_up_text))
-                    withAnnotation(
-                        tag = "sign-up",
-                        annotation = "sign-up"
-                    ) {
+            val signUpText = stringResource(R.string.sign_up_text)
+            val signUpLinkText = stringResource(R.string.sign_up_link_text)
 
-                        pushStyle(
-                            SpanStyle(
-                                color = Color.Blue,
-                                textDecoration = TextDecoration.Underline
-                            )
+            val annotatedString = buildAnnotatedString {
+                append(signUpText)
+
+                withAnnotation(
+                    tag = "sign-up",
+                    annotation = "sign-up"
+                ) {
+                    pushStyle(
+                        SpanStyle(
+                            color = Color.Blue,
+                            textDecoration = TextDecoration.Underline
                         )
-                        append("Sign-up")
-                        pop()
-                    }
-                },
+                    )
+                    append(signUpLinkText)
+                    pop()
+                }
+            }
+
+            Text(
+                text = annotatedString,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                 modifier = Modifier
                     .clickable(onClick = {

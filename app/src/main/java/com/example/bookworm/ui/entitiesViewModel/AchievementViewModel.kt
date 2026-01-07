@@ -19,7 +19,6 @@ data class LockedAchievementsState(
 )
 
 interface AchievementActions {
-    fun getAchievementImage(achievementId: Long): Int?
 }
 
 class AchievementViewModel(
@@ -37,10 +36,6 @@ class AchievementViewModel(
     val lockedAchievementsState get() = _lockedAchievementsState.asStateFlow()
 
     val actions = object : AchievementActions {
-        override fun getAchievementImage(achievementId: Long): Int? {
-            val achievement = lockedAchievementsState.value.achievements.find { it.achievementId == achievementId }
-            return achievement?.image
-        }
 
     }
 

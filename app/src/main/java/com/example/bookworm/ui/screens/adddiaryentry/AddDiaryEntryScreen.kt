@@ -1,6 +1,5 @@
 package com.example.bookworm.ui.screens.adddiaryentry
 
-import android.util.Log
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -37,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
@@ -44,12 +44,8 @@ import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AddEntryResults
 import com.example.bookworm.ui.BookWormRoute
-import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.utils.TimeUtils.convertMillisToDate
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import okhttp3.internal.wait
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,7 +63,7 @@ fun AddDiaryEntryScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "BookWorm",
+                        text = stringResource(R.string.app_name),
                         fontFamily = FontFamily(Font(R.font.alegreya_sans_sc_medium)),
                         style = MaterialTheme.typography.headlineMedium,
                     )
@@ -77,7 +73,7 @@ fun AddDiaryEntryScreen(
                         actions.setShowAlert(true)
                         actions.setNavDestination(BookWormRoute.BookDetails(state.bookId))
                     }) {
-                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = "Go Back")
+                        Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = stringResource(R.string.go_back_icon_desc))
                     }
                 },
                 actions = {
@@ -87,7 +83,7 @@ fun AddDiaryEntryScreen(
                             actions.setNavDestination(BookWormRoute.Settings)
                         }
                     ) {
-                        Icon(Icons.Filled.Settings, contentDescription = "App Settings")
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_icon_desc))
                     }
                 }
             )
@@ -99,7 +95,6 @@ fun AddDiaryEntryScreen(
                         if (state.validPages) {
                             coroutineScope.launch {
                                 val result = actions.addEntry()
-                                Log.d("DEBUG LOG", "This is errorMessage -> ${state.errorMessage}")
                                 if (result == AddEntryResults.Success) {
                                     onNavigateUp()
                                 }
@@ -115,7 +110,7 @@ fun AddDiaryEntryScreen(
                     }
                 }
             ) {
-                Icon(Icons.Outlined.Check, "Add Diary entry")
+                Icon(Icons.Outlined.Check, stringResource(R.string.confirm_icon_desc))
             }
         }
     ) { contentPadding ->
@@ -141,7 +136,7 @@ fun AddDiaryEntryScreen(
                 .fillMaxSize()
         ) {
             Text(
-                "New Diary entry",
+                stringResource(R.string.add_entry_message),
                 style = MaterialTheme.typography.titleLarge
             )
             //entry date
@@ -151,10 +146,10 @@ fun AddDiaryEntryScreen(
                     actions.setDateError(false)
                     actions.setPagesError(false)
                 },
-                label = { Text("Date") },
-                placeholder = { Text("DD/MM/YYYY") },
+                label = { Text(stringResource(R.string.date_label)) },
+                placeholder = { Text(stringResource(R.string.date_placeholder)) },
                 trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = "Select date")
+                    Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.date_picker_icon_desc))
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,11 +166,11 @@ fun AddDiaryEntryScreen(
                     if (state.dateError) {
                         when (state.errorMessage) {
                             AddEntryResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
 
                             AddEntryResults.InvalidDate ->  {
-                                Text("Enter a valid date")
+                                Text(stringResource(R.string.invalid_date_error))
                             }
                             else -> {
                             }
@@ -203,8 +198,8 @@ fun AddDiaryEntryScreen(
                     actions.setDateError(false)
                     actions.setPagesError(false)
                 },
-                label = { Text("Pages read") },
-                placeholder = { Text("Enter the page you arrived at") },
+                label = { Text(stringResource(R.string.pages_read_label)) },
+                placeholder = { Text(stringResource(R.string.pages_read_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,
@@ -213,10 +208,10 @@ fun AddDiaryEntryScreen(
                     if (state.pagesError) {
                         when (state.errorMessage) {
                             AddEntryResults.InvalidPage -> {
-                                Text("Enter a valid page")
+                                Text(stringResource(R.string.invalid_pages_error))
                             }
                             AddEntryResults.CannotSubmit -> {
-                                Text("Fill all fields please")
+                                Text(stringResource(R.string.fill_all_fields_error))
                             }
                             else -> {
 
@@ -230,8 +225,8 @@ fun AddDiaryEntryScreen(
             OutlinedTextField(
                 value = state.comment,
                 onValueChange = actions::setComment,
-                label = { Text("Comment") },
-                placeholder = { Text("Enter your comment here") },
+                label = { Text(stringResource(R.string.comment_label)) },
+                placeholder = { Text(stringResource(R.string.comment_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 20,
@@ -255,12 +250,12 @@ fun DatePickerModal(
                 onDateSelected(datePickerState.selectedDateMillis)
                 onDismiss()
             }) {
-                Text("OK")
+                Text(stringResource(R.string.date_picker_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.date_picker_cancel))
             }
         }
     ) {
@@ -274,8 +269,8 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
         onDismissRequest = {
             actions.setShowAlert(false)
         },
-        title = { Text(text = "Warning!") },
-        text = { Text(text = "You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.") },
+        title = { Text(text = stringResource(R.string.exit_warning_alert_title)) },
+        text = { Text(text = stringResource(R.string.exit_warning_alert_body)) },
         dismissButton = {
             TextButton(
                 onClick = {
@@ -284,7 +279,7 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
                 }
             ) {
                 Text(
-                    text = "Cancel",
+                    text = stringResource(R.string.exit_warning_alert_cancel),
                 )
             }
         },
@@ -297,7 +292,7 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {
                 Text(
-                    text = "Leave Page",
+                    text = stringResource(R.string.exit_warning_alert_confirm),
                     color = MaterialTheme.colorScheme.onError
                 )
             }

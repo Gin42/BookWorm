@@ -1,39 +1,34 @@
 package com.example.bookworm.ui.screens.notifications
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CircleNotifications
 import androidx.compose.material.icons.outlined.Stars
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.bookworm.R
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.NavBottom
-import com.example.bookworm.ui.entitiesViewModel.LoggedUserState
 import com.example.bookworm.ui.entitiesViewModel.NotificationActions
 import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 import com.example.bookworm.ui.screens.userpage.AchievementPositions
@@ -59,7 +54,7 @@ fun NotificationsScreen(
 
             item {
                 if (state.notifications.isNotEmpty()) {
-                    state.notifications.forEach { it ->
+                    state.notifications.forEach {
 
                         val strings = achievementStringFinder(it.body)
 
@@ -83,19 +78,24 @@ fun NotificationsScreen(
                             leadingContent = {
                                 Icon(
                                     Icons.Outlined.Stars,
-                                    "Award notification icon"
+                                    stringResource(R.string.achievement_notification_icon_desc)
                                 )
 
                             },
                             trailingContent = {
                                 if (!it.isRead) {
-                                    IconButton(onClick = { actions.readNotification(it.notificationId) }) {
-                                        Icon(Icons.Outlined.Check, "Read notification icon")
+                                    OutlinedIconButton(onClick = { actions.readNotification(it.notificationId) }) {
+                                        Icon(
+                                            Icons.Outlined.Check,
+                                            stringResource(R.string.read_notification_icon_desc)
+                                        )
                                     }
                                 } else {
                                     Text(
-                                        "Read",
-                                        color = Color.Green
+                                        stringResource(R.string.notification_read_message),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
                                     )
                                 }
                             },
@@ -111,14 +111,16 @@ fun NotificationsScreen(
                         ) {
                         Icon(
                             imageVector = Icons.Outlined.CircleNotifications,
-                            contentDescription = "Notification Icon",
-                            modifier = Modifier.size(64.dp)
+                            contentDescription = stringResource(R.string.notification_icon_desc),
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
                         Text(
-                            text = "You have no notifications",
+                            text = stringResource(R.string.notification_empty_message),
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }

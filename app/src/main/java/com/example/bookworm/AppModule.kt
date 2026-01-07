@@ -10,7 +10,6 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.bookworm.core.data.BookWormDatabase
 import com.example.bookworm.core.data.evaluators.AchievementEvaluator
 import com.example.bookworm.core.data.models.AchievementName
-import com.example.bookworm.core.data.models.AchievementType
 import com.example.bookworm.core.data.models.usecase.ReadingStatusStateMachine
 import com.example.bookworm.core.data.repositories.AchievementRepository
 import com.example.bookworm.core.data.repositories.BookRepository
@@ -30,7 +29,6 @@ import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.home.LibraryViewModel
 import com.example.bookworm.ui.screens.settings.ThemeViewModel
 import com.example.bookworm.ui.screens.stats.StatsViewModel
-import com.example.bookworm.ui.screens.userpage.UserPageViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -152,8 +150,6 @@ val appModule = module {
             repository = get()
         )
     }
-
-    viewModel { UserPageViewModel() }
 
     viewModel { (userId: Long) ->
         AchievementViewModel(

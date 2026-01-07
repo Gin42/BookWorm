@@ -1,11 +1,7 @@
 <resources>
     <string name="app_name" translatable="false">BookWorm</string>
 
-    <!-- Top App bar -->
-
-
-
-    <!-- Registration and Login -->
+    <!-- Registration and Login screens-->
     <string name="registration_message">Create your account</string>
     <string name="sign_in_text">You already have an account? </string>
     <string name="sign_in_link_text">Sign-in</string>
@@ -14,29 +10,121 @@
     <string name="sign_up_text">You don\'t have an account? </string>
     <string name="sign_up_link_text">Sign-up</string>
 
+    <!-- Add book screen -->
+    <string name="add_book_message">Add new book</string>
+    <string name="modify_book_message">Modify book</string>
+
+    <!-- Add journey entry screen -->
+    <string name="add_entry_message">Add journey entry</string>
+    <string name="date_picker_confirm">OK</string>
+    <string name="date_picker_cancel">Cancel</string>
+
+    <!-- Book details screen -->
+    <string name="progress_message">Progress:</string>
+    <string name="current_message">Current</string>
+    <string name="number_entries_message">Number of entries:</string>
+    <string name="pages_read__message">Pages read:</string>
+
+    <!-- Library screen -->
+    <string name="search_message">Search:</string>
+    <string name="filters_selection_message">Filter selection</string>
+    <string name="favourites_option">Favourites</string>
+
+    <!-- Notification screen -->
+    <string name="notification_read_message">Read</string>
+
+    <!-- Settings screen -->
+    <string name="theme_selection_message">Theme selection</string>
+
+    <!-- Statistics screen -->
+    <string name="pages_per_month_heading">Pages per month</string>
+    <string name="pages_per_month_body_part_1">You have an average of</string>
+    <string name="pages_per_month_body_part_2">pages read in a month</string>
+
+    <!-- User page screen -->
+    <string name="favourites_message">Favourites</string>
+    <string name="achievements_message">Achievements</string>
+
+
     <!-- Images desc -->
     <string name="user_profile_picture_desc">User profile picture</string>
-
-    <!-- Accessibility -->
+    <string name="book_cover_desc">Book cover</string>
     <string name="app_logo_desc">BookWorm app logo</string>
+    <string name="achievement_image_desc">Achievement image</string>
 
     <!-- Buttons -->
-    <string name="sign_up_button_desc">Sign up</string>
-    <string name="sign_in_button_desc">Sign in</string>
+    <string name="sign_up_button">Sign up</string>
+    <string name="sign_in_button">Sign in</string>
+    <string name="exit_warning_alert_confirm_button">Leave Page</string>
+    <string name="exit_warning_alert_cancel_button">Cancel</string>
+    <string name="show_all_button">Favourites</string>
 
     <!-- Icons -->
-    <string name="add_image_icon_desc">Add image</string>
-    <string name="password_visibility_icon_desc">Toggle password visibility</string>
-    <string name="go_back_icon_desc">Go Back</string>
-    <string name="settings_icon_desc">Settings</string>
+    <string name="add_image_icon_desc">Add image icon</string>
+    <string name="password_visibility_icon_desc">Toggle password visibility icon</string>
+    <string name="go_back_icon_desc">Go back icon</string>
+    <string name="settings_icon_desc">Settings icon</string>
+    <string name="add_book_icon_desc">Add book icon</string>
+    <string name="add_entry_icon_desc">Add journey entry icon</string>
+    <string name="confirm_icon_desc">Confirm icon</string>
+    <string name="date_picker_icon_desc">Date picker icon</string>
+    <string name="favourite_icon_desc">Favourite icon</string>
+    <string name="modify_icon_desc">Modify icon</string>
+    <string name="expand_options_icon_desc">Expand options icon</string>
+    <string name="minimize_options_icon_desc">Minimize options icon</string>
+    <string name="clear_input_icon_desc">Clear input icon</string>
+    <string name="filters_icon_desc">Filters icon</string>
+    <string name="book_icon_desc">Book icon</string>
+    <string name="achievement_notification_icon_desc">Achievement notification icon</string>
+    <string name="read_notification_icon_desc">Read notification icon</string>
+    <string name="notification_icon_desc">Notification icon</string>
 
 
     <!-- Labels and Placeholders -->
-    <string name="username_label">Username</string>
+    <string name="username_label">Username *</string>
     <string name="username_placeholder">Username</string>
-
-    <string name="password_label">Password</string>
+    <string name="password_label">Password *</string>
     <string name="password_placeholder">Password</string>
+
+    <string name="title_label">Title *</string>
+    <string name="title_placeholder">Title</string>
+    <string name="author_label">Author *</string>
+    <string name="author_placeholder">Author</string>
+    <string name="tot_pages_label">Pages *</string>
+    <string name="tot_pages_placeholder">Total pages</string>
+    <string name="book_cover_label">Book cover</string>
+
+    <string name="date_label">Date *</string>
+    <string name="date_placeholder">DD/MM/YYYY</string>
+    <string name="pages_read_label">Pages read *</string>
+    <string name="pages_read_placeholder">Enter the page you arrived at</string>
+    <string name="comment_label">Comment</string>
+    <string name="comment_placeholder">Comment</string>
+
+    <!-- Errors and alerts -->
+    <string name="fill_all_fields_error">Fill all required(*) fields</string>
+    <string name="existent_book_error">Book already exists</string>
+    <string name="invalid_pages_error">Enter a valid number of pages</string>
+    <string name="invalid_date_error">Enter a valid date</string>
+    <string name="wrong_credential_error">Wrong credentials, try again</string>
+    <string name="username_taken_error">Username already taken</string>
+    <string name="exit_warning_alert_title">Warning!</string>
+    <string name="exit_warning_alert_body">You have unsaved changes. Are you sure you want to leave this page? Your changes will be lost.</string>
+
+    <!-- Empty messages -->
+    <string name="journey_empty_message">It seems like you haven\'t started this journey yet.\nStart reading.</string>
+    <string name="library_empty_message">There seems to be a shortage of books.\nAdd some.</string>
+    <string name="notification_empty_message">You have no notification.</string>
+    <string name="stats_empty_message">No reading data for this year yet.</string>
+    <string name="favourites_empty_message">It seems like you haven\'t found you favourites yet.
+Start reading.</string>
+
+    <!-- Bottom navigation -->
+    <string name="library_label">Library</string>
+    <string name="stats_label">Stats</string>
+    <string name="user_page_label">User Page</string>
+    <string name="inbox_label">Inbox</string>
+
 
     <!-- Achievements -->
     <string name="Read1_ach_name">Read 1</string>

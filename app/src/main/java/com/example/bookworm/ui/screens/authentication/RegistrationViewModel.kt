@@ -1,16 +1,12 @@
 package com.example.bookworm.ui.screens.authentication
 
 import android.net.Uri
-import androidx.compose.foundation.text.input.TextFieldState
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.UserEntity
 import com.example.bookworm.core.data.models.AuthenticationResults
-import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 
 data class RegistrationState(
     val username: String = "",

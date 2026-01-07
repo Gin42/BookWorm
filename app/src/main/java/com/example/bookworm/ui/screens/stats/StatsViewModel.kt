@@ -81,7 +81,6 @@ class StatsViewModel(
 
         init {
             observeJourneys()
-            Log.d(TAG, "USER ID: $userId")
         }
 
         private fun observeJourneys() {
@@ -96,7 +95,6 @@ class StatsViewModel(
                             )
                         }
 
-                        Log.d(TAG, "JOURNEYS: ${_state.value.allJourneys}")
                     }
             }
         }

@@ -7,7 +7,9 @@ import androidx.compose.material.icons.outlined.AddComment
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
+import com.example.bookworm.R
 import com.example.bookworm.ui.BookWormRoute
 
 
@@ -17,7 +19,7 @@ fun AddBookFloatingButton(navController: NavController) {
         onClick = { navController.navigate(BookWormRoute.AddBook (null)) },
         shape = CircleShape,
     ) {
-        Icon(Icons.Filled.Add, "Add item")
+        Icon(Icons.Filled.Add, stringResource(R.string.add_book_icon_desc))
     }
 }
 
@@ -27,6 +29,6 @@ fun AddDiaryFloatingButton(navController: NavController, bookId: Long) {
         onClick = { navController.navigate(BookWormRoute.AddDiaryEntry(bookId)) },
         shape = CircleShape,
     ) {
-        Icon(Icons.Outlined.AddComment, "Add diary entry")
+        Icon(Icons.Outlined.AddComment, stringResource(R.string.add_entry_icon_desc))
     }
 }
