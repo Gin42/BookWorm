@@ -68,7 +68,7 @@ fun UserPageScreen(
     ) { contentPadding ->
 
         LazyColumn(
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(16.dp),
             modifier = Modifier.padding(contentPadding),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -77,7 +77,7 @@ fun UserPageScreen(
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .padding(top = 30.dp)
+                        .padding(top = 20.dp)
                         .fillMaxWidth()
                 ) {
 
@@ -109,7 +109,6 @@ fun UserPageScreen(
                         .fillMaxWidth()
                 ) {
                     ListItem(
-                        modifier = Modifier.padding(top = 8.dp, bottom = 0.dp),
                         headlineContent = {
                             Text(
                                 stringResource(R.string.favourites_message),

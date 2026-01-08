@@ -26,7 +26,7 @@
     <string name="pages_read_message">Page you arrived at:</string>
 
     <!-- Library screen -->
-    <string name="search_message">Search:</string>
+    <string name="search_message">Search</string>
     <string name="filters_selection_message">Filter selection</string>
     <string name="favourites_option">Favourites</string>
 
@@ -81,6 +81,9 @@
 
 
     <!-- Labels and Placeholders -->
+    <!-- I campi obbligatori sono segnati *-->
+    <string name="required_field_message">Required fields are marked *</string>
+
     <string name="username_label">Username *</string>
     <string name="username_placeholder">Username</string>
     <string name="password_label">Password *</string>
@@ -104,7 +107,7 @@
     <!-- Errors and alerts -->
     <string name="fill_all_fields_error">Fill all required(*) fields</string>
     <string name="existent_book_error">Book already exists</string>
-    <string name="invalid_pages_error">Enter a valid number of pages</string>
+    <string name="invalid_pages_error">Enter a valid page</string>
     <string name="invalid_date_error">Enter a valid date</string>
     <string name="wrong_credential_error">Wrong credentials, try again</string>
     <string name="username_taken_error">Username already taken</string>
@@ -114,7 +117,7 @@
     <!-- Empty messages -->
     <string name="journey_empty_message">It seems like you haven\'t started this journey yet.\nStart reading.</string>
     <string name="library_empty_message">There seems to be a shortage of books.\nAdd some.</string>
-    <string name="notification_empty_message">You have no notification.</string>
+    <string name="notification_empty_message">You have no notifications.</string>
     <string name="stats_empty_message">No reading data for this year yet.</string>
     <string name="favourites_empty_message">It seems like you haven\'t found you favourites yet.
 Start reading.</string>
@@ -127,22 +130,22 @@ Start reading.</string>
 
 
     <!-- Achievements -->
-    <string name="Read1_ach_name">Read 1</string>
+    <string name="Read1_ach_name">An unexpected journey</string>
     <string name="Read1_ach_desc">Read 1 book</string>
-    <string name="Read5_ach_name">Read 5</string>
-    <string name="Read5_ach_desc">Read 5 book</string>
-    <string name="Read10_ach_name">Read 10</string>
-    <string name="Read10_ach_desc">Read 10 book</string>
-    <string name="Read20_ach_name">Read 20</string>
-    <string name="Read20_ach_desc">Read 20 book</string>
+    <string name="Read5_ach_name">There is no place like home</string>
+    <string name="Read5_ach_desc">Read 5 books</string>
+    <string name="Read10_ach_name">The game is afoot</string>
+    <string name="Read10_ach_desc">Read 10 books</string>
+    <string name="Read20_ach_name">Just one more chapter</string>
+    <string name="Read20_ach_desc">Read 20 books</string>
 
-    <string name="Add1_ach_name">Add 1</string>
+    <string name="Add1_ach_name">There is no friend as loyal as a book</string>
     <string name="Add1_ach_desc">Add 1 book</string>
-    <string name="Add5_ach_name">Add 5</string>
-    <string name="Add5_ach_desc">Add 5 book</string>
-    <string name="Add10_ach_name">Add 10</string>
-    <string name="Add10_ach_desc">Add 10 book</string>
-    <string name="Add20_ach_name">Add 20</string>
-    <string name="Add20_ach_desc">Add 20 book</string>
+    <string name="Add5_ach_name">We\'re all mad here.</string>
+    <string name="Add5_ach_desc">Add 5 books</string>
+    <string name="Add10_ach_name">Second star to the right and straight on \'til morning.</string>
+    <string name="Add10_ach_desc">Add 10 books</string>
+    <string name="Add20_ach_name">Narnia! It\'s all in the wardrobe just like I told you!</string>
+    <string name="Add20_ach_desc">Add 20 books</string>
 
 </resources>

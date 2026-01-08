@@ -6,14 +6,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -48,6 +52,17 @@ class MainActivity : ComponentActivity() {
                     Theme.System -> isSystemInDarkTheme()
                 }
             ) {
+
+                if (!themeState.isLoaded) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator()
+                    }
+                    return@BookWormTheme
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -79,7 +94,9 @@ class MainActivity : ComponentActivity() {
                             updateBadgeCount = { screen: BottomNavigation, count: Int ->
                                 badgeCount.first { it.first == screen }.second.intValue = count
                             },
-                            modifier = Modifier.padding(bottom = innerPadding.calculateBottomPadding()),
+                            modifier = Modifier
+                                .padding(innerPadding)
+                                .consumeWindowInsets(innerPadding),
                             themeState = themeState,
                             themeViewModel = themeViewModel
                         )

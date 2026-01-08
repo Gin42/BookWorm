@@ -1,6 +1,5 @@
 package com.example.bookworm.ui.composables
 
-/*TODO*/
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
@@ -9,13 +8,13 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.bookworm.ui.BottomNavigation
-import androidx.navigation.NavDestination.Companion.hasRoute
-import com.example.bookworm.ui.BookWormRoute
 
 @Composable
 fun NavBottom(
@@ -50,7 +49,7 @@ fun NavBottom(
                 },
                 label = {
                     Text(
-                        currentScreen.label,
+                        stringResource(currentScreen.labelRes)
                     )
                 },
             )

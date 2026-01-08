@@ -77,7 +77,7 @@ fun BookDetailsScreen(
 
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
-            contentPadding = PaddingValues(8.dp),
+            contentPadding = PaddingValues(16.dp),
             modifier = Modifier.padding(contentPadding)
         ) {
 
@@ -186,7 +186,6 @@ fun BookDetailsScreen(
                                 style = MaterialTheme.typography.labelLarge
                             )
                         },
-                        /*TODO*/
                         trailingContent = {
                             Text("$progressPercent%", style = MaterialTheme.typography.labelLarge)
                         }

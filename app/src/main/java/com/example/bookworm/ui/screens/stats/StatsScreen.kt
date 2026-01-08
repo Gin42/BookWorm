@@ -41,21 +41,19 @@ fun StatsScreen(
     ) { contentPadding ->
 
         LazyColumn(
-            modifier = Modifier.padding(contentPadding)
+            modifier = Modifier.padding(contentPadding).padding(horizontal = 16.dp)
         ) {
             item {
                 val (pagesPerMonth, monthAverage) = actions.calculatePagesPerMonth()
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
                 ) {
                     // Title
                     Text(
                         stringResource(R.string.pages_per_month_heading),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
                     )
 
                     // Chart

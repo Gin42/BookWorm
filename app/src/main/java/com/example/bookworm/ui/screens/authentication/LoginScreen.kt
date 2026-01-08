@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -20,6 +23,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,6 +45,7 @@ import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AuthenticationResults
 import com.example.bookworm.core.data.models.Theme
 import com.example.bookworm.ui.screens.settings.ThemeState
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction2
 
@@ -55,15 +60,17 @@ fun LoginScreen(
     onNavigateToRegistration: () -> Unit
 ) {
     Scaffold(
+
     )
     { contentPadding ->
         Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(30.dp))
 
@@ -87,7 +94,7 @@ fun LoginScreen(
                 style = MaterialTheme.typography.displaySmall,
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(30.dp))
 
             Text(
                 stringResource(R.string.login_message),
@@ -122,15 +129,14 @@ fun LoginScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.error
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
             // Password
-
             OutlinedTextField(
                 value = state.password,
                 onValueChange = {
@@ -172,33 +178,37 @@ fun LoginScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.error
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            val coroutineScope = rememberCoroutineScope()
 
             Button(
                 onClick = {
                     if (state.canSubmit) {
-                        val signInResult = runBlocking {
-                            onSignIn(
+                        coroutineScope.launch {
+                            val signInResult = onSignIn(
                                 state.username.trim(),
                                 state.password.trim()
                             )
-                        }
-                        when (signInResult) {
-                            AuthenticationResults.Success -> {
-                                onNavigateToHome()
-                            }
+                            when (signInResult) {
+                                AuthenticationResults.Success -> {
+                                    onNavigateToHome()
+                                }
 
-                            AuthenticationResults.WrongCredentials -> {
-                                actions.setError(true)
-                                actions.setErrorMessage(AuthenticationResults.WrongCredentials)
-                            }
+                                AuthenticationResults.WrongCredentials -> {
+                                    actions.setError(true)
+                                    actions.setErrorMessage(AuthenticationResults.WrongCredentials)
+                                }
 
-                            else -> {
+                                else -> {
+                                }
                             }
                         }
                     } else {

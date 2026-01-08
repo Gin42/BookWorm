@@ -42,8 +42,7 @@ fun SettingsScreen(
         Column(
             Modifier
                 .padding(contentPadding)
-                .padding(8.dp)
-                .padding(bottom = 15.dp)
+                .padding(16.dp)
         ) {
             ListItem(
                 headlineContent = {

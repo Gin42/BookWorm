@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -101,7 +104,6 @@ fun AddDiaryEntryScreen(
                 onClick = {
                     if (state.canSubmit) {
                         if (state.validPages) {
-                            Log.d("valid", state.pages)
                             coroutineScope.launch {
                                 val result = actions.addEntry()
                                 if (result == AddEntryResults.Success) {
@@ -150,11 +152,13 @@ fun AddDiaryEntryScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 stringResource(R.string.add_entry_message),
@@ -196,6 +200,8 @@ fun AddDiaryEntryScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.dateError
@@ -242,6 +248,8 @@ fun AddDiaryEntryScreen(
 
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.pagesError

@@ -3,12 +3,12 @@ package com.example.bookworm.ui.screens.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -49,13 +49,12 @@ import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.ui.composables.AddBookFloatingButton
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
-import com.example.bookworm.ui.composables.NavBottom
-import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryScreen(
+    modifier: Modifier,
     navController: NavController,
     onBookClick: (Long) -> Unit,
     state: LibraryState,
@@ -66,6 +65,7 @@ fun LibraryScreen(
     Scaffold(
         floatingActionButton = { AddBookFloatingButton(navController) },
         topBar = { AppBar(navController) },
+        contentWindowInsets = WindowInsets()
     ) { contentPadding ->
 
         if (state.openFilters) {
@@ -74,8 +74,8 @@ fun LibraryScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = contentPadding.calculateTopPadding())
-                .padding(horizontal = 8.dp)
+                .padding(contentPadding)
+                .padding(horizontal = 16.dp)
         ) {
 
             Row(
@@ -94,7 +94,7 @@ fun LibraryScreen(
                         SearchBarDefaults.InputField(
                             query = state.query,
                             onQueryChange = { actions.setQuery(it) },
-                            placeholder = { Text(stringResource(R.string.favourites_option)) },
+                            placeholder = { Text(stringResource(R.string.search_message)) },
                             leadingIcon = {
                                 Icon(
                                     Icons.Outlined.Search,
@@ -160,7 +160,7 @@ fun LibraryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier
-                        .padding(8.dp)
+                        .padding(16.dp)
                         .fillMaxSize()
                 ) {
                     Icon(
@@ -221,7 +221,8 @@ fun FiltersSelection(actions: LibraryActions, state: LibraryState) {
                         onCheckedChange = {
                             actions.filterByFavourites(!state.favouritesOnly)
                             actions.openFilters(false)
-                        }
+                        },
+                        modifier = Modifier.padding(start = 20.dp)
                     )
                 }
 

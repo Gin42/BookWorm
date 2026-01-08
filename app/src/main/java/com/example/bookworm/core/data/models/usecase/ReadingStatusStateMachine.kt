@@ -65,7 +65,7 @@ class ReadingStatusStateMachine {
                 )
 
 
-            // READING -> PLAN TO READ /*TODO doubt*/
+
             ReadingStatus.READING to ReadingStatus.PLAN_TO_READ ->
                 StatusTransitionResult(
                     newStatus = ReadingStatus.PLAN_TO_READ,

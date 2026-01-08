@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -46,8 +47,7 @@ fun NotificationsScreen(
     ) { contentPadding ->
 
         LazyColumn(
-            contentPadding = PaddingValues(8.dp),
-            modifier = Modifier.padding(contentPadding),
+            modifier = Modifier.padding(contentPadding).padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
@@ -59,7 +59,6 @@ fun NotificationsScreen(
 
                         ListItem(
                             modifier = Modifier
-                                .padding(8.dp)
                                 .clickable { onNavigateToUserPage() },
                             headlineContent = {
                                 Text(
@@ -102,12 +101,12 @@ fun NotificationsScreen(
                     }
                 } else {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-
-                        ) {
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxSize()
+                    ) {
                         Icon(
                             imageVector = Icons.Outlined.CircleNotifications,
                             contentDescription = stringResource(R.string.notification_icon_desc),

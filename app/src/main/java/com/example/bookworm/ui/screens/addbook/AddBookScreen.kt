@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.Settings
@@ -30,6 +33,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
@@ -48,6 +52,7 @@ import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
 import com.example.bookworm.ui.screens.adddiaryentry.EntryAlert
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -66,6 +71,8 @@ fun AddBookScreen(
     LaunchedEffect(bookId) {
         bookId?.let { actions.setBook(it) }
     }
+
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -111,29 +118,28 @@ fun AddBookScreen(
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 onClick = {
                     if (state.canSubmit) {
-
                         if (state.validPages) {
 
-                            val result = runBlocking {
-                                addBook(state.toBook())
-                            }
-                            when (result) {
-                                AddBookResults.BookPresent -> {
-                                    actions.setError(true)
-                                    actions.setErrorMessage(AddBookResults.BookPresent)
-                                }
+                            coroutineScope.launch {
+                                val result = addBook(state.toBook())
+                                when (result) {
+                                    AddBookResults.BookPresent -> {
+                                        actions.setError(true)
+                                        actions.setErrorMessage(AddBookResults.BookPresent)
+                                    }
 
-                                AddBookResults.Success -> {
-                                    onNavigateUp()
-                                }
+                                    AddBookResults.Success -> {
+                                        onNavigateUp()
+                                    }
 
-                                AddBookResults.CannotSubmit -> {
-                                    actions.setError(true)
-                                    actions.setPagesError(true)
-                                    actions.setErrorMessage(AddBookResults.CannotSubmit)
-                                }
+                                    AddBookResults.CannotSubmit -> {
+                                        actions.setError(true)
+                                        actions.setPagesError(true)
+                                        actions.setErrorMessage(AddBookResults.CannotSubmit)
+                                    }
 
-                                AddBookResults.InvalidPages -> {}
+                                    AddBookResults.InvalidPages -> {}
+                                }
                             }
                         } else {
                             actions.setPagesError(true)
@@ -177,11 +183,13 @@ fun AddBookScreen(
 
         Column(
             verticalArrangement = Arrangement.spacedBy(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Text(
@@ -215,9 +223,12 @@ fun AddBookScreen(
                             AddBookResults.BookPresent -> {
                                 Text(stringResource(R.string.existent_book_error))
                             }
+
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.error
@@ -249,6 +260,8 @@ fun AddBookScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.error
@@ -285,6 +298,8 @@ fun AddBookScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.pagesError
@@ -312,7 +327,7 @@ fun AddBookScreen(
                 Button(
                     onClick = { actions.setPickerVisible(true) },
                     shape = CircleShape,
-                )  {
+                ) {
                     Icon(
                         Icons.Outlined.Add,
                         contentDescription = stringResource(R.string.add_image_icon_desc),
@@ -346,7 +361,7 @@ fun BookAlert(onConfirm: () -> Unit, onDismiss: () -> Unit) {
         confirmButton = {
             Button(
                 onClick = {
-                   onConfirm()
+                    onConfirm()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {

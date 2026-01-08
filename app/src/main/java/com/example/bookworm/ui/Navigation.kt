@@ -2,6 +2,7 @@ package com.example.bookworm.ui
 
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.BarChart
 import androidx.compose.material.icons.outlined.Book
@@ -11,21 +12,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import androidx.navigation.navOptions
 import androidx.navigation.toRoute
+import com.example.bookworm.R
 import com.example.bookworm.ui.entitiesViewModel.AchievementViewModel
 import com.example.bookworm.ui.entitiesViewModel.NotificationViewModel
-import com.example.bookworm.ui.entitiesViewModel.NotificationsState
 import com.example.bookworm.ui.entitiesViewModel.UserViewModel
 import com.example.bookworm.ui.screens.addbook.AddBookScreen
 import com.example.bookworm.ui.screens.addbook.AddBookViewModel
@@ -38,7 +36,6 @@ import com.example.bookworm.ui.screens.authentication.RegistrationViewModel
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsScreen
 import com.example.bookworm.ui.screens.bookdetails.BookDetailsViewModel
 import com.example.bookworm.ui.screens.home.LibraryScreen
-import com.example.bookworm.ui.screens.home.LibraryState
 import com.example.bookworm.ui.screens.home.LibraryViewModel
 import com.example.bookworm.ui.screens.notifications.NotificationsScreen
 import com.example.bookworm.ui.screens.settings.SettingsScreen
@@ -90,12 +87,15 @@ sealed interface BookWormRoute {
     data object APP : BookWormRoute
 }
 
-/** TODO may delete label*/
-enum class BottomNavigation(val label: String, val icon: ImageVector, val route: BookWormRoute) {
-    Library("Library", Icons.Outlined.Book, BookWormRoute.Home),
-    Stats("Stats", Icons.Outlined.BarChart, BookWormRoute.Statistics),
-    Notifications("Inbox", Icons.Outlined.Inbox, BookWormRoute.Notifications),
-    UserPage("User Page", Icons.Outlined.Person, BookWormRoute.UserPage),
+enum class BottomNavigation(
+    @StringRes val labelRes: Int,
+    val icon: ImageVector,
+    val route: BookWormRoute
+) {
+    Library(R.string.library_label, Icons.Outlined.Book, BookWormRoute.Home),
+    Stats(R.string.stats_label, Icons.Outlined.BarChart, BookWormRoute.Statistics),
+    Notifications(R.string.inbox_label, Icons.Outlined.Inbox, BookWormRoute.Notifications),
+    UserPage(R.string.user_page_label, Icons.Outlined.Person, BookWormRoute.UserPage),
 }
 
 fun NavHostController.navigateSingleTopTo(route: BookWormRoute) {
@@ -126,16 +126,6 @@ fun BookWormNavGraph(
     themeState: ThemeState,
     themeViewModel: ThemeViewModel
 ) {
-
-    /** TODO debug*/
-    navController.addOnDestinationChangedListener { controller, _, _ ->
-        val routes = controller
-            .currentBackStack.value
-            .map { it.destination.route }
-            .joinToString(", ")
-
-        Log.d("BackStackLog", "BackStack: $routes")
-    }
 
     val userViewModel = koinViewModel<UserViewModel>()
     val userState by userViewModel.state.collectAsStateWithLifecycle()
@@ -211,6 +201,7 @@ fun BookWormNavGraph(
         ) {
             composable<BookWormRoute.Home> {
                 LibraryScreen(
+                    modifier = modifier,
                     navController,
                     state = libraryState,
                     books = libraryViewModel.filteredBooks.collectAsState(),

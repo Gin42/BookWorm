@@ -9,22 +9,28 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,6 +56,8 @@ import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
 import com.example.bookworm.ui.screens.settings.ThemeState
+import ir.ehsannarmani.compose_charts.ColumnChart
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -63,19 +71,19 @@ fun RegistrationScreen(
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit
 ) {
-    Scaffold(
-
-    )
+    Scaffold()
     { contentPadding ->
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Column (
             modifier = Modifier
                 .padding(contentPadding)
-                .padding(8.dp)
+                .padding(16.dp)
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .imePadding(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(30.dp))
+
             val iconColor = when (themeState.theme) {
                 Theme.Light -> Color.Black
                 Theme.Dark -> Color.White
@@ -125,14 +133,12 @@ fun RegistrationScreen(
                     desc = stringResource(R.string.user_profile_picture_desc),
                     CircleShape
                 )
-               Button(
+                FilledIconButton(
                     onClick = { actions.setPickerVisible(true) },
-                    shape = CircleShape,
                 ) {
                     Icon(
                         Icons.Outlined.Add,
                         contentDescription = stringResource(R.string.add_image_icon_desc),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
                 }
             }
@@ -167,12 +173,12 @@ fun RegistrationScreen(
                             else -> {
                             }
                         }
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.usernameError,
             )
-
-            Spacer(modifier = Modifier.height(8.dp))
 
             // Password
             OutlinedTextField(
@@ -206,23 +212,29 @@ fun RegistrationScreen(
                 supportingText = {
                     if (state.passwordError && state.errorMessage == AuthenticationResults.CannotSubmit) {
                         Text(stringResource(R.string.fill_all_fields_error))
+                    } else {
+                        Text(stringResource(R.string.required_field_message))
                     }
                 },
                 isError = state.passwordError
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.padding(8.dp))
+
+            val coroutineScope = rememberCoroutineScope()
 
             // Registration button
             Button(
                 onClick = {
                     if (state.canSubmit) {
-                        val signupResult = runBlocking { onSignUp(state.toUser()) }
-                        if (signupResult == AuthenticationResults.Success) {
-                            onNavigateToHome()
-                        } else if (signupResult == AuthenticationResults.UsernameTaken) {
-                            actions.setUsernameError(true)
-                            actions.setErrorMessage(AuthenticationResults.UsernameTaken)
+                        coroutineScope.launch {
+                            val signupResult = onSignUp(state.toUser())
+                            if (signupResult == AuthenticationResults.Success) {
+                                onNavigateToHome()
+                            } else if (signupResult == AuthenticationResults.UsernameTaken) {
+                                actions.setUsernameError(true)
+                                actions.setErrorMessage(AuthenticationResults.UsernameTaken)
+                            }
                         }
                     } else {
                         actions.setUsernameError(true)

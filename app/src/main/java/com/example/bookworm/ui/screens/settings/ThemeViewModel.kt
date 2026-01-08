@@ -14,6 +14,8 @@ import kotlinx.coroutines.launch
 
 data class ThemeState(
     val theme: com.example.bookworm.core.data.models.Theme,
+    val isLoaded: Boolean = false
+
 )
 
 data class SettingsState(
@@ -32,11 +34,21 @@ class ThemeViewModel(
     private val _settingsState = MutableStateFlow(SettingsState())
     val settingsState = _settingsState.asStateFlow()
 
-    val state = repository.theme.map { ThemeState(it) }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = ThemeState(com.example.bookworm.core.data.models.Theme.System)
-    )
+    val state = repository.theme
+        .map { theme ->
+            ThemeState(
+                theme = theme,
+                isLoaded = true
+            )
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(),
+            initialValue = ThemeState(
+                theme = com.example.bookworm.core.data.models.Theme.System,
+                isLoaded = false
+            )
+        )
 
     fun changeTheme(theme: com.example.bookworm.core.data.models.Theme) = viewModelScope.launch {
         repository.setTheme(theme)
@@ -45,7 +57,6 @@ class ThemeViewModel(
     val actions = object : SettingsAction {
         override fun toggleThemeExpanded(themeExpanded: Boolean) {
             _settingsState.update { it.copy(themeExpanded = themeExpanded) }
-
         }
     }
 }
