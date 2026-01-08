@@ -2,6 +2,7 @@ package com.example.bookworm.ui.screens.addbook
 
 import android.net.Uri
 import androidx.core.net.toUri
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
@@ -33,7 +34,7 @@ data class AddBookState(
     val isImagePickerVisible: Boolean = false,
 ) {
     val canSubmit get() = title.isNotBlank() && author.isNotBlank() && pages.isNotBlank()
-    val validPages get () = pages.toInt() >= 0
+    val validPages get () = pages.toInt() >= 0 && pages.isDigitsOnly()
 
     fun toBook() = BookEntity(
         bookId = bookId

@@ -1,5 +1,6 @@
 package com.example.bookworm.ui.screens.adddiaryentry
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -9,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
@@ -40,7 +42,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AddEntryResults
@@ -96,6 +101,7 @@ fun AddDiaryEntryScreen(
                 onClick = {
                     if (state.canSubmit) {
                         if (state.validPages) {
+                            Log.d("valid", state.pages)
                             coroutineScope.launch {
                                 val result = actions.addEntry()
                                 if (result == AddEntryResults.Success) {
@@ -215,6 +221,10 @@ fun AddDiaryEntryScreen(
                 },
                 label = { Text(stringResource(R.string.pages_read_label)) },
                 placeholder = { Text(stringResource(R.string.pages_read_placeholder)) },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.NumberPassword
+                ),
+                visualTransformation = VisualTransformation.None,
                 modifier = Modifier
                     .fillMaxWidth(),
                 maxLines = 1,

@@ -3,6 +3,7 @@ package com.example.bookworm.ui.screens.adddiaryentry
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.JourneyEntryEntity
@@ -43,7 +44,7 @@ data class AddDiaryEntryState(
 ) {
 
     val canSubmit get() = pages.isNotBlank()
-    val validPages get() = pages.toInt() >= 0
+    val validPages get() = pages.toInt() >= 0 && pages.isDigitsOnly()
 
     fun toEntry(journeyId: Long): JourneyEntryEntity {
         return JourneyEntryEntity(

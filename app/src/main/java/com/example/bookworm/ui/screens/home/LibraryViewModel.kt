@@ -19,7 +19,8 @@ data class LibraryState(
 
     val openFilters: Boolean = false,
     val selectedStatus: ReadingStatus? = null,
-    val favouritesOnly: Boolean = false
+    val favouritesOnly: Boolean = false,
+    val countFiltersActive: Int = 0
 )
 
 interface LibraryActions {
@@ -76,10 +77,12 @@ class LibraryViewModel(
 
         override fun filterByFavourites(enabled: Boolean) {
             _state.update { it.copy(favouritesOnly = enabled) }
+            setFiltersActive()
         }
 
         override fun filterByStatus(status: ReadingStatus?) {
             _state.update { it.copy(selectedStatus = status) }
+            setFiltersActive()
         }
 
         override fun openFilters(value: Boolean) {
@@ -90,6 +93,17 @@ class LibraryViewModel(
             return repository.addBook(book)
         }
 
+    }
+
+    private fun setFiltersActive() {
+        var count = 0
+        if (_state.value.favouritesOnly) {
+            count += 1
+        }
+        if (_state.value.selectedStatus != null) {
+            count += 1
+        }
+        _state.update { it.copy(countFiltersActive = count) }
     }
 
     private fun List<BookEntity>.filterByQuery(query: String): List<BookEntity> {

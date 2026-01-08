@@ -20,6 +20,8 @@ import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DockedSearchBar
@@ -117,16 +119,26 @@ fun LibraryScreen(
                     content = {}
                 )
 
-                IconButton(
-                    onClick = { actions.openFilters(true) },
-                    modifier = Modifier
-                        .size(40.dp)
-                        .align(Alignment.CenterVertically)
+                BadgedBox(
+                    badge = {
+                        if (state.countFiltersActive > 0) {
+                            Badge {
+                                Text(text = state.countFiltersActive.toString())
+                            }
+                        }
+                    },
+                    modifier = Modifier.align(Alignment.CenterVertically)
                 ) {
-                    Icon(
-                        Icons.Filled.FilterList,
-                        contentDescription = stringResource(R.string.filters_icon_desc)
-                    )
+                    IconButton(
+                        onClick = { actions.openFilters(true) },
+                        modifier = Modifier
+                            .size(40.dp)
+                    ) {
+                        Icon(
+                            Icons.Filled.FilterList,
+                            contentDescription = stringResource(R.string.filters_icon_desc)
+                        )
+                    }
                 }
             }
 
