@@ -2,6 +2,7 @@ package com.example.bookworm.ui.screens.authentication
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -43,9 +45,11 @@ import androidx.compose.ui.unit.dp
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.UserEntity
 import com.example.bookworm.core.data.models.AuthenticationResults
+import com.example.bookworm.core.data.models.Theme
 import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
+import com.example.bookworm.ui.screens.settings.ThemeState
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -53,6 +57,7 @@ import kotlin.reflect.KSuspendFunction1
 fun RegistrationScreen(
     state: RegistrationState,
     actions: RegistrationActions,
+    themeState: ThemeState,
     onSignUp: KSuspendFunction1<UserEntity, AuthenticationResults>,
     onNavigateToHome: () -> Unit,
     onNavigateToLogin: () -> Unit
@@ -69,11 +74,18 @@ fun RegistrationScreen(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(30.dp))
+            val iconColor = when (themeState.theme) {
+                Theme.Light -> Color.Black
+                Theme.Dark -> Color.White
+                Theme.System -> if (isSystemInDarkTheme()) Color.White else Color.Black
+            }
+
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = stringResource(R.string.app_logo_desc),
                 modifier = Modifier
-                    .height(120.dp)
+                    .height(120.dp),
+                colorFilter = ColorFilter.tint(iconColor)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -230,8 +242,11 @@ fun RegistrationScreen(
             val signUpText = stringResource(R.string.sign_in_text)
             val signUpLinkText = stringResource(R.string.sign_in_link_text)
 
+            val color = MaterialTheme.colorScheme.primary
+
             val annotatedString = buildAnnotatedString {
                 append(signUpText)
+                append(" ")
 
                 withAnnotation(
                     tag = "sign-up",
@@ -239,7 +254,7 @@ fun RegistrationScreen(
                 ) {
                     pushStyle(
                         SpanStyle(
-                            color = Color.Blue,
+                            color = color,
                             textDecoration = TextDecoration.Underline
                         )
                     )

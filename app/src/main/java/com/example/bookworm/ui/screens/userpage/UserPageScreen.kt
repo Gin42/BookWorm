@@ -28,6 +28,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -233,15 +235,16 @@ fun Achievement(
                     Image(
                         modifier = Modifier
                             .height(80.dp)
-                            .alpha(0.2F),
+                            .alpha(0.5F),
                         painter = painterResource(id = item.image),
                         contentDescription = stringResource(R.string.achievement_image_desc),
-                        contentScale = ContentScale.FillHeight
+                        contentScale = ContentScale.FillHeight,
+                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                     )
                     Icon(
                         Icons.Outlined.Lock,
                         null,
-                        modifier = Modifier.size(30.dp)
+                        modifier = Modifier.size(30.dp),
                     )
                 }
             } else {
@@ -250,7 +253,8 @@ fun Achievement(
                         .height(80.dp),
                     painter = painterResource(id = item.image),
                     contentDescription = stringResource(R.string.achievement_image_desc),
-                    contentScale = ContentScale.FillHeight
+                    contentScale = ContentScale.FillHeight,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
                 )
             }
         }

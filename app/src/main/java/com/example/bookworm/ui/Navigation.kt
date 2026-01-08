@@ -108,6 +108,9 @@ fun BookWormNavGraph(navController: NavHostController) {
 
     val notificationState by notificationVM.state.collectAsStateWithLifecycle()
 
+    val themeViewModel = koinViewModel<ThemeViewModel>()
+    val themeState by themeViewModel.state.collectAsStateWithLifecycle()
+
     NavHost(
         navController = navController,
         startDestination = BookWormRoute.Login
@@ -119,6 +122,7 @@ fun BookWormNavGraph(navController: NavHostController) {
             RegistrationScreen(
                 state = registrationState,
                 actions = registrationViewModel.actions,
+                themeState =  themeState,
                 onSignUp = userViewModel.actions::registerUser,
                 onNavigateToHome = {
                     navController.navigate(route = BookWormRoute.Home,
@@ -143,6 +147,7 @@ fun BookWormNavGraph(navController: NavHostController) {
                 state = loginState,
                 actions = loginViewModel.actions,
                 onSignIn = userViewModel.actions::loginUser,
+                themeState = themeState,
                 onNavigateToHome = {
                     navController.navigate(BookWormRoute.Home,
                         navOptions = navOptions {
@@ -242,8 +247,7 @@ fun BookWormNavGraph(navController: NavHostController) {
         }
 
         composable<BookWormRoute.Settings> {
-            val themeViewModel = koinViewModel<ThemeViewModel>()
-            val themeState by themeViewModel.state.collectAsStateWithLifecycle()
+
             val settingsState by themeViewModel.settingsState.collectAsStateWithLifecycle()
 
             SettingsScreen(

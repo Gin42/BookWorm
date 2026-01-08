@@ -2,6 +2,7 @@ package com.example.bookworm.ui.screens.authentication
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -37,6 +39,8 @@ import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
 import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AuthenticationResults
+import com.example.bookworm.core.data.models.Theme
+import com.example.bookworm.ui.screens.settings.ThemeState
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction2
 
@@ -46,6 +50,7 @@ fun LoginScreen(
     state: LoginState,
     actions: LoginAction,
     onSignIn: KSuspendFunction2<String, String, AuthenticationResults>,
+    themeState: ThemeState,
     onNavigateToHome: () -> Unit,
     onNavigateToRegistration: () -> Unit
 ) {
@@ -61,11 +66,19 @@ fun LoginScreen(
                 .fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(30.dp))
+
+            val iconColor = when (themeState.theme) {
+                Theme.Light -> Color.Black
+                Theme.Dark -> Color.White
+                Theme.System -> if (isSystemInDarkTheme()) Color.White else Color.Black
+            }
+
             Image(
                 painter = painterResource(id = R.drawable.logo),
                 contentDescription = stringResource(R.string.app_logo_desc),
                 modifier = Modifier
-                    .height(120.dp)
+                    .height(120.dp),
+                colorFilter = ColorFilter.tint(iconColor)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -206,8 +219,11 @@ fun LoginScreen(
             val signUpText = stringResource(R.string.sign_up_text)
             val signUpLinkText = stringResource(R.string.sign_up_link_text)
 
+            val color = MaterialTheme.colorScheme.primary
+
             val annotatedString = buildAnnotatedString {
                 append(signUpText)
+                append(" ")
 
                 withAnnotation(
                     tag = "sign-up",
@@ -215,7 +231,7 @@ fun LoginScreen(
                 ) {
                     pushStyle(
                         SpanStyle(
-                            color = Color.Blue,
+                            color = color,
                             textDecoration = TextDecoration.Underline
                         )
                     )

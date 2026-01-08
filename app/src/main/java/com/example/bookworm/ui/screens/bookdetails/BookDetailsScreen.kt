@@ -393,7 +393,7 @@ fun DiaryEntry(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        stringResource(R.string.pages_read__message) + entry.pagesRead
+                        stringResource(R.string.pages_read_message) + entry.pagesRead
                     )
                     Text(entry.comment.orEmpty())
                 }

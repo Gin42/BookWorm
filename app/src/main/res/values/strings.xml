@@ -23,7 +23,7 @@
     <string name="progress_message">Progress:</string>
     <string name="current_message">Current</string>
     <string name="number_entries_message">Number of entries:</string>
-    <string name="pages_read__message">Pages read:</string>
+    <string name="pages_read_message">Page you arrived at:</string>
 
     <!-- Library screen -->
     <string name="search_message">Search:</string>
@@ -39,7 +39,7 @@
     <!-- Statistics screen -->
     <string name="pages_per_month_heading">Pages per month</string>
     <string name="pages_per_month_body_part_1">You have an average of</string>
-    <string name="pages_per_month_body_part_2">pages read in a month</string>
+    <string name="pages_per_month_body_part_2">Pages read in a month</string>
 
     <!-- User page screen -->
     <string name="favourites_message">Favourites</string>
@@ -96,7 +96,7 @@
 
     <string name="date_label">Date *</string>
     <string name="date_placeholder">DD/MM/YYYY</string>
-    <string name="pages_read_label">Pages read *</string>
+    <string name="pages_read_label">Page you arrived at *</string>
     <string name="pages_read_placeholder">Enter the page you arrived at</string>
     <string name="comment_label">Comment</string>
     <string name="comment_placeholder">Comment</string>

@@ -217,24 +217,23 @@ class AddDiaryEntryViewModel(
         val totalPages = state.totalPages
         val pages = state.pages.toInt()
 
-        if (journey == null) {
-            if (pages > totalPages) {
-                actions.setPagesError(true)
-                actions.setErrorMessage(AddEntryResults.InvalidPage)
-                return false
-            }
-            if (selectedDate > today) {
-                actions.setDateError(true)
-                actions.setErrorMessage(AddEntryResults.InvalidDate)
-                return false
-            } else {
-                return true
-            }
-        } else {
-
+        /** We check that the pages and date are correct:
+         * the pages should not be more than the max pages,
+         * and the date should not be later than today.*/
+        if (pages > totalPages) {
+            actions.setPagesError(true)
+            actions.setErrorMessage(AddEntryResults.InvalidPage)
+            return false
+        }
+        if (selectedDate > today) {
+            actions.setDateError(true)
+            actions.setErrorMessage(AddEntryResults.InvalidDate)
+            return false
+        }
+        if (journey != null) {
             val startDate = journey.journey.startDate
-
-            // If journey has no entries
+            /** If journey has no entries:
+             * Check that the date of the entry is later than the start date of the journey*/
             if (journey.entries.isEmpty()) {
                 if (selectedDate >= startDate) {
                     return true
@@ -244,7 +243,8 @@ class AddDiaryEntryViewModel(
                     return false
                 }
             } else {
-                // If journey has entries
+                /** If journey has entries:
+                 * Check that the page entered is bigger than the last page */
 
                 val lastPage = if (journey.journey.endDate == null) {
                     journey.entries.lastOrNull()?.pagesRead
@@ -266,5 +266,6 @@ class AddDiaryEntryViewModel(
                 }
             }
         }
+        return true
     }
 }
