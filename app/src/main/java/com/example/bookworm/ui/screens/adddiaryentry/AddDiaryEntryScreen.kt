@@ -1,5 +1,6 @@
 package com.example.bookworm.ui.screens.adddiaryentry
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -70,6 +71,7 @@ fun AddDiaryEntryScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
+                        actions.setNavDestination(null)
                         actions.setShowAlert(true)
                         actions.setNavDestination(BookWormRoute.BookDetails(state.bookId))
                     }) {
@@ -79,6 +81,7 @@ fun AddDiaryEntryScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            actions.setNavDestination(null)
                             actions.setShowAlert(true)
                             actions.setNavDestination(BookWormRoute.Settings)
                         }
@@ -116,15 +119,27 @@ fun AddDiaryEntryScreen(
     ) { contentPadding ->
 
         if (state.showAlert) {
-            EntryAlert(actions)
+            EntryAlert(onConfirm = {
+                actions.setShowAlert(false)
+                if (state.navDestination == BookWormRoute.BookDetails(state.bookId)) {
+                    onNavigateUp()
+                } else if (state.navDestination != null) {
+                    navController.navigate(state.navDestination) {
+                        popUpTo(BookWormRoute.AddDiaryEntry(state.bookId)) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }, onDismiss = {
+                actions.setShowAlert(false)
+                actions.setNavDestination(null)
+            })
         }
 
-        LaunchedEffect(state.alertConfirmed) {
-            if (state.alertConfirmed && state.navDestination != null) {
-                navController.navigate(state.navDestination)
-                actions.setAlertConfirmed(false)
-                actions.setNavDestination(null)
-            }
+        BackHandler(enabled = true) {
+            actions.setNavDestination(null)
+            actions.setShowAlert(true)
+            actions.setNavDestination(BookWormRoute.BookDetails(state.bookId))
         }
 
         Column(
@@ -264,18 +279,17 @@ fun DatePickerModal(
 }
 
 @Composable
-fun EntryAlert(actions: AddDiaryEntryActions) {
+fun EntryAlert(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = {
-            actions.setShowAlert(false)
+            onDismiss()
         },
         title = { Text(text = stringResource(R.string.exit_warning_alert_title)) },
         text = { Text(text = stringResource(R.string.exit_warning_alert_body)) },
         dismissButton = {
             TextButton(
                 onClick = {
-                    actions.setAlertConfirmed(false) //quindi continui a modificare
-                    actions.setShowAlert(false)
+                    onDismiss()
                 }
             ) {
                 Text(
@@ -286,8 +300,7 @@ fun EntryAlert(actions: AddDiaryEntryActions) {
         confirmButton = {
             Button(
                 onClick = {
-                    actions.setAlertConfirmed(true)
-                    actions.setShowAlert(false) //quindi esci e te ne freghi
+                    onConfirm()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {

@@ -43,7 +43,6 @@ fun NotificationsScreen(
 ) {
     Scaffold(
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController, state) },
     ) { contentPadding ->
 
         LazyColumn(

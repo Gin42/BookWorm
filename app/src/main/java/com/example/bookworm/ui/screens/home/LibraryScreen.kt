@@ -3,6 +3,8 @@ package com.example.bookworm.ui.screens.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -57,25 +59,21 @@ fun LibraryScreen(
     state: LibraryState,
     books: State<List<BookEntity>>,
     actions: LibraryActions,
-    notificationsState: NotificationsState
 ) {
 
     Scaffold(
         floatingActionButton = { AddBookFloatingButton(navController) },
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         if (state.openFilters) {
             FiltersSelection(actions, state)
         }
-
-
         Column(
             modifier = Modifier
-                .padding(contentPadding)
                 .fillMaxSize()
-                .padding(8.dp)
+                .padding(top = contentPadding.calculateTopPadding())
+                .padding(horizontal = 8.dp)
         ) {
 
             Row(

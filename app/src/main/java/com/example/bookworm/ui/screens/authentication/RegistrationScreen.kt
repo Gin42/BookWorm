@@ -55,6 +55,7 @@ import kotlin.reflect.KSuspendFunction1
 
 @Composable
 fun RegistrationScreen(
+
     state: RegistrationState,
     actions: RegistrationActions,
     themeState: ThemeState,
@@ -63,6 +64,7 @@ fun RegistrationScreen(
     onNavigateToLogin: () -> Unit
 ) {
     Scaffold(
+
     )
     { contentPadding ->
         Column(

@@ -35,11 +35,9 @@ fun StatsScreen(
     navController: NavController,
     state: StatsState,
     actions: StatsActions,
-    notificationsState: NotificationsState
 ) {
     Scaffold(
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         LazyColumn(

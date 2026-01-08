@@ -1,5 +1,6 @@
 package com.example.bookworm.ui.screens.addbook
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -42,6 +44,7 @@ import com.example.bookworm.ui.BookWormRoute
 import com.example.bookworm.ui.composables.ImagePickerBottomSheet
 import com.example.bookworm.ui.composables.ImageWithPlaceholder
 import com.example.bookworm.ui.composables.Size
+import com.example.bookworm.ui.screens.adddiaryentry.EntryAlert
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction1
 
@@ -73,6 +76,7 @@ fun AddBookScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = {
+                        actions.setNavDestination(null)
                         actions.setShowAlert(true)
                         actions.setNavDestination(BookWormRoute.Home)
                     }) {
@@ -85,6 +89,7 @@ fun AddBookScreen(
                 actions = {
                     IconButton(
                         onClick = {
+                            actions.setNavDestination(null)
                             actions.setShowAlert(true)
                             actions.setNavDestination(BookWormRoute.Settings)
                         }
@@ -144,15 +149,27 @@ fun AddBookScreen(
     ) { contentPadding ->
 
         if (state.showAlert) {
-            BookAlert(actions)
+            BookAlert(onConfirm = {
+                actions.setShowAlert(false)
+                if (state.navDestination == BookWormRoute.Home) {
+                    onNavigateUp()
+                } else if (state.navDestination != null) {
+                    navController.navigate(state.navDestination) {
+                        popUpTo(BookWormRoute.AddBook(bookId)) {
+                            inclusive = true
+                        }
+                    }
+                }
+            }, onDismiss = {
+                actions.setShowAlert(false)
+                actions.setNavDestination(null)
+            })
         }
 
-        LaunchedEffect(state.alertConfirmed) {
-            if (state.alertConfirmed && state.navDestination != null) {
-                navController.navigate(state.navDestination)
-                actions.setAlertConfirmed(false)
-                actions.setNavDestination(null)
-            }
+        BackHandler(enabled = true) {
+            actions.setNavDestination(null)
+            actions.setShowAlert(true)
+            actions.setNavDestination(BookWormRoute.Home)
         }
 
         Column(
@@ -301,18 +318,17 @@ fun AddBookScreen(
 }
 
 @Composable
-fun BookAlert(actions: AddBookActions) {
+fun BookAlert(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = {
-            actions.setShowAlert(false)
+            onDismiss()
         },
         title = { Text(text = stringResource(R.string.exit_warning_alert_title)) },
         text = { Text(text = stringResource(R.string.exit_warning_alert_body)) },
         dismissButton = {
             TextButton(
                 onClick = {
-                    actions.setAlertConfirmed(false) //quindi continui a modificare
-                    actions.setShowAlert(false)
+                    onDismiss()
                 }
             ) {
                 Text(
@@ -323,8 +339,7 @@ fun BookAlert(actions: AddBookActions) {
         confirmButton = {
             Button(
                 onClick = {
-                    actions.setAlertConfirmed(true)
-                    actions.setShowAlert(false) //quindi esci e te ne freghi
+                   onConfirm()
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
             ) {

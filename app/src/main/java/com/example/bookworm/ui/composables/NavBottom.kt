@@ -4,87 +4,76 @@ package com.example.bookworm.ui.composables
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.MutableState
 import androidx.navigation.NavController
-import androidx.navigation.navOptions
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.example.bookworm.ui.BottomNavigation
-import com.example.bookworm.ui.entitiesViewModel.NotificationsState
-
+import androidx.navigation.NavDestination.Companion.hasRoute
+import com.example.bookworm.ui.BookWormRoute
 
 @Composable
 fun NavBottom(
     navController: NavController,
-    notificationsState: NotificationsState
+    currentDestination: NavDestination?,
+    badgeCount: List<Pair<BottomNavigation, MutableState<Int>>>
 ) {
-
-    val destinations = listOf(
-        BottomNavigation.Library,
-        BottomNavigation.Stats,
-        BottomNavigation.Notifications,
-        BottomNavigation.UserPage,
-    )
-
-    val selectedNavigationIndex = rememberSaveable {
-        mutableIntStateOf(0)
-    }
-
     NavigationBar {
-        destinations.forEachIndexed { index, destination ->
-
+        BottomNavigation.entries.forEach { currentScreen ->
+            val isSelected =
+                currentDestination?.hierarchy?.any {
+                    it.hasRoute(
+                        currentScreen.route::class
+                    )
+                } == true
             NavigationBarItem(
-                selected = selectedNavigationIndex.value == index,
+                selected = isSelected,
                 onClick = {
-                    selectedNavigationIndex.value = index
-                    navController.navigate(destination.route,
-                        navOptions = navOptions {
-                            popUpTo(navController.graph.startDestinationId) {
+                    val route = currentScreen.route
+                    if (!navController.popBackStack(route, inclusive = false)) {
+                        navController.navigate(route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
                                 saveState = true
                             }
                             launchSingleTop = true
                             restoreState = true
-                        })
+                        }
+                    }
                 },
                 icon = {
-                    if (destination == BottomNavigation.Notifications) {
-                        BadgedBox(
-                            badge = {
-                                if (notificationsState.unreadNotifications.isNotEmpty()) {
-                                    Badge(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                                        content = {
-                                            Text(notificationsState.unreadNotifications.size.toString())
-                                        }
-                                    )
-                                }
-                            }
-                        ) {
-                            Icon(
-                                destination.icon,
-                                contentDescription = "${destination.label} icon"
-                            )
-                        }
-                    } else {
-                        Icon(
-                            destination.icon,
-                            contentDescription = "${destination.label} icon"
-                        )
-
-                    }
+                    GetBadgeIcon(currentScreen, badgeCount)
                 },
                 label = {
                     Text(
-                        destination.label,
+                        currentScreen.label,
                     )
                 },
-
-                )
+            )
         }
+    }
+}
+
+
+@Composable
+private fun GetBadgeIcon(
+    currentScreen: BottomNavigation,
+    badgeCount: List<Pair<BottomNavigation, MutableState<Int>>>
+) {
+    val count = badgeCount.first { it.first == currentScreen }.second.value
+    BadgedBox(
+        badge = {
+            if (count > 0) {
+                Badge {
+                    Text(text = count.toString())
+                }
+            }
+        }
+    ) {
+        Icon(currentScreen.icon, null)
     }
 }

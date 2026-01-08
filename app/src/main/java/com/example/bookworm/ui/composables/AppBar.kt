@@ -31,7 +31,7 @@ fun AppBar(navController: NavController, goBack: Boolean = false) {
         },
         navigationIcon = {
             if (goBack && navController.previousBackStackEntry != null) {
-                IconButton(onClick = { navController.navigateUp() }) {
+                IconButton(onClick = { navController.popBackStack() }) {
                     Icon(
                         Icons.AutoMirrored.Outlined.ArrowBack,
                         contentDescription = stringResource(R.string.go_back_icon_desc)

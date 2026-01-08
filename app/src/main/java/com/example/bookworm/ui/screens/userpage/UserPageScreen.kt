@@ -61,12 +61,10 @@ fun UserPageScreen(
     lockedAchievementsState: LockedAchievementsState,
     onSeeFavourites: () -> Unit,
     onBookClick: (Long) -> Unit,
-    notificationsState: NotificationsState
 ) {
 
     Scaffold(
         topBar = { AppBar(navController) },
-        bottomBar = { NavBottom(navController, notificationsState) },
     ) { contentPadding ->
 
         LazyColumn(
