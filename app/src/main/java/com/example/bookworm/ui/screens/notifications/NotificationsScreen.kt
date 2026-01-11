@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -47,7 +48,9 @@ fun NotificationsScreen(
     ) { contentPadding ->
 
         LazyColumn(
-            modifier = Modifier.padding(contentPadding).padding(16.dp),
+            modifier = Modifier
+                .padding(contentPadding)
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
 
@@ -74,27 +77,39 @@ fun NotificationsScreen(
                                 )
                             },
                             leadingContent = {
-                                Icon(
-                                    Icons.Outlined.Stars,
-                                    stringResource(R.string.achievement_notification_icon_desc)
-                                )
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        Icons.Outlined.Stars,
+                                        stringResource(R.string.achievement_notification_icon_desc)
+                                    )
+                                }
 
                             },
                             trailingContent = {
-                                if (!it.isRead) {
-                                    OutlinedIconButton(onClick = { actions.readNotification(it.notificationId) }) {
-                                        Icon(
-                                            Icons.Outlined.Check,
-                                            stringResource(R.string.read_notification_icon_desc)
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxHeight(),
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    if (!it.isRead) {
+                                        OutlinedIconButton(onClick = { actions.readNotification(it.notificationId) }) {
+                                            Icon(
+                                                Icons.Outlined.Check,
+                                                stringResource(R.string.read_notification_icon_desc)
+                                            )
+                                        }
+                                    } else {
+                                        Text(
+                                            stringResource(R.string.notification_read_message),
+                                            color = MaterialTheme.colorScheme.secondary,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            fontWeight = FontWeight.Bold,
                                         )
                                     }
-                                } else {
-                                    Text(
-                                        stringResource(R.string.notification_read_message),
-                                        color = MaterialTheme.colorScheme.primary,
-                                        style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                    )
                                 }
                             },
                         )

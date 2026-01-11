@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.BackPress
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,7 +21,10 @@ data class LibraryState(
     val openFilters: Boolean = false,
     val selectedStatus: ReadingStatus? = null,
     val favouritesOnly: Boolean = false,
-    val countFiltersActive: Int = 0
+    val countFiltersActive: Int = 0,
+
+    val showToast: Boolean = false,
+    val backPressState: BackPress = BackPress.Idle
 )
 
 interface LibraryActions {
@@ -30,6 +34,9 @@ interface LibraryActions {
     fun setQuery(query: String)
     fun filterByFavourites(enabled: Boolean)
     fun filterByStatus(status: ReadingStatus?)
+
+    fun setShowToast(value: Boolean)
+    fun setBackPressState(value: BackPress)
 }
 
 class LibraryViewModel(
@@ -91,6 +98,14 @@ class LibraryViewModel(
 
         override suspend fun addBook(book: BookEntity): AddBookResults {
             return repository.addBook(book)
+        }
+
+        override fun setShowToast(value: Boolean) {
+            _state.update { it.copy(showToast = value) }
+        }
+
+        override fun setBackPressState(value: BackPress) {
+            _state.update { it.copy(backPressState = value) }
         }
 
     }

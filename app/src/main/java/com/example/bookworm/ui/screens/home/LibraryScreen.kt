@@ -1,5 +1,7 @@
 package com.example.bookworm.ui.screens.home
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,9 +35,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.isTraversalGroup
 import androidx.compose.ui.semantics.semantics
@@ -45,10 +49,12 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.bookworm.R
 import com.example.bookworm.core.data.database.entities.BookEntity
+import com.example.bookworm.core.data.models.BackPress
 import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.ui.composables.AddBookFloatingButton
 import com.example.bookworm.ui.composables.AppBar
 import com.example.bookworm.ui.composables.BookItem
+import kotlinx.coroutines.delay
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,6 +73,24 @@ fun LibraryScreen(
         topBar = { AppBar(navController) },
         contentWindowInsets = WindowInsets()
     ) { contentPadding ->
+
+        val context = LocalContext.current
+        if (state.showToast) {
+            Toast.makeText(context, stringResource(R.string.press_exit_message), Toast.LENGTH_SHORT)
+                .show()
+            actions.setShowToast(false)
+        }
+        LaunchedEffect(key1 = state.backPressState) {
+            if (state.backPressState == BackPress.InitialTouch) {
+                delay(2000)
+                actions.setBackPressState(BackPress.Idle)
+            }
+        }
+        BackHandler(state.backPressState == BackPress.Idle) {
+            actions.setBackPressState(BackPress.InitialTouch)
+            actions.setShowToast(true)
+        }
+
 
         if (state.openFilters) {
             FiltersSelection(actions, state)

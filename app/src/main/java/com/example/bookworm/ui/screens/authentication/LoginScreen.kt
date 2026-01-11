@@ -1,5 +1,7 @@
 package com.example.bookworm.ui.screens.authentication
 
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -23,11 +25,17 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -35,6 +43,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -43,12 +52,13 @@ import androidx.compose.ui.text.withAnnotation
 import androidx.compose.ui.unit.dp
 import com.example.bookworm.R
 import com.example.bookworm.core.data.models.AuthenticationResults
+import com.example.bookworm.core.data.models.BackPress
 import com.example.bookworm.core.data.models.Theme
 import com.example.bookworm.ui.screens.settings.ThemeState
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlin.reflect.KSuspendFunction2
-
 
 @Composable
 fun LoginScreen(
@@ -63,6 +73,24 @@ fun LoginScreen(
 
     )
     { contentPadding ->
+
+        val context = LocalContext.current
+        if (state.showToast) {
+            Toast.makeText(context, stringResource(R.string.press_exit_message), Toast.LENGTH_SHORT)
+                .show()
+            actions.setShowToast(false)
+        }
+        LaunchedEffect(key1 = state.backPressState) {
+            if (state.backPressState == BackPress.InitialTouch) {
+                delay(2000)
+                actions.setBackPressState(BackPress.Idle)
+            }
+        }
+        BackHandler(state.backPressState == BackPress.Idle) {
+            actions.setBackPressState(BackPress.InitialTouch)
+            actions.setShowToast(true)
+        }
+
         Column(
             modifier = Modifier
                 .padding(contentPadding)
@@ -113,6 +141,8 @@ fun LoginScreen(
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+
                 maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 supportingText = {
@@ -149,7 +179,7 @@ fun LoginScreen(
                     .fillMaxWidth(),
                 maxLines = 1,
                 visualTransformation = if (state.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
                 trailingIcon = {
                     Icon(
                         if (state.showPassword) {

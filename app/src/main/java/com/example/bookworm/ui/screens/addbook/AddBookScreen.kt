@@ -23,6 +23,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,6 +41,7 @@ import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -193,7 +195,7 @@ fun AddBookScreen(
         ) {
 
             Text(
-                if (bookId != null) {
+                if (bookId == null) {
                     stringResource(R.string.add_book_message)
                 } else {
                     stringResource(R.string.modify_book_message)
@@ -211,6 +213,7 @@ fun AddBookScreen(
                 placeholder = { Text(stringResource(R.string.title_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 supportingText = {
@@ -244,7 +247,8 @@ fun AddBookScreen(
                 placeholder = { Text(stringResource(R.string.author_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
-                maxLines = 20,
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 supportingText = {
                     if (state.error) {
@@ -277,12 +281,13 @@ fun AddBookScreen(
                 label = { Text(stringResource(R.string.tot_pages_label)) },
                 placeholder = { Text(stringResource(R.string.tot_pages_placeholder)) },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Next
                 ),
                 visualTransformation = VisualTransformation.None,
                 modifier = Modifier
                     .fillMaxWidth(),
-                maxLines = 20,
+                maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 supportingText = {
                     if (state.pagesError) {
@@ -324,14 +329,12 @@ fun AddBookScreen(
                     desc = stringResource(R.string.book_cover_desc),
                     CircleShape
                 )
-                Button(
+                FilledIconButton(
                     onClick = { actions.setPickerVisible(true) },
-                    shape = CircleShape,
                 ) {
                     Icon(
                         Icons.Outlined.Add,
                         contentDescription = stringResource(R.string.add_image_icon_desc),
-                        modifier = Modifier.size(ButtonDefaults.IconSize)
                     )
                 }
             }

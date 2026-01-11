@@ -42,6 +42,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -157,6 +158,7 @@ fun RegistrationScreen(
                 placeholder = { Text(stringResource(R.string.username_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 supportingText = {
@@ -194,7 +196,7 @@ fun RegistrationScreen(
                     .fillMaxWidth(),
                 maxLines = 1,
                 visualTransformation = if (state.showPassword) VisualTransformation.None else PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
                 trailingIcon = {
                     Icon(
                         if (state.showPassword) {

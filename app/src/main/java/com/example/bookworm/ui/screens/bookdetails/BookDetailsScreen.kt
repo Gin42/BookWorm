@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -158,10 +160,12 @@ fun BookDetailsScreen(
                     ReadingStatus.DROPPED, ReadingStatus.PLAN_TO_READ -> {
                         actions.showProgress(false)
                     }
+
                     ReadingStatus.FINISHED -> {
                         actions.showProgress(true)
                         lastPagesRead = state.selectedBook.pages
                     }
+
                     ReadingStatus.READING -> {
                         actions.showProgress(true)
                     }
@@ -193,7 +197,23 @@ fun BookDetailsScreen(
                 }
             }
 
+
             if (state.bookJourneys.isNotEmpty()) {
+                item {
+                    if (!state.showProgress) {
+                        Spacer(modifier = Modifier.height(20.dp))
+                    }
+                    Text(
+                        stringResource(R.string.journeys_message),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .padding(start = 8.dp),
+                        textAlign = TextAlign.Start
+                    )
+                }
                 items(state.bookJourneys.size) { index ->
                     BookJourney(index, state, actions)
                 }
@@ -229,18 +249,12 @@ fun StatusSelection(
     actions: BookDetailsAction
 ) {
 
-    val verticalPadding = if (!state.showProgress) {
-        32.dp
-    } else {
-        0.dp
-    }
 
     ListItem(
         modifier = Modifier
             .border(1.dp, Color.Transparent)
             .clip(MaterialTheme.shapes.medium)
-            .clickable { actions.toggleStatusExpanded(!state.statusExpanded) }
-            .padding(vertical = verticalPadding),
+            .clickable { actions.toggleStatusExpanded(!state.statusExpanded) },
         headlineContent = {
             Text(
                 state.selectedBook.status.name.replace('_', ' ').lowercase()
@@ -392,7 +406,7 @@ fun DiaryEntry(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        stringResource(R.string.pages_read_message) + entry.pagesRead
+                        stringResource(R.string.pages_read_message) + " " + entry.pagesRead
                     )
                     Text(entry.comment.orEmpty())
                 }

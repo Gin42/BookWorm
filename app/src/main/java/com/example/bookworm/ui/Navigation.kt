@@ -1,6 +1,7 @@
 package com.example.bookworm.ui
 
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Inbox
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -65,8 +67,8 @@ sealed interface BookWormRoute {
     @Serializable
     data object Settings : BookWormRoute
 
-    @Serializable
-    data object Statistics : BookWormRoute
+    /*@Serializable
+    data object Statistics : BookWormRoute*/
 
     @Serializable
     data class AddDiaryEntry(val bookId: Long) : BookWormRoute
@@ -93,7 +95,8 @@ enum class BottomNavigation(
     val route: BookWormRoute
 ) {
     Library(R.string.library_label, Icons.Outlined.Book, BookWormRoute.Home),
-    Stats(R.string.stats_label, Icons.Outlined.BarChart, BookWormRoute.Statistics),
+
+    //Stats(R.string.stats_label, Icons.Outlined.BarChart, BookWormRoute.Statistics),
     Notifications(R.string.inbox_label, Icons.Outlined.Inbox, BookWormRoute.Notifications),
     UserPage(R.string.user_page_label, Icons.Outlined.Person, BookWormRoute.UserPage),
 }
@@ -199,6 +202,7 @@ fun BookWormNavGraph(
         navigation<BookWormRoute.APP>(
             startDestination = BookWormRoute.Home
         ) {
+
             composable<BookWormRoute.Home> {
                 LibraryScreen(
                     modifier = modifier,
@@ -269,7 +273,12 @@ fun BookWormNavGraph(
                     lockedAchievementsState = lockedAchievementsState,
                     onSeeFavourites = {
                         libraryViewModel.actions.filterByFavourites(true)
-                        navController.popBackStack(BookWormRoute.Home, inclusive = false)
+                        navController.navigate(BookWormRoute.Home) {
+                            popUpTo(BookWormRoute.Home) {
+                                inclusive = false
+                            }
+                            launchSingleTop = true
+                        }
                     },
                     onBookClick = { bookId ->
                         navController.navigate(BookWormRoute.BookDetails(bookId))
@@ -291,7 +300,7 @@ fun BookWormNavGraph(
                 )
             }
 
-            composable<BookWormRoute.Statistics> {
+            /*composable<BookWormRoute.Statistics> {
                 val statsVm = koinViewModel<StatsViewModel>(
                     parameters = {
                         parametersOf(
@@ -306,7 +315,7 @@ fun BookWormNavGraph(
                     state,
                     statsVm.actions,
                 )
-            }
+            }*/
 
             composable<BookWormRoute.AddDiaryEntry> { backStackEntry ->
 

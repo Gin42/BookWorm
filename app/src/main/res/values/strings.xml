@@ -21,13 +21,14 @@
 
     <!-- Book details screen -->
     <string name="progress_message">Progress:</string>
+    <string name="journeys_message">Book journeys:</string>
     <string name="current_message">Current</string>
     <string name="number_entries_message">Number of entries:</string>
     <string name="pages_read_message">Page you arrived at:</string>
 
     <!-- Library screen -->
     <string name="search_message">Search</string>
-    <string name="filters_selection_message">Filter selection</string>
+    <string name="filters_selection_message">Filters selection</string>
     <string name="favourites_option">Favourites</string>
 
     <!-- Notification screen -->
@@ -57,7 +58,7 @@
     <string name="sign_in_button">Sign in</string>
     <string name="exit_warning_alert_confirm_button">Leave Page</string>
     <string name="exit_warning_alert_cancel_button">Cancel</string>
-    <string name="show_all_button">Favourites</string>
+    <string name="show_all_button">Show all</string>
 
     <!-- Icons -->
     <string name="add_image_icon_desc">Add image icon</string>
@@ -105,6 +106,7 @@
     <string name="comment_placeholder">Comment</string>
 
     <!-- Errors and alerts -->
+    <string name="press_exit_message">Press again to exit</string>
     <string name="fill_all_fields_error">Fill all required(*) fields</string>
     <string name="existent_book_error">Book already exists</string>
     <string name="invalid_pages_error">Enter a valid page</string>
@@ -131,13 +133,13 @@ Start reading.</string>
 
     <!-- Achievements -->
     <string name="Read1_ach_name">An unexpected journey</string>
-    <string name="Read1_ach_desc">Read 1 book</string>
+    <string name="Read1_ach_desc">Complete 1 journey</string>
     <string name="Read5_ach_name">There is no place like home</string>
-    <string name="Read5_ach_desc">Read 5 books</string>
+    <string name="Read5_ach_desc">Complete 5 journey</string>
     <string name="Read10_ach_name">The game is afoot</string>
-    <string name="Read10_ach_desc">Read 10 books</string>
+    <string name="Read10_ach_desc">Complete 10 journey</string>
     <string name="Read20_ach_name">Just one more chapter</string>
-    <string name="Read20_ach_desc">Read 20 books</string>
+    <string name="Read20_ach_desc">Complete 20 journey</string>
 
     <string name="Add1_ach_name">There is no friend as loyal as a book</string>
     <string name="Add1_ach_desc">Add 1 book</string>

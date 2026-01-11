@@ -45,6 +45,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -176,6 +177,7 @@ fun AddDiaryEntryScreen(
                 trailingIcon = {
                     Icon(Icons.Default.DateRange, contentDescription = stringResource(R.string.date_picker_icon_desc))
                 },
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                 modifier = Modifier
                     .fillMaxWidth()
                     .pointerInput(state.date) {
@@ -228,7 +230,8 @@ fun AddDiaryEntryScreen(
                 label = { Text(stringResource(R.string.pages_read_label)) },
                 placeholder = { Text(stringResource(R.string.pages_read_placeholder)) },
                 keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.NumberPassword
+                    keyboardType = KeyboardType.NumberPassword,
+                    imeAction = ImeAction.Next
                 ),
                 visualTransformation = VisualTransformation.None,
                 modifier = Modifier
@@ -262,7 +265,7 @@ fun AddDiaryEntryScreen(
                 placeholder = { Text(stringResource(R.string.comment_placeholder)) },
                 modifier = Modifier
                     .fillMaxWidth(),
-                maxLines = 20,
+                maxLines = 1,
                 textStyle = MaterialTheme.typography.bodyMedium
             )
         }
