@@ -49,6 +49,7 @@ import com.example.bookworm.ui.screens.userpage.UserPageScreen
 import kotlinx.serialization.Serializable
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import androidx.navigation.NavController
 
 
 sealed interface BookWormRoute {
@@ -101,13 +102,29 @@ enum class BottomNavigation(
     UserPage(R.string.user_page_label, Icons.Outlined.Person, BookWormRoute.UserPage),
 }
 
-fun NavHostController.navigateSingleTopTo(route: BookWormRoute) {
-    navigate(route) {
-        popUpTo(BookWormRoute.APP) {
-            saveState = true
+
+@SuppressLint("RestrictedApi")
+@Composable
+fun NavBackStackLoggerDebug(
+    navController: NavHostController,
+    tag: String = "NavBackStack"
+) {
+    DisposableEffect(navController) {
+
+        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
+            val stack = controller.currentBackStack.value
+                .joinToString(" -> ") { entry ->
+                    entry.destination.route ?: entry.destination.displayName
+                }
+
+            Log.d(tag, "BackStack: $stack")
         }
-        launchSingleTop = true
-        restoreState = true
+
+        navController.addOnDestinationChangedListener(listener)
+
+        onDispose {
+            navController.removeOnDestinationChangedListener(listener)
+        }
     }
 }
 
@@ -348,7 +365,10 @@ fun BookWormNavGraph(
                     state = notificationsState,
                     actions = notificationsViewModel.actions,
                     onNavigateToUserPage = {
-                        navController.navigateSingleTopTo(BookWormRoute.UserPage)
+                        navController.navigate(BookWormRoute.UserPage) {
+                            launchSingleTop = true
+                            restoreState = false
+                        }
                     }
                 )
             }
