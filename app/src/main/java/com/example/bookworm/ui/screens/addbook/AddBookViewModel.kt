@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bookworm.core.data.database.entities.BookEntity
 import com.example.bookworm.core.data.models.AddBookResults
+import com.example.bookworm.core.data.models.ReadingStatus
 import com.example.bookworm.core.data.repositories.BookRepository
 import com.example.bookworm.ui.BookWormRoute
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,6 +23,9 @@ data class AddBookState(
     val bookCover: Uri? = Uri.EMPTY,
     val userId: Long = 0,
     val bookId: Long? = null,
+
+    val bookState: ReadingStatus = ReadingStatus.PLAN_TO_READ,
+    val favourite: Boolean = false,
 
     val showAlert: Boolean = false,
     val alertConfirmed: Boolean = false,
@@ -44,6 +48,8 @@ data class AddBookState(
         pages = pages.trim().toInt(),
         image = bookCover.toString(),
         userId = userId,
+        favourite = favourite,
+        status = bookState
     )
 }
 
@@ -54,6 +60,8 @@ interface AddBookActions {
     fun setCover(bookCover: Uri?)
     fun setUserId(userId: Long)
     fun setBookId(bookId: Long)
+    fun setBookState(state: ReadingStatus)
+    fun setFavourite(value: Boolean)
 
     fun setBook(bookId: Long)
 
@@ -85,6 +93,8 @@ class AddBookViewModel(
                         setAuthor(bookEntity.author)
                         setPages(bookEntity.pages.toString())
                         setCover(bookEntity.image?.toUri())
+                        setBookState(bookEntity.status)
+                        setFavourite(bookEntity.favourite)
                     } else {
                     }
                 }
@@ -93,6 +103,14 @@ class AddBookViewModel(
 
         override fun setBookId(bookId: Long) {
             _state.update { it.copy(bookId = bookId) }
+        }
+
+        override fun setBookState(state: ReadingStatus) {
+            _state.update { it.copy(bookState = state) }
+        }
+
+        override fun setFavourite(value: Boolean) {
+            _state.update { it.copy(favourite = value) }
         }
 
         override fun setTitle(title: String) {
